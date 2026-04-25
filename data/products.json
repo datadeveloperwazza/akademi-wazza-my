@@ -1,0 +1,18 @@
+[
+  {
+    "id": "wdc",
+    "title": "Wazza Digital Camp: Google Sheets Series",
+    "description": "Kuasai elemen-elemen penting dalam Google Sheets dalam masa singkat dengan Modul Lengkap Berbahasa Melayu.",
+    "image_url": "./assets/wazza-digital-camp.jpg",
+    "link_url": "https://digital.wazza.my/order/form/campsheetseries-search2",
+    "button_text": "Klik Untuk Info Lanjut"
+  },
+  {
+    "id": "autocrat",
+    "title": "Automasi Autocrat",
+    "description": "Transformasikan data Google Sheets kepada dokumen PDF & Google Docs secara automatik. Sesuai untuk penjanaan sijil digital, invois, dan laporan rasmi dengan hanya satu klik.",
+    "image_url": "./assets/wazza-autocrat.png",
+    "link_url": "https://academy.wazza.my/autocrat",
+    "button_text": "Klik Untuk Info Lanjut"
+  }
+]

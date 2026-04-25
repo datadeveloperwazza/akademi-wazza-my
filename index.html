@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akademi Wazza Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #f0f4ff; }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #dde3f5;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(79,103,208,0.12);
+    }
+    .card img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      display: block;
+      background: #e8edf8;
+    }
+    .btn {
+      display: block;
+      background: #3d5cf5;
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #2f4ee0; }
+
+    .skeleton {
+      background: linear-gradient(90deg, #e4e9f8 25%, #d6dcf2 50%, #e4e9f8 75%);
+      background-size: 300% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 16px;
+      height: 320px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div style="max-width: 960px; margin: 0 auto; padding: 48px 20px 80px;">
+
+    <!-- Title -->
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: #1a2562; margin-bottom: 6px;">Akademi Wazza Digital</h1>
+      <p style="font-size: 0.875rem; color: #7a87b8;">Program digital berbahasa Melayu untuk bantu anda kuasai Google Sheets dan Sistem Automasi.</p>
+    </div>
+
+    <!-- Grid -->
+    <div id="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+
+    <p id="error-msg" style="display:none; text-align:center; color:#aaa; font-size:0.85rem; margin-top:48px;">
+      Gagal memuatkan produk. Cuba muat semula.
+    </p>
+
+  </div>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid #dde3f5; padding: 28px 20px; text-align: center;">
+    <p style="font-size: 0.78rem; color: #a0aacf; line-height: 1.8;">
+      &copy; 2026 Wazza Digital Sdn Bhd<br />
+      202101008919 (1409218-A)
+    </p>
+  </footer>
+
+  <script>
+    async function loadProducts() {
+      const grid = document.getElementById('product-grid');
+      const err  = document.getElementById('error-msg');
+
+      try {
+        const res = await fetch('./data/products.json');
+        if (!res.ok) throw new Error();
+        const products = await res.json();
+
+        grid.innerHTML = '';
+
+        products.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${p.image_url}" alt="${p.title}"
+              onerror="this.style.background='#e8e8e3'; this.style.minHeight='160px'; this.removeAttribute('src');" />
+            <div style="padding: 18px; display:flex; flex-direction:column; flex:1; gap:10px;">
+              <h2 style="font-size:0.95rem; font-weight:700; color:#1a2562; line-height:1.4;">${p.title}</h2>
+              <p style="font-size:0.8rem; color:#7a87b8; line-height:1.6; flex:1;">${p.description}</p>
+              <a href="${p.link_url}" target="_blank" rel="noopener" class="btn">${p.button_text}</a>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+      } catch {
+        grid.innerHTML = '';
+        err.style.display = 'block';
+      }
+    }
+
+    loadProducts();
+  </script>
+
+</body>
+</html>
