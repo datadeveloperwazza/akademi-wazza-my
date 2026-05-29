@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div id="loader" class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-4"></div>
+        <h2 class="text-xl font-bold animate-pulse text-blue-400">Processing Clock-Out...</h2>
+        <p id="statusText" class="text-sm text-gray-400 mt-2">Mencari rekod anda...</p>
+    </div>
+
+    <div id="loginForm" class="hidden w-full max-w-sm bg-gray-800 p-6 rounded-xl shadow-2xl border border-blue-500">
+        <h2 class="text-2xl font-bold text-blue-500 text-center mb-2">Siapa Anda?</h2>
+        <p class="text-center text-gray-400 text-sm mb-6">Sila login untuk Clock Out.</p>
+
+        <div class="mb-4">
+            <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Sila Pilih Nama</label>
+            <select id="userSelect"
+                class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white outline-none focus:border-blue-500 transition appearance-none cursor-pointer">
+            </select>
+        </div>
+        <input type="password" id="passInput" placeholder="Password"
+            class="w-full p-3 mb-6 rounded bg-gray-700 border border-gray-600 text-white">
+
+        <button onclick="doLogin()"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition">LOG MASUK</button>
+        <p id="loginError" class="text-red-500 text-center mt-3 text-sm"></p>
+    </div>
+
+    <div id="successScreen"
+        class="hidden text-center bg-blue-900 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-blue-400">
+        <div class="text-6xl mb-4">👋</div>
+        <h2 class="text-3xl font-bold text-white">BYE BYE!</h2>
+        <div class="mt-4 bg-blue-800 bg-opacity-50 p-4 rounded-lg">
+            <p id="successMsg" class="text-xl text-blue-100 font-bold"></p>
+            <p class="text-sm text-blue-300 mt-2">Masa Keluar: <span id="outTime"></span></p>
+        </div>
+        <p class="text-xs text-gray-400 mt-6">Hati-hati balik!</p>
+    </div>
+
+    <div id="errorScreen"
+        class="hidden text-center bg-red-900 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-red-600">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-white">RALAT</h2>
+        <p id="errorMsg" class="text-red-100 mt-4 font-medium whitespace-pre-line"></p>
+    </div>
+
+    <script>
+        // ===== CONFIG — isi sebelum deploy =====
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjwycP8S7eGC_dLML24louH75mM9pOsVxDhTJJ8qE_qSgzPcCKHJhd9hzilAaaMaoT/exec";
+        const WEBSITE_URL = "https://urus.wazza.my"; // tiada trailing slash
+        // =======================================
+
+        function callGAS(action, params, onSuccess, onError) {
+            const url = GAS_URL + "?data=" + encodeURIComponent(JSON.stringify(Object.assign({ action: action }, params || {})));
+            fetch(url)
+            .then(function(res) {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(function(data) { if (onSuccess) onSuccess(data); })
+            .catch(function(err) {
+                if (onError) onError(err);
+                else console.error("callGAS error:", action, err);
+            });
+        }
+
+        let userIP = "Unknown";
+
+        window.onload = function () {
+            // Cari IP (background, tak blocking)
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json()).then(data => userIP = data.ip).catch(e => { });
+
+            // Check Login
+            let savedNama = localStorage.getItem("wazza_nama");
+            if (savedNama) {
+                // Ada session — terus proceed clock out, loader kekal
+                performClockOut(savedNama);
+            } else {
+                // Tiada session — load senarai nama DULU, baru tunjuk login form
+                document.getElementById('statusText').innerText = "Memuatkan senarai nama...";
+                callGAS("getStaffList", {}, function (names) {
+                    const select = document.getElementById('userSelect');
+                    select.innerHTML = '<option value="" disabled selected>-- Sila Pilih Nama Anda --</option>';
+                    names.forEach(function(name) {
+                        let option = document.createElement("option");
+                        option.text = name;
+                        option.value = name;
+                        select.add(option);
+                    });
+                    // Senarai dah siap — baru hide loader & tunjuk login form
+                    document.getElementById('loader').classList.add('hidden');
+                    document.getElementById('loginForm').classList.remove('hidden');
+                }, function (err) {
+                    document.getElementById('statusText').innerText = "Gagal muatkan senarai. Cuba muat semula.";
+                });
+            }
+        };
+
+        function doLogin() {
+            const u = document.getElementById('userSelect').value;
+            const p = document.getElementById('passInput').value;
+            const btn = document.querySelector('#loginForm button');
+
+            if (!u) {
+                document.getElementById('loginError').innerText = "Sila pilih nama anda.";
+                return;
+            }
+
+            btn.innerText = "Checking...";
+            btn.disabled = true;
+
+            callGAS("verifyLogin", { u: u, p: p }, function (res) {
+                if (res.status === 'SUCCESS') {
+                    localStorage.setItem("wazza_nama", res.nama);
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('loader').classList.remove('hidden');
+                    performClockOut(res.nama);
+                } else {
+                    document.getElementById('loginError').innerText = res.message;
+                    btn.innerText = "LOG MASUK";
+                    btn.disabled = false;
+                }
+            }, function (err) {
+                document.getElementById('loginError').innerText = "Ralat rangkaian: " + err.message;
+                btn.innerText = "LOG MASUK";
+                btn.disabled = false;
+            });
+        }
+
+        function performClockOut(nama) {
+            document.getElementById('statusText').innerText = "Mengesan Lokasi...";
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => { sendOutData(nama, pos.coords.latitude, pos.coords.longitude); },
+                    (err) => { sendOutData(nama, 0, 0); } // Kalau GPS error, proceed je la (Optional)
+                );
+            } else {
+                sendOutData(nama, 0, 0);
+            }
+        }
+
+        function sendOutData(nama, lat, lng) {
+            document.getElementById('statusText').innerText = "Updating Database...";
+
+            const payload = {
+                nama: nama,
+                lat: lat,
+                lng: lng,
+                ip: userIP
+            };
+
+            callGAS("processClockOut", { payload: payload }, function (res) {
+                document.getElementById('loader').classList.add('hidden');
+
+                if (res.status === 'SUCCESS') {
+                    document.getElementById('successScreen').classList.remove('hidden');
+                    document.getElementById('successMsg').innerText = res.message;
+                    document.getElementById('outTime').innerText = res.time;
+                } else if (res.status === 'WARNING') {
+                    // Warning guna skrin success tapi tukar warna sikit (atau guna Error screen pun boleh)
+                    document.getElementById('errorScreen').classList.remove('hidden');
+                    document.getElementById('errorScreen').classList.replace('bg-red-900', 'bg-yellow-900');
+                    document.getElementById('errorScreen').classList.replace('border-red-600', 'border-yellow-600');
+                    document.querySelector('#errorScreen h2').innerText = "INFO";
+                    document.getElementById('errorMsg').innerText = res.message;
+                } else {
+                    document.getElementById('errorScreen').classList.remove('hidden');
+                    document.getElementById('errorMsg').innerText = res.message;
+                }
+            }, function (err) {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('errorScreen').classList.remove('hidden');
+                document.getElementById('errorMsg').innerText = "Ralat rangkaian: " + err.message;
+            });
+        }
+    </script>
+</body>
+
+</html>

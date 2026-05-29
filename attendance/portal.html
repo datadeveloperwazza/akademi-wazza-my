@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg:           #111827;
+            --surface:      #1f2937;
+            --surface-2:    #111827;
+            --surface-3:    #374151;
+            --border:       #374151;
+            --border-hover: #4b5563;
+            --accent:       #eab308;
+            --accent-dim:   rgba(234,179,8,0.08);
+            --accent-glow:  rgba(234,179,8,0.20);
+            --success:      #4ade80;
+            --danger:       #f87171;
+            --info:         #60a5fa;
+            --text-1:       #f9fafb;
+            --text-2:       #9ca3af;
+            --text-3:       #6b7280;
+            --sidebar-w:    256px;
+            --header-h:     64px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color:#f9fafb;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+
+        /* ── Page loader ── */
+        #pageLoader {
+            position: fixed; inset: 0;
+            background: #111827;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 16px;
+            transition: opacity 0.4s ease;
+        }
+        #pageLoader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loader-ring {
+            width: 40px; height: 40px;
+            border: 3px solid #374151;
+            border-top-color: #eab308;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Login overlay ── */
+        #loginOverlay {
+            position: fixed; inset: 0;
+            background: #111827;
+            z-index: 200;
+            display: flex;
+            align-items: center; justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #loginOverlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .login-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-top: 4px solid #eab308;
+            border-radius: 16px;
+            padding: 28px 32px 24px;
+            width: 100%; max-width: 400px;
+            animation: fadeUp 0.4s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .login-logo {
+            width: 40px; height: 40px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(245,166,35,0.3);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 14px;
+        }
+
+        /* ── Form elements ── */
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color:#9ca3af;
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #f9fafb;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: none;
+        }
+        .form-input:focus { border-color: #eab308; box-shadow: 0 0 0 1px #eab308; }
+        .form-input::placeholder { color: #6b7280; }
+        .form-input[readonly] { opacity: 0.5; cursor: not-allowed; }
+
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+        .btn-primary {
+            width: 100%;
+            background: #ca8a04;
+            color: #111827;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:hover { background: #a16207; }
+        .btn-primary:active { background: #854d0e; }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .btn-secondary {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: #d1d5db;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-secondary:hover { background: #4b5563; color: #f9fafb; }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .badge-success { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .badge-danger  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+        .badge-warning { background: rgba(234,179,8,0.12);   color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
+        .badge-muted   { background: #374151; color: #9ca3af; border: 1px solid #4b5563; }
+
+        /* ════════════════════════════════════════
+           DESKTOP LAYOUT
+        ════════════════════════════════════════ */
+        #appShell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: var(--sidebar-w);
+            background: #1f2937;
+            border-right: 1px solid #374151;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #374151;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .sidebar-brand-icon {
+            width: 36px; height: 36px;
+            background: rgba(234,179,8,0.08);
+            border: 1px solid rgba(234,179,8,0.3);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; flex-shrink: 0;
+        }
+        .sidebar-brand-text {
+            font-size: 13px; font-weight: 700;
+            color:#f9fafb;
+            line-height: 1.2;
+        }
+        .sidebar-brand-sub {
+            font-size: 10px; color: #eab308;
+            font-weight: 600; letter-spacing: 0.05em;
+        }
+
+        /* Profile block in sidebar */
+        .sidebar-profile {
+            padding: 16px 20px;
+            border-bottom: 1px solid #374151;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .avatar-wrap { position: relative; flex-shrink: 0; }
+        .avatar-wrap img {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eab308;
+        }
+        .avatar-dot {
+            position: absolute; bottom: 1px; right: 1px;
+            width: 10px; height: 10px;
+            background: #4ade80;
+            border: 2px solid #1f2937;
+            border-radius: 50%;
+        }
+        .sidebar-profile-name { font-size: 13px; font-weight: 600; color:#f9fafb; }
+        .sidebar-profile-role { font-size: 10px; color: #eab308; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .sidebar-profile-id   { font-size: 10px; color:#6b7280; font-family: 'Inter', monospace; margin-top: 1px; }
+
+        /* Nav items */
+        .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 500;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            margin-bottom: 2px;
+            border: none; background: none; width: 100%; text-align: left;
+        }
+        .nav-item:hover { background: #374151; color: #f9fafb; }
+        .nav-item.active { background: #eab308; color: #111827; font-weight: 700; }
+        .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .sidebar-footer {
+            padding: 12px 10px;
+            border-top: 1px solid #374151;
+        }
+
+        /* Main content area */
+        #mainContent {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top bar (desktop) */
+        #topbar {
+            height: var(--header-h);
+            background: #1f2937;
+            border-bottom: 1px solid #374151;
+            display: flex; align-items: center;
+            padding: 0 32px;
+            position: sticky; top: 0; z-index: 40;
+        }
+        .topbar-title { font-size: 16px; font-weight: 600; color:#f9fafb; }
+        .topbar-sub { font-size: 12px; color:#6b7280; margin-top: 1px; font-family: 'Inter', monospace; }
+
+        /* Content panels */
+        #contentArea { flex: 1; padding: 32px; max-width: 1100px; }
+
+        /* Tab panels */
+        .tab-panel { display: none; animation: fadeUp 0.25s ease both; }
+        .tab-panel.active { display: block; }
+
+        /* Cards */
+        .card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card-sm { padding: 16px; }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        /* Stat cards */
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .stat-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin-bottom: 6px; }
+        .stat-val { font-size: 28px; font-weight: 800; font-family: 'Inter', monospace; line-height: 1; }
+
+        /* Today card */
+        .today-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-left: 4px solid #6b7280;
+            border-radius: 12px;
+            padding: 20px 24px;
+        }
+        .today-card.hadir  { border-left-color: #4ade80; }
+        .today-card.lewat  { border-left-color: #f87171; }
+        .today-card.absent { border-left-color: #6b7280; }
+
+        .time-big { font-family: 'Inter', monospace; font-size: 36px; font-weight: 700; line-height: 1; }
+
+        /* Log rows */
+        .log-row {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-left: 4px solid #6b7280;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+        }
+        .log-row.hadir { border-left-color: #4ade80; }
+        .log-row.lewat { border-left-color: #f87171; }
+
+        .leave-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-left: 4px solid #6b7280;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .leave-card.lulus   { border-left-color: #4ade80; }
+        .leave-card.ditolak { border-left-color: #f87171; }
+        .leave-card.proses  { border-left-color: #eab308; }
+
+        /* Desktop home — 2-col */
+        @media (min-width: 1024px) {
+            .home-grid {
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: 20px;
+                align-items: start;
+            }
+            .home-left { display: flex; flex-direction: column; gap: 20px; }
+            .home-right { display: flex; flex-direction: column; gap: 20px; }
+        }
+        @media (max-width: 1023px) {
+            .home-grid { display: flex; flex-direction: column; gap: 16px; }
+        }
+
+        /* Form styling */
+        .apply-form-wrap {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative; overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        }
+
+        /* ════════════════════════════════════════
+           MOBILE LAYOUT — override sidebar to bottom nav
+        ════════════════════════════════════════ */
+        @media (max-width: 767px) {
+            :root { --sidebar-w: 0px; }
+
+            #sidebar { display: none; }
+
+
+            #mainContent { margin-left: 0; padding-bottom: 72px; }
+
+            /* Mobile header */
+            #mobileHeader {
+                display: flex !important;
+                position: sticky; top: 0; z-index: 50;
+                height: 60px;
+                background: #1f2937;
+                border-bottom: 1px solid #374151;
+                align-items: center;
+                padding: 0 16px;
+                gap: 12px;
+            }
+            #mobileHeader .mob-avatar img {
+                width: 34px; height: 34px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #eab308;
+            }
+            #mobileHeader .mob-name { font-size: 14px; font-weight: 600; }
+            #mobileHeader .mob-role { font-size: 10px; color: #eab308; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+            /* Hide desktop topbar on mobile */
+            #topbar { display: none; }
+
+            #contentArea { padding: 16px; max-width: 100%; }
+
+            /* Bottom nav */
+            #bottomNav {
+                display: flex !important;
+                position: fixed; bottom: 0; left: 0; right: 0;
+                height: 64px;
+                background: #1f2937;
+                border-top: 1px solid #374151;
+                z-index: 50;
+            }
+            .bnav-item {
+                flex: 1; display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                gap: 3px;
+                font-size: 9px; font-weight: 600;
+                text-transform: uppercase; letter-spacing: 0.04em;
+                color: #6b7280;
+                cursor: pointer;
+                border: none; background: none;
+                transition: color 0.15s;
+                padding: 0;
+            }
+            .bnav-item .bnav-icon { font-size: 18px; line-height: 1; }
+            .bnav-item.active { color: #eab308; }
+
+            .stat-val { font-size: 24px; }
+            .time-big { font-size: 28px; }
+        }
+
+        @media (min-width: 768px) {
+            #mobileHeader { display: none; }
+            #bottomNav { display: none; }
+        }
+
+        /* Textarea */
+        textarea.form-input { resize: vertical; min-height: 90px; }
+
+        /* File input */
+        .file-input-wrap { position: relative; }
+        .file-input-wrap input[type="file"] {
+            width: 100%;
+            background: #111827;
+            border: 1px dashed #4b5563;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #9ca3af;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .file-input-wrap input[type="file"]::-webkit-file-upload-button {
+            background: #ca8a04;
+            color: #111827;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-right: 12px;
+            font-family: inherit;
+        }
+
+        /* Success card */
+        .success-card {
+            background: #1f2937;
+            border: 1px solid rgba(74,222,128,0.3);
+            border-radius: 12px;
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        /* Warning box */
+        .rule-warning {
+            background: rgba(248,113,113,0.08);
+            border: 1px solid rgba(248,113,113,0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #f87171;
+        }
+
+        /* Date search bar */
+        .date-search-bar {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap;
+        }
+        .date-search-bar .field { flex: 1; min-width: 120px; }
+
+        /* Spinner for buttons */
+        .btn-spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #111827;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+
+        /* GPS loader overlay */
+        #gpsLoader {
+            position: absolute; inset: 0;
+            background: rgba(17,24,39,0.92);
+            z-index: 50;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            border-radius: 12px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+        .empty-state .empty-icon { font-size: 28px; margin-bottom: 8px; }
+
+        /* Divider */
+        .divider { height: 1px; background: #374151; margin: 4px 0; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.25s ease both; }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+<!-- ══════════ PAGE LOADER ══════════ -->
+<div id="pageLoader">
+    <div class="loader-ring"></div>
+    <p style="font-size:11px; font-weight:700; letter-spacing:0.1em; color:#eab308;">MENYEDIAKAN PORTAL...</p>
+</div>
+
+<!-- ══════════ LOGIN OVERLAY ══════════ -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2 style="text-align:center; font-size:18px; font-weight:800; margin-bottom:4px;">Log Masuk</h2>
+        <p style="text-align:center; font-size:12px; color:#6b7280; margin-bottom:20px;">Sila log masuk untuk akses Portal Staf</p>
+
+        <form onsubmit="handlePortalLogin(this); return false;" style="display:flex; flex-direction:column; gap:16px;">
+            <div>
+                <label class="form-label">Nama Staf</label>
+                <select name="username" id="loginUserSelect" required class="form-input">
+                    <option value="" disabled selected>-- Sila Pilih Nama Anda --</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Kata Laluan</label>
+                <input type="password" name="password" required placeholder="••••••••" class="form-input">
+            </div>
+            <button type="submit" id="btnLogin" class="btn-primary" style="margin-top:4px;">
+                <span id="loginBtnText">MASUK</span>
+                <svg id="loginSpinner" style="display:none;" class="btn-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </button>
+            <p id="loginError" style="text-align:center; font-size:12px; color:#f87171; min-height:16px;"></p>
+            <p style="text-align:center; font-size:11px; color:#6b7280;">Terlupa password? Hubungi <span style="color:#eab308; font-weight:600;">Admin</span>.</p>
+        </form>
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid #374151; text-align:center;">
+            <a href="admin" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#6b7280; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='#eab308'" onmouseout="this.style.color='#6b7280'">
+                ⚙️ Pergi ke Admin Panel
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ APP SHELL ══════════ -->
+<div id="appShell" style="display:none;">
+
+    <!-- SIDEBAR (desktop) -->
+    <aside id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">⚡</div>
+            <div>
+                <div class="sidebar-brand-text">WAZZA</div>
+                <div class="sidebar-brand-sub">Staff Portal</div>
+            </div>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="avatar-wrap">
+                <img id="profilePic" src="https://via.placeholder.com/150" alt="profile">
+                <div class="avatar-dot"></div>
+            </div>
+            <div style="min-width:0;">
+                <div id="staffName" class="sidebar-profile-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Loading...</div>
+                <div id="staffRole" class="sidebar-profile-role">...</div>
+                <div id="staffID" class="sidebar-profile-id">ID: ...</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button onclick="switchTab('home')" id="btnHome" class="nav-item active">
+                <span class="nav-icon">🏠</span> Dashboard
+            </button>
+            <button onclick="switchTab('attendance')" id="btnAtt" class="nav-item">
+                <span class="nav-icon">📅</span> Rekod Kehadiran
+            </button>
+            <button onclick="switchTab('leave')" id="btnLeave" class="nav-item">
+                <span class="nav-icon">📋</span> Sejarah Cuti
+            </button>
+            <button onclick="switchTab('apply')" id="btnApply" class="nav-item">
+                <span class="nav-icon">📝</span> Mohon Cuti
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button onclick="logoutPortal()" class="btn-secondary" style="width:100%; font-size:12px;">
+                🚪 Keluar Sistem
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+
+        <!-- Mobile header -->
+        <header id="mobileHeader" style="display:none;">
+            <div class="mob-avatar avatar-wrap" style="flex-shrink:0;">
+                <img id="profilePicMob" src="https://via.placeholder.com/150" alt="">
+                <div class="avatar-dot"></div>
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div id="staffNameMob" class="mob-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Loading...</div>
+                <div id="staffRoleMob" class="mob-role">...</div>
+            </div>
+            <button onclick="logoutPortal()" style="background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); color:#f87171; font-size:11px; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; flex-shrink:0;">
+                Keluar
+            </button>
+        </header>
+
+        <!-- Desktop topbar -->
+        <header id="topbar">
+            <div>
+                <div class="topbar-title" id="topbarTitle">Dashboard</div>
+                <div class="topbar-sub" id="topbarSub">Selamat datang</div>
+            </div>
+        </header>
+
+        <!-- Content area -->
+        <main id="contentArea">
+
+            <!-- ── TAB: HOME ── -->
+            <div id="tabHome" class="tab-panel active fade-in">
+
+                <!-- Clock In / Out Section -->
+                <div style="margin-bottom:20px;">
+
+                    <!-- State: Loading -->
+                    <div id="ciStateLoading" class="card" style="text-align:center; padding:24px;">
+                        <div class="loader-ring" style="margin:0 auto;"></div>
+                    </div>
+
+                    <!-- State: Sistem Tutup -->
+                    <div id="ciStateClosed" class="card" style="display:none; border-left:4px solid #6b7280; text-align:center; padding:28px 20px;">
+                        <div style="font-size:32px; margin-bottom:8px;">⛔</div>
+                        <p id="ciClosedMsg" style="font-size:13px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.06em;">SISTEM DITUTUP</p>
+                        <p style="font-size:11px; color:#6b7280; margin-top:6px;">Waktu pendaftaran kehadiran telah tamat.</p>
+                    </div>
+
+                    <!-- State: Belum Clock In -->
+                    <div id="ciStateIn" class="card" style="display:none; border-left:4px solid #4ade80; padding:20px;">
+                        <p style="font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; font-weight:700; margin-bottom:6px;">Kehadiran Hari Ini</p>
+                        <p style="font-size:12px; color:#9ca3af; margin-bottom:16px;">Anda belum merekod kehadiran hari ini.</p>
+                        <a id="ciBtnIn" href="#" target="_blank"
+                            style="display:flex; align-items:center; justify-content:center; gap:8px; background:#4ade80; color:#111827; font-size:14px; font-weight:700; padding:14px; border-radius:10px; text-decoration:none; text-transform:uppercase; letter-spacing:0.06em;">
+                            👆 Clock In
+                        </a>
+                        <p id="ciLateNote" style="display:none; font-size:10px; color:#f97316; text-align:center; margin-top:8px; font-style:italic;">⏰ Waktu lewat — rekod akan ditandakan LEWAT.</p>
+                    </div>
+
+                    <!-- State: Dah Clock In, belum Clock Out -->
+                    <div id="ciStateOut" class="card" style="display:none; border-left:4px solid #60a5fa; padding:20px;">
+                        <p style="font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; font-weight:700; margin-bottom:12px;">Kehadiran Hari Ini</p>
+                        <div style="display:flex; align-items:center; gap:20px; margin-bottom:16px;">
+                            <div>
+                                <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Masa Masuk</p>
+                                <p id="ciInTimeDisplay" style="font-size:22px; font-weight:700; font-family:'Inter',monospace; color:#4ade80;">--:--</p>
+                            </div>
+                            <div style="font-size:18px; color:#4b5563;">→</div>
+                            <div>
+                                <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Masa Keluar</p>
+                                <p style="font-size:22px; font-weight:700; font-family:'Inter',monospace; color:#4b5563;">--:--</p>
+                            </div>
+                        </div>
+                        <a id="coBtnOut" href="#" target="_blank"
+                            style="display:flex; align-items:center; justify-content:center; gap:8px; background:#60a5fa; color:#111827; font-size:14px; font-weight:700; padding:14px; border-radius:10px; text-decoration:none; text-transform:uppercase; letter-spacing:0.06em;">
+                            👋 Clock Out
+                        </a>
+                        <p style="font-size:10px; color:#6b7280; text-align:center; margin-top:8px; font-style:italic;">*Auto-Checkout pukul 6:00 PM</p>
+                    </div>
+
+                    <!-- State: Selesai (clock in + clock out) -->
+                    <div id="ciStateDone" class="card" style="display:none; border-left:4px solid #4ade80; padding:20px;">
+                        <p style="font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; font-weight:700; margin-bottom:12px;">Kehadiran Hari Ini</p>
+                        <div style="display:flex; align-items:center; gap:20px; margin-bottom:14px;">
+                            <div>
+                                <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Masa Masuk</p>
+                                <p id="ciInTimeDone" style="font-size:22px; font-weight:700; font-family:'Inter',monospace; color:#4ade80;">--:--</p>
+                            </div>
+                            <div style="font-size:18px; color:#4b5563;">→</div>
+                            <div>
+                                <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Masa Keluar</p>
+                                <p id="ciOutTimeDone" style="font-size:22px; font-weight:700; font-family:'Inter',monospace; color:#eab308;">--:--</p>
+                            </div>
+                        </div>
+                        <div style="background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.2); border-radius:8px; padding:10px; text-align:center;">
+                            <span style="font-size:12px; font-weight:700; color:#4ade80;">✅ Kehadiran Lengkap</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="home-grid">
+                    <div class="home-left">
+                        <!-- Today status -->
+                        <div>
+                            <p class="section-title">Status Hari Ini</p>
+                            <div id="homeTodayCard" class="today-card absent">
+                                <div style="display:flex; align-items:center; justify-content:center; min-height:80px;">
+                                    <div class="loader-ring" style="width:28px;height:28px;border-width:2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div>
+                            <p class="section-title">Statistik Bulan Ini</p>
+                            <div class="stat-grid">
+                                <div class="stat-card">
+                                    <div class="stat-label">Hadir</div>
+                                    <div id="statHadir" class="stat-val" style="color:#4ade80;">-</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Lewat</div>
+                                    <div id="statLewat" class="stat-val" style="color:#f87171;">-</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Cuti</div>
+                                    <div id="statCuti" class="stat-val" style="color:#eab308;">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="home-right">
+                        <!-- Latest leave -->
+                        <div>
+                            <p class="section-title">Permohonan Cuti Terkini</p>
+                            <div id="homeLatestLeave" class="card">
+                                <div style="display:flex; align-items:center; justify-content:center; min-height:60px;">
+                                    <div class="loader-ring" style="width:24px;height:24px;border-width:2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Leave Balance Widget -->
+                        <div>
+                            <p class="section-title">Baki Cuti Saya</p>
+                            <div id="leaveBalanceWidget" class="card" style="padding:16px;">
+                                <div style="display:flex;align-items:center;justify-content:center;min-height:50px;">
+                                    <div class="loader-ring" style="width:22px;height:22px;border-width:2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick action -->
+                        <button onclick="switchTab('apply')" style="width:100%; background:var(--accent-dim); border:1px dashed rgba(245,166,35,0.35); color:#eab308; font-size:13px; font-weight:600; padding:14px; border-radius:10px; cursor:pointer; transition:background 0.15s;" onmouseover="this.style.background='rgba(245,166,35,0.15)'" onmouseout="this.style.background='var(--accent-dim)'">
+                            + Mohon Cuti Baru
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TAB: REKOD ── -->
+            <div id="tabAttendance" class="tab-panel fade-in">
+                <p class="section-title">Semak Rekod Kehadiran</p>
+                <div class="date-search-bar" style="margin-bottom:20px;">
+                    <div class="field">
+                        <label class="form-label">Tarikh Mula</label>
+                        <input type="date" id="searchDateStart" class="form-input">
+                    </div>
+                    <div class="field">
+                        <label class="form-label">Tarikh Akhir</label>
+                        <input type="date" id="searchDateEnd" class="form-input">
+                    </div>
+                    <button onclick="searchMyAttendance()" id="btnSearchAtt" class="btn-secondary" style="padding:10px 20px; white-space:nowrap; flex-shrink:0;">
+                        Cari Rekod
+                    </button>
+                </div>
+                <div id="attList" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+
+            <!-- ── TAB: SEJARAH ── -->
+            <div id="tabLeave" class="tab-panel fade-in">
+                <p class="section-title">Sejarah Permohonan Cuti</p>
+                <div id="leaveList" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <!-- ── TAB: MOHON ── -->
+            <div id="tabApply" class="tab-panel fade-in">
+                <p class="section-title">Borang Permohonan</p>
+
+                <div class="apply-form-wrap" style="max-width:640px;">
+                    <div id="gpsLoader" style="display:none;">
+                        <div class="loader-ring"></div>
+                        <p style="font-size:12px; color:#eab308; margin-top:12px; font-weight:600;">Memproses Laporan & Lokasi...</p>
+                        <p style="font-size:11px; color:#6b7280; margin-top:4px;">(Sila tunggu jika ada fail)</p>
+                    </div>
+
+                    <form id="leaveForm" onsubmit="handleLeaveSubmit(this); return false;" style="display:flex; flex-direction:column; gap:16px;">
+                        <div>
+                            <label class="form-label">Nama Staf</label>
+                            <input type="text" name="nama" id="formNama" readonly class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Jenis Cuti</label>
+                            <select name="jenis" id="formJenis" required class="form-input" onchange="checkJenisLaporan()">
+                                <option value="" disabled selected>Memuatkan jenis...</option>
+                            </select>
+                            <!-- Legend -->
+                            <div style="margin-top:8px; background:#111827; border:1px solid #374151; border-radius:8px; padding:10px 12px;">
+                                <p style="font-size:9px; font-weight:700; color:#4b5563; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px;">Panduan Jenis Cuti</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 12px;">
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">AL</strong> — Cuti Tahunan</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HAL</strong> — ½ Hari AL</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">MC</strong> — Cuti Sakit</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">EL</strong> — Cuti Kecemasan</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HEL</strong> — ½ Hari EL</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HL</strong> — Hospitalisasi</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">ML</strong> — Cuti Bersalin</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">PL</strong> — Cuti Isteri Bersalin</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">BL</strong> — Cuti Ihsan</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">UL</strong> — Tanpa Gaji</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HUL</strong> — ½ Hari UL</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">RL</strong> — Cuti Ganti</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p id="warningLambat" style="display:none; font-size:11px; color:#eab308; font-style:italic;">*Datang lambat hanya sah untuk tarikh hari ini sahaja.</p>
+
+                        <div class="date-row">
+                            <div>
+                                <label class="form-label" id="labelTarikhMula">Tarikh Mula</label>
+                                <input type="date" name="tarikhMula" id="formTarikhMula" required class="form-input" onchange="syncDates()">
+                            </div>
+                            <div id="boxTarikhTamat">
+                                <label class="form-label">Tarikh Tamat</label>
+                                <input type="date" name="tarikhTamat" id="formTarikhTamat" required class="form-input" onchange="syncDates()">
+                            </div>
+                        </div>
+
+                        <div id="ruleWarning" class="rule-warning" style="display:none;"></div>
+
+                        <div>
+                            <label class="form-label">Sebab / Alasan</label>
+                            <textarea name="sebab" rows="3" required placeholder="Cth: Demam panas / Tayar pancit" class="form-input"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="form-label" id="labelLampiran">Bukti Lampiran <span style="color:#6b7280; font-weight:400; text-transform:none; letter-spacing:0;">(Pilihan — Max 2MB)</span></label>
+                            <div class="file-input-wrap">
+                                <input type="file" id="formFile" accept="image/*,application/pdf">
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="ip" id="formIp">
+                        <input type="hidden" name="latitude" id="formLat">
+                        <input type="hidden" name="longitude" id="formLng">
+
+                        <button type="submit" id="btnSubmitLeave" class="btn-primary">
+                            HANTAR PERMOHONAN
+                        </button>
+                    </form>
+
+                    <div id="formSuccess" class="success-card" style="display:none;">
+                        <div style="font-size:40px; margin-bottom:12px;">✅</div>
+                        <p style="font-size:18px; font-weight:700; margin-bottom:6px;">Berjaya Dihantar!</p>
+                        <p style="font-size:13px; color:#9ca3af; margin-bottom:20px;">Permohonan anda sedang diproses oleh admin.</p>
+                        <button type="button" onclick="resetFormAndGoHistory()" class="btn-secondary" style="padding:10px 24px;">
+                            Lihat Status Permohonan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div><!-- /mainContent -->
+
+</div><!-- /appShell -->
+
+<!-- Bottom Nav (mobile only) -->
+<nav id="bottomNav" style="display:none;">
+    <button onclick="switchTab('home')" id="bnavHome" class="bnav-item active">
+        <span class="bnav-icon">🏠</span> Home
+    </button>
+    <button onclick="switchTab('attendance')" id="bnavAtt" class="bnav-item">
+        <span class="bnav-icon">📅</span> Rekod
+    </button>
+    <button onclick="switchTab('leave')" id="bnavLeave" class="bnav-item">
+        <span class="bnav-icon">📋</span> Sejarah
+    </button>
+    <button onclick="switchTab('apply')" id="bnavApply" class="bnav-item">
+        <span class="bnav-icon">📝</span> Mohon
+    </button>
+</nav>
+
+<script>
+    // ===== CONFIG =====
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzjwycP8S7eGC_dLML24louH75mM9pOsVxDhTJJ8qE_qSgzPcCKHJhd9hzilAaaMaoT/exec";
+    const WEBSITE_URL = "https://urus.wazza.my";
+    // ==================
+
+    function callGAS(action, params, onSuccess, onError) {
+        if (action === "processCuti") {
+            fetch(GAS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(Object.assign({ action: action }, params || {}))
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) { if (onSuccess) onSuccess(data); })
+            .catch(function(err) { if (onError) onError(err); else console.error("callGAS error:", action, err); });
+            return;
+        }
+        const url = GAS_URL + "?data=" + encodeURIComponent(JSON.stringify(Object.assign({ action: action }, params || {})));
+        fetch(url)
+        .then(function(res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+        })
+        .then(function(data) { if (onSuccess) onSuccess(data); })
+        .catch(function(err) {
+            if (onError) onError(err);
+            else console.error("callGAS error:", action, err);
+        });
+    }
+
+    let currentUser = localStorage.getItem("wazza_nama");
+    let leaveRules = { al_advance: 0, al_streak_doc_req: 0, mc_streak_doc_req: 0 };
+    let leaveBalance = null;
+    let allLeaveTypes = [];
+
+    // Pool map — jenis cuti yang tied kepada limit column
+    var leavePoolMap = { AL:'AL', HAL:'AL', MC:'MC', HL:'HL', ML:'ML', PL:'PL', EL:'EL', HEL:'EL', BL:'BL' };
+
+    function populateLeaveDropdown() {
+        var select = document.getElementById('formJenis');
+        if (!select || allLeaveTypes.length === 0) return;
+        var current = select.value;
+        select.innerHTML = '<option value="" disabled selected>-- Pilih Jenis --</option>';
+        allLeaveTypes.forEach(function(type) {
+            var typeUpper = type.trim().toUpperCase();
+            var pool = leavePoolMap[typeUpper] || null;
+            // Sembunyikan jenis cuti yang limit = 0 (tidak berkenaan)
+            // limit = -1 (unlimited) → tunjuk
+            if (pool && leaveBalance && leaveBalance[pool] && leaveBalance[pool].limit === 0) return;
+            var option = document.createElement("option");
+            option.text = type; option.value = type;
+            select.add(option);
+        });
+        // Restore selected value kalau masih wujud dalam list
+        if (current) select.value = current;
+    }
+
+    window.onload = function () {
+        if (currentUser) {
+            // Already logged in — pageLoader already visible, load dashboard
+            loadDashboard(currentUser);
+            setupFormInit();
+        } else {
+            // Not logged in — load staff names, then fade out loader & fade in login
+            callGAS("getStaffList", {}, function (names) {
+                const select = document.getElementById('loginUserSelect');
+                select.innerHTML = '<option value="" disabled selected>-- Sila Pilih Nama Anda --</option>';
+                names.forEach(function(name) {
+                    let option = document.createElement("option");
+                    option.text = name; option.value = name;
+                    select.add(option);
+                });
+                // Fade out loader, fade in login form
+                var loader = document.getElementById('pageLoader');
+                loader.classList.add('fade-out');
+                setTimeout(function() {
+                    loader.style.display = 'none';
+                    document.getElementById('loginOverlay').classList.add('visible');
+                }, 400);
+            }, function(err) {
+                // On error — still show login with error message
+                var loader = document.getElementById('pageLoader');
+                loader.classList.add('fade-out');
+                setTimeout(function() {
+                    loader.style.display = 'none';
+                    document.getElementById('loginOverlay').classList.add('visible');
+                    document.getElementById('loginError').innerText = '⚠️ Gagal muat senarai staf. Sila refresh halaman.';
+                }, 400);
+            });
+        }
+    };
+
+    function setPortalLoginLoading(isLoading) {
+        const btn = document.getElementById('btnLogin');
+        const btnText = document.getElementById('loginBtnText');
+        const spinner = document.getElementById('loginSpinner');
+        btn.disabled = isLoading;
+        btnText.innerText = isLoading ? "MEMUAT..." : "MASUK";
+        spinner.style.display = isLoading ? "block" : "none";
+    }
+
+    function handlePortalLogin(form) {
+        document.getElementById('loginError').innerText = "";
+        setPortalLoginLoading(true);
+        callGAS("verifyLogin", { u: form.username.value, p: form.password.value }, function (res) {
+            if (res.status === 'SUCCESS') {
+                currentUser = res.nama;
+                localStorage.setItem("wazza_nama", res.nama);
+                document.getElementById('loginOverlay').classList.remove('visible');
+                var loader = document.getElementById('pageLoader');
+                loader.style.display = 'flex';
+                loader.classList.remove('fade-out');
+                loadDashboard(currentUser);
+                setupFormInit();
+            } else {
+                document.getElementById('loginError').innerText = res.message;
+                setPortalLoginLoading(false);
+            }
+        }, function (err) {
+            document.getElementById('loginError').innerText = "Ralat rangkaian: " + err.message;
+            setPortalLoginLoading(false);
+        });
+    }
+
+    function logoutPortal() {
+        if (confirm("Anda pasti untuk log keluar?")) {
+            localStorage.removeItem("wazza_nama");
+            location.reload();
+        }
+    }
+
+    function getLocalISODate() {
+        let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+        return (new Date(Date.now() - tzoffset)).toISOString().slice(0, 10);
+    }
+
+    function setupFormInit() {
+        document.getElementById('formNama').value = currentUser;
+        let todayStr = getLocalISODate();
+        document.getElementById('formTarikhMula').value = todayStr;
+        document.getElementById('formTarikhTamat').value = todayStr;
+        let firstDayMonth = new Date(); firstDayMonth.setDate(1);
+        let firstDayStr = (new Date(firstDayMonth.getTime() - ((new Date()).getTimezoneOffset() * 60000))).toISOString().slice(0, 10);
+        document.getElementById('searchDateStart').value = firstDayStr;
+        document.getElementById('searchDateEnd').value = todayStr;
+
+        callGAS("getLeaveValidationConfig", {}, function (res) { leaveRules = res; });
+
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => document.getElementById('formIp').value = data.ip)
+            .catch(e => { document.getElementById('formIp').value = "Unknown"; });
+
+        callGAS("getLeaveTypes", {}, function (types) {
+            allLeaveTypes = types;
+            populateLeaveDropdown();
+        });
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('formLat').value = position.coords.latitude;
+                    document.getElementById('formLng').value = position.coords.longitude;
+                },
+                (error) => { },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        }
+    }
+
+    function validateLeaveRules() {
+        let jenis = document.getElementById('formJenis').value || "";
+        let tmInput = document.getElementById('formTarikhMula').value;
+        let ttInput = document.getElementById('formTarikhTamat').value;
+        if (!jenis || !tmInput || !ttInput) return;
+
+        let tm = new Date(tmInput); let tt = new Date(ttInput);
+        let todayStr = getLocalISODate(); let todayObj = new Date(todayStr);
+        let btn = document.getElementById('btnSubmitLeave');
+        let fileInput = document.getElementById('formFile');
+        let warningBox = document.getElementById('ruleWarning');
+        let labelLampiran = document.getElementById('labelLampiran');
+
+        btn.disabled = false;
+        fileInput.required = false;
+        warningBox.style.display = 'none';
+        warningBox.innerHTML = "";
+        labelLampiran.innerHTML = `Bukti Lampiran <span style="color:#6b7280; font-weight:400; text-transform:none; letter-spacing:0;">(Pilihan — Max 2MB)</span>`;
+
+        if (jenis.includes("Lambat")) return;
+
+        let timeDiff = tt.getTime() - tm.getTime();
+        let dayStreak = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        let advanceDiff = tm.getTime() - todayObj.getTime();
+        let advanceDays = Math.ceil(advanceDiff / (1000 * 3600 * 24));
+
+        let jenisUpper = jenis.trim().toUpperCase();
+        let isMC = jenisUpper === "MC";
+        let isAL = jenisUpper === "AL" || jenisUpper === "HAL";
+        let isEL = jenisUpper === "EL" || jenisUpper === "HEL";
+
+        let errors = []; let needsDoc = false;
+        if (isMC && leaveRules.mc_streak_doc_req > 0 && dayStreak >= leaveRules.mc_streak_doc_req) { needsDoc = true; }
+        if ((isAL || isEL) && leaveRules.al_streak_doc_req > 0 && dayStreak > leaveRules.al_streak_doc_req) { needsDoc = true; }
+        if (isAL && leaveRules.al_advance > 0 && advanceDays < leaveRules.al_advance) {
+            errors.push(`⚠️ AL wajib dimohon sekurang-kurangnya ${leaveRules.al_advance} hari lebih awal. Sila tukar kepada EL jika ini kes kecemasan.`);
+        }
+
+        // Semak baki cuti
+        if (leaveBalance) {
+            var poolMap = { AL: 'AL', HAL: 'AL', MC: 'MC', HL: 'HL', ML: 'ML', PL: 'PL', EL: 'EL', HEL: 'EL', BL: 'BL' };
+            var halfDayTypes = ['HAL', 'HEL', 'HUL'];
+            var pool = poolMap[jenisUpper];
+            if (pool && leaveBalance[pool] && leaveBalance[pool].balance !== null) {
+                var b = leaveBalance[pool];
+                var daysRequested = halfDayTypes.includes(jenisUpper) ? 0.5 : dayStreak;
+                if (b.balance <= 0) {
+                    errors.push(`⛔ Baki cuti <strong>${pool}</strong> telah habis (0 hari berbaki). Sila hubungi admin.`);
+                } else if (b.balance < daysRequested) {
+                    errors.push(`⛔ Baki cuti <strong>${pool}</strong> tidak mencukupi. Baki: <strong>${b.balance} hari</strong>, dimohon: <strong>${daysRequested} hari</strong>.`);
+                }
+            }
+        }
+
+        if (needsDoc) {
+            fileInput.required = true;
+            labelLampiran.innerHTML = `Bukti Lampiran <span style="color:#f87171; font-weight:700;">* (WAJIB MUAT NAIK)</span>`;
+        }
+        if (errors.length > 0) {
+            warningBox.innerHTML = errors.join("<br><br>");
+            warningBox.style.display = 'block';
+            btn.disabled = true;
+        }
+    }
+
+    function checkJenisLaporan() {
+        let jenis = document.getElementById('formJenis').value;
+        let tm = document.getElementById('formTarikhMula');
+        let tt = document.getElementById('formTarikhTamat');
+        let boxTt = document.getElementById('boxTarikhTamat');
+        let warning = document.getElementById('warningLambat');
+        let labelMula = document.getElementById('labelTarikhMula');
+        let todayStr = getLocalISODate();
+
+        if (jenis.includes("Lambat")) {
+            tm.value = todayStr; tm.setAttribute('min', todayStr); tm.setAttribute('max', todayStr); tm.readOnly = true;
+            tt.value = todayStr; boxTt.style.display = 'none'; warning.style.display = 'block'; labelMula.innerText = "Tarikh Kejadian";
+        } else {
+            tm.removeAttribute('min'); tm.removeAttribute('max'); tm.readOnly = false;
+            boxTt.style.display = ''; warning.style.display = 'none'; labelMula.innerText = "Tarikh Mula";
+        }
+        validateLeaveRules();
+    }
+
+    function syncDates() {
+        let tm = document.getElementById('formTarikhMula');
+        let tt = document.getElementById('formTarikhTamat');
+        if (tt.value < tm.value) tt.value = tm.value;
+        validateLeaveRules();
+    }
+
+    function handleLeaveSubmit(form) {
+        const fileInput = document.getElementById('formFile');
+        const file = fileInput.files[0];
+        if (fileInput.required && !file) {
+            alert("Ralat Sistem: Cuti ini wajib disertakan dengan bukti lampiran.");
+            return;
+        }
+        document.getElementById('gpsLoader').style.display = 'flex';
+        const btn = document.getElementById('btnSubmitLeave');
+        btn.disabled = true;
+
+        if (file) {
+            if (file.size > 2097152) {
+                alert("Saiz fail terlalu besar! Sila pastikan saiz fail bawah 2MB.");
+                resetSubmitState(); return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64Data = e.target.result.split(',')[1];
+                sendData(form, base64Data, file.type, file.name);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            sendData(form, null, null, null);
+        }
+    }
+
+    function sendData(form, fileData, mimeType, fileName) {
+        const formData = {
+            nama: form.nama.value,
+            jenis: form.jenis.value,
+            tarikhMula: form.tarikhMula.value,
+            tarikhTamat: form.tarikhTamat.value,
+            sebab: form.sebab.value,
+            ip: document.getElementById('formIp').value || "Unknown",
+            lat: form.latitude.value || "",
+            lng: form.longitude.value || "",
+            fileData: fileData, mimeType: mimeType, fileName: fileName
+        };
+        callGAS("processCuti", { formData: formData }, function (response) {
+            resetSubmitState();
+            if (response && response.status === 'ERROR') { alert(response.message); return; }
+            document.getElementById('leaveForm').style.display = 'none';
+            document.getElementById('formSuccess').style.display = 'block';
+            loadDashboard(currentUser);
+        }, function (err) {
+            resetSubmitState();
+            alert("Ralat rangkaian: " + err.message);
+        });
+    }
+
+    function resetSubmitState() {
+        document.getElementById('gpsLoader').style.display = 'none';
+        const btn = document.getElementById('btnSubmitLeave');
+        btn.disabled = false;
+    }
+
+    function resetFormAndGoHistory() {
+        document.getElementById('leaveForm').reset();
+        document.getElementById('leaveForm').style.display = '';
+        document.getElementById('formSuccess').style.display = 'none';
+        setupFormInit(); checkJenisLaporan(); switchTab('leave');
+    }
+
+    function searchMyAttendance() {
+        let ds = document.getElementById('searchDateStart').value;
+        let de = document.getElementById('searchDateEnd').value;
+        let btn = document.getElementById('btnSearchAtt');
+        if (!ds || !de) { alert("Sila pilih Tarikh Mula dan Akhir."); return; }
+        if (ds > de) { alert("Tarikh Mula tak boleh lebih dari Tarikh Akhir."); return; }
+        btn.innerText = "Mencari..."; btn.disabled = true;
+        document.getElementById('attList').innerHTML = `<div class="empty-state"><div class="loader-ring" style="margin:0 auto 8px;"></div><p>Menarik rekod...</p></div>`;
+        callGAS("getStaffAttendanceByDateRange", { username: currentUser, dateStart: ds, dateEnd: de }, function (logs) {
+            renderAttendanceLogs(logs, "Tiada rekod dijumpai pada julat tarikh ini.");
+            btn.innerText = "Cari Rekod"; btn.disabled = false;
+        });
+    }
+
+    function renderAttendanceLogs(logs, emptyMsg) {
+        const attList = document.getElementById('attList');
+        attList.innerHTML = "";
+        if (logs.length === 0) {
+            attList.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>${emptyMsg}</p></div>`;
+            return;
+        }
+        logs.forEach(log => {
+            let isLate = String(log.status).toUpperCase().includes("LEWAT");
+            let rowClass = isLate ? 'lewat' : 'hadir';
+            let badge = isLate
+                ? `<span class="badge badge-danger">LEWAT</span>`
+                : `<span class="badge badge-success">HADIR</span>`;
+            attList.innerHTML += `
+            <div class="log-row ${rowClass}">
+                <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                    ${badge}
+                    <span style="font-size:12px; color:#9ca3af; font-family:'Inter',monospace;">${log.date}</span>
+                </div>
+                <div style="display:flex; gap:24px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Masuk</div>
+                        <div style="font-family:'Inter',monospace; font-size:15px; font-weight:600; color:#4ade80;">${log.in || '--:--'}</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6b7280; margin-bottom:2px;">Keluar</div>
+                        <div style="font-family:'Inter',monospace; font-size:15px; font-weight:600; color:${log.out === '--:--' ? 'var(--text-3)' : 'var(--accent)'};">${log.out || '--:--'}</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    function loadDashboard(u) {
+        document.getElementById('pageLoader').style.display = 'flex';
+        callGAS("getStaffDashboardData", { username: u }, renderDashboard, function (err) {
+            alert("Gagal menghubungi pelayan. Sila refresh semula.\nSebab: " + err.message);
+            document.getElementById('staffName').innerText = "Ralat!";
+            document.getElementById('pageLoader').style.display = 'none';
+        });
+    }
+
+    function renderDashboard(data) {
+        document.getElementById('appShell').style.display = 'flex';
+        document.getElementById('pageLoader').style.display = 'none';
+        document.getElementById('loginOverlay').classList.remove('visible');
+        if (data.status === 'ERROR') { alert(data.message); return; }
+
+        // Set status kehadiran hari ini untuk clock in/out logic
+        userClockedInToday = !!data.todayLog;
+        if (data.todayLog) {
+            todayClockInTime = data.todayLog.in || '--:--';
+            userClockedOutToday = !!(data.todayLog.out && data.todayLog.out !== '--:--');
+            todayClockOutTime = data.todayLog.out || '--:--';
+        } else {
+            userClockedOutToday = false;
+            todayClockInTime = '--:--';
+            todayClockOutTime = '--:--';
+        }
+
+        if (!ciIntervalId) initKehadiran();
+
+        // Profile — desktop sidebar
+        document.getElementById('staffName').innerText = data.profile.name;
+        document.getElementById('staffRole').innerText = data.profile.role;
+        document.getElementById('staffID').innerText = "ID: " + data.profile.id;
+
+        // Profile — mobile header
+        document.getElementById('staffNameMob').innerText = data.profile.name;
+        document.getElementById('staffRoleMob').innerText = data.profile.role;
+
+        // Topbar
+        document.getElementById('topbarTitle').innerText = "Dashboard";
+        document.getElementById('topbarSub').innerText = "Selamat datang, " + data.profile.name;
+
+        // Profile pic
+        function setPic(el, url) {
+            let picUrl = url;
+            if (picUrl && typeof picUrl === 'string' && picUrl.trim() !== "") {
+                picUrl = picUrl.trim();
+                if (picUrl.includes("drive.google.com")) {
+                    let match = picUrl.match(/\/d\/(.+?)\//);
+                    if (match && match[1]) picUrl = "https://lh3.googleusercontent.com/d/" + match[1];
+                }
+                el.src = picUrl;
+            } else {
+                el.src = "https://via.placeholder.com/150?text=No+Pic";
+            }
+        }
+        setPic(document.getElementById('profilePic'), data.profile.pic);
+        setPic(document.getElementById('profilePicMob'), data.profile.pic);
+
+        // ── Today card ──
+        const todayCard = document.getElementById('homeTodayCard');
+        if (data.todayLog) {
+            let isLate = String(data.todayLog.status).toUpperCase().includes("LEWAT");
+            let cardClass = isLate ? 'today-card lewat' : 'today-card hadir';
+            let statusText = isLate ? 'HADIR (LEWAT)' : 'HADIR';
+            let statusColor = isLate ? 'var(--danger)' : 'var(--success)';
+            todayCard.className = cardClass;
+            todayCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <span style="font-size:12px; color:#9ca3af; font-family:'Inter',monospace;">${data.todayLog.date}</span>
+                    <span style="font-size:11px; font-weight:800; letter-spacing:0.08em; color:${statusColor};">${statusText}</span>
+                </div>
+                <div style="display:flex; gap:40px;">
+                    <div>
+                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Masuk</div>
+                        <div class="time-big" style="color:#f9fafb;">${data.todayLog.in}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Keluar</div>
+                        <div class="time-big" style="color:${data.todayLog.out === '--:--' ? 'var(--text-3)' : 'var(--accent)'};">${data.todayLog.out}</div>
+                    </div>
+                </div>`;
+        } else {
+            todayCard.className = 'today-card absent';
+            todayCard.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px; gap:6px;">
+                    <div style="font-size:28px;">👋</div>
+                    <p style="font-size:13px; font-weight:600; color:#9ca3af;">Belum Rekod Kehadiran</p>
+                    <p style="font-size:11px; color:#6b7280;">Sila scan QR di pintu masuk.</p>
+                </div>`;
+        }
+
+        // Stats
+        document.getElementById('statHadir').innerText = data.monthlyStats.present;
+        document.getElementById('statLewat').innerText = data.monthlyStats.late;
+        document.getElementById('statCuti').innerText  = data.monthlyStats.leave;
+
+        // Latest leave
+        const latestLeaveCard = document.getElementById('homeLatestLeave');
+        if (data.latestLeave) {
+            let l = data.latestLeave;
+            let badge = "";
+            if (l.status === "DILULUSKAN") badge = `<span class="badge badge-success">LULUS</span>`;
+            else if (l.status === "DITOLAK") badge = `<span class="badge badge-danger">DITOLAK</span>`;
+            else badge = `<span class="badge badge-warning">PROSES</span>`;
+            latestLeaveCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <p style="font-size:13px; font-weight:700; text-transform:uppercase;">${l.type}</p>
+                    ${badge}
+                </div>
+                <p style="font-size:11px; color:#6b7280; font-family:'Inter',monospace; margin-bottom:8px;">${l.date}</p>
+                <div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:10px 12px; font-size:12px; color:#9ca3af; font-style:italic;">"${l.reason}"</div>`;
+        } else {
+            latestLeaveCard.innerHTML = `<div class="empty-state" style="padding:20px;"><p>Tiada permohonan terkini.</p></div>`;
+        }
+
+        // Attendance logs
+        renderAttendanceLogs(data.attendance, "Tiada rekod 10 hari terakhir.");
+
+        // Leave history
+        const leaveList = document.getElementById('leaveList');
+        leaveList.innerHTML = "";
+        if (data.leave.length === 0) {
+            leaveList.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Tiada sejarah permohonan.</p></div>`;
+        }
+        data.leave.forEach(cuti => {
+            let badge = ""; let cls = "proses";
+            if (cuti.status === "DILULUSKAN") { badge = `<span class="badge badge-success">LULUS</span>`; cls = "lulus"; }
+            else if (cuti.status === "DITOLAK") { badge = `<span class="badge badge-danger">DITOLAK</span>`; cls = "ditolak"; }
+            else { badge = `<span class="badge badge-warning">PROSES</span>`; cls = "proses"; }
+
+            let attachHtml = "";
+            if (cuti.attachment && cuti.attachment !== "Tiada" && cuti.attachment !== "") {
+                attachHtml = `<a href="${cuti.attachment}" target="_blank" style="display:inline-flex; align-items:center; gap:4px; margin-top:8px; font-size:11px; color:#60a5fa; text-decoration:none;">🔗 Lihat Lampiran</a>`;
+            }
+
+            leaveList.innerHTML += `
+            <div class="leave-card ${cls}">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                    <div>
+                        <p style="font-size:13px; font-weight:700; text-transform:uppercase;">${cuti.type}</p>
+                        <p style="font-size:11px; color:#6b7280; font-family:'Inter',monospace; margin-top:2px;">${cuti.date}</p>
+                    </div>
+                    ${badge}
+                </div>
+                <div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:10px 12px; font-size:12px; color:#9ca3af; font-style:italic;">"${cuti.reason}"${attachHtml}</div>
+            </div>`;
+        });
+
+        // Leave balance widget
+        leaveBalance = data.leaveBalance;
+        renderLeaveBalanceWidget(leaveBalance);
+        populateLeaveDropdown();
+    }
+
+    function renderLeaveBalanceWidget(bal) {
+        var widget = document.getElementById('leaveBalanceWidget');
+        if (!widget) return;
+        if (!bal) {
+            widget.innerHTML = '<p style="font-size:12px;color:#6b7280;text-align:center;padding:12px 0;">Tiada data baki cuti.</p>';
+            return;
+        }
+        var types = [
+            { key: 'AL', label: 'AL — Cuti Tahunan' },
+            { key: 'MC', label: 'MC — Cuti Sakit' },
+            { key: 'EL', label: 'EL — Cuti Kecemasan' },
+            { key: 'HL', label: 'HL — Hospitalisasi' },
+            { key: 'ML', label: 'ML — Cuti Bersalin' },
+            { key: 'PL', label: 'PL — Cuti Isteri Bersalin' },
+            { key: 'BL', label: 'BL — Cuti Ihsan' }
+        ];
+        var html = '';
+        var hasAny = false;
+        types.forEach(function(t) {
+            var b = bal[t.key];
+            if (!b || b.limit === 0) return; // skip tidak berkenaan
+            hasAny = true;
+            if (b.unlimited || b.limit === -1) {
+                // Unlimited — tunjuk ∞ tanpa progress bar
+                html += '<div style="margin-bottom:10px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                    '<span style="font-size:11px;font-weight:600;color:#9ca3af;">' + t.label + '</span>' +
+                    '<span style="font-size:11px;font-weight:700;color:#eab308;">∞ Tiada Had</span>' +
+                    '</div></div>';
+            } else {
+                var pct = Math.min(100, Math.round((b.used / b.limit) * 100));
+                var color = b.balance === 0 ? '#f87171' : b.balance <= Math.ceil(b.limit * 0.2) ? '#eab308' : '#4ade80';
+                var balLabel = b.balance === 0
+                    ? '<span style="color:#f87171;font-weight:700;">HABIS</span>'
+                    : '<span style="color:' + color + ';font-weight:700;">' + b.balance + ' / ' + b.limit + ' hari</span>';
+                html += '<div style="margin-bottom:10px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
+                    '<span style="font-size:11px;font-weight:600;color:#9ca3af;">' + t.label + '</span>' +
+                    balLabel +
+                    '</div>' +
+                    '<div style="height:5px;background:#374151;border-radius:4px;overflow:hidden;">' +
+                    '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:4px;"></div>' +
+                    '</div></div>';
+            }
+        });
+        if (bal['UL']) {
+            var ulUsed = bal['UL'].used || 0;
+            if (hasAny) html += '<div style="height:1px; background:#374151; margin:6px 0;"></div>';
+            html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:2px 0;">' +
+                '<span style="font-size:11px; font-weight:600; color:#9ca3af;">UL — Tanpa Gaji</span>' +
+                '<span style="font-size:11px; font-weight:700; color:' + (ulUsed > 0 ? '#f87171' : '#6b7280') + ';">' + ulUsed + ' hari digunakan</span>' +
+                '</div>';
+            hasAny = true;
+        }
+        widget.innerHTML = hasAny ? html : '<p style="font-size:12px;color:#6b7280;text-align:center;padding:8px 0;">Tiada had cuti ditetapkan untuk anda.</p>';
+    }
+
+    // Tab switching — sync sidebar nav + bottom nav + topbar title
+    const tabTitles = { home: 'Dashboard', attendance: 'Rekod Kehadiran', leave: 'Sejarah Cuti', apply: 'Mohon Cuti' };
+
+    function switchTab(tab) {
+        ['home','attendance','leave','apply'].forEach(t => {
+            var el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+            if (el) el.classList.remove('active');
+        });
+        ['btnHome','btnAtt','btnLeave','btnApply'].forEach(id => {
+            var el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        });
+        ['bnavHome','bnavAtt','bnavLeave','bnavApply'].forEach(id => {
+            var el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        });
+
+        const panelMap = { home: 'tabHome', attendance: 'tabAttendance', leave: 'tabLeave', apply: 'tabApply' };
+        const btnMap   = { home: 'btnHome', attendance: 'btnAtt', leave: 'btnLeave', apply: 'btnApply' };
+        const bnavMap  = { home: 'bnavHome', attendance: 'bnavAtt', leave: 'bnavLeave', apply: 'bnavApply' };
+
+        var panel = document.getElementById(panelMap[tab]);
+        if (panel) panel.classList.add('active');
+        var btn = document.getElementById(btnMap[tab]);
+        if (btn) btn.classList.add('active');
+        var bnav = document.getElementById(bnavMap[tab]);
+        if (bnav) bnav.classList.add('active');
+
+        document.getElementById('topbarTitle').innerText = tabTitles[tab] || 'Portal';
+    }
+
+    // ===== KEHADIRAN (Clock In / Out) =====
+    var ciCurrentToken = "";
+    var ciIntervalId = null;
+    var userClockedInToday = false;
+    var userClockedOutToday = false;
+    var todayClockInTime = '--:--';
+    var todayClockOutTime = '--:--';
+
+    function setCiState(state) {
+        ['Loading','Closed','In','Out','Done'].forEach(function(s) {
+            var el = document.getElementById('ciState' + s);
+            if (el) el.style.display = 'none';
+        });
+        var target = document.getElementById('ciState' + state);
+        if (target) target.style.display = '';
+    }
+
+    function initKehadiran() {
+        var outURL = WEBSITE_URL + "/clockout";
+        document.getElementById('coBtnOut').href = outURL;
+        checkCiToken();
+        if (ciIntervalId) clearInterval(ciIntervalId);
+        ciIntervalId = setInterval(checkCiToken, 5000);
+    }
+
+    function checkCiToken() {
+        callGAS("getDashboardStatus", {}, function(data) {
+            if (!data.isOpen) {
+                var msgEl = document.getElementById('ciClosedMsg');
+                if (msgEl && data.statusMsg) msgEl.innerText = data.statusMsg;
+                setCiState('Closed');
+                return;
+            }
+
+            if (userClockedInToday && userClockedOutToday) {
+                document.getElementById('ciInTimeDone').innerText = todayClockInTime;
+                document.getElementById('ciOutTimeDone').innerText = todayClockOutTime;
+                setCiState('Done');
+                return;
+            }
+
+            if (userClockedInToday) {
+                document.getElementById('ciInTimeDisplay').innerText = todayClockInTime;
+                setCiState('Out');
+                return;
+            }
+
+            // Belum clock in — update token URL secara senyap
+            if (data.token && data.token !== ciCurrentToken) {
+                ciCurrentToken = data.token;
+            }
+            var scanURL = WEBSITE_URL + "/scan?token=" + ciCurrentToken;
+            document.getElementById('ciBtnIn').href = scanURL;
+            var lateNote = document.getElementById('ciLateNote');
+            if (lateNote) lateNote.style.display = data.isLate ? '' : 'none';
+            // Tukar warna butang kalau lewat
+            var btnIn = document.getElementById('ciBtnIn');
+            if (btnIn) btnIn.style.background = data.isLate ? '#f97316' : '#4ade80';
+            setCiState('In');
+        });
+    }
+</script>
+</body>
+</html>

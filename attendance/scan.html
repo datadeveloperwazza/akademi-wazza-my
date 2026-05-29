@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6 relative">
+
+    <div id="loader" class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-500 mx-auto mb-4"></div>
+        <h2 class="text-xl font-bold animate-pulse">Memproses...</h2>
+        <p id="statusText" class="text-sm text-gray-400 mt-2">Initializing...</p>
+    </div>
+
+    <div id="loginForm" class="hidden w-full max-w-sm bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700">
+        <h2 class="text-2xl font-bold text-yellow-500 text-center mb-2">Login Staf</h2>
+        <p class="text-center text-gray-400 text-sm mb-6">Pilih nama & masukkan password.</p>
+
+        <div class="mb-4 relative">
+            <select id="userInput"
+                class="w-full p-3 rounded bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-yellow-500 appearance-none">
+                <option value="" disabled selected>-- Sila Pilih Nama --</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+            </div>
+        </div>
+
+        <input type="password" id="passInput" placeholder="Password"
+            class="w-full p-3 mb-6 rounded bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-yellow-500">
+
+        <button id="loginBtn" onclick="doLogin()"
+            class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 rounded transition shadow-lg mb-4 flex items-center justify-center gap-2">
+            <span id="loginBtnText">LOG MASUK</span>
+            <svg id="loginSpinner" style="display:none;" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+        </button>
+        <p id="loginError" class="text-red-500 text-center mt-3 text-sm"></p>
+        <p class="text-center text-gray-500 text-xs mt-5">
+            Terlupa password? Sila hubungi <span class="text-yellow-400 font-semibold">Admin</span> untuk reset.
+        </p>
+
+    </div>
+
+    <div id="successScreen"
+        class="hidden text-center bg-green-900 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-green-600">
+        <div class="text-6xl mb-4">✅</div>
+        <h2 class="text-3xl font-bold text-white">BERJAYA!</h2>
+        <div class="mt-4 bg-green-800 bg-opacity-50 p-4 rounded-lg">
+            <p id="successName" class="text-xl text-green-100 font-mono font-bold"></p>
+            <p id="successTime" class="text-sm text-green-300 mt-1"></p>
+        </div>
+        <button onclick="goToPortal()"
+            class="mt-6 text-sm bg-green-800 hover:bg-green-700 text-white py-2 px-4 rounded-full border border-green-500 transition">
+            Lihat Rekod Saya
+        </button>
+    </div>
+
+    <div id="errorScreen"
+        class="hidden text-center bg-red-900 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-red-600">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-white">MAAF</h2>
+        <p id="errorMsg" class="text-red-100 mt-4 font-medium"></p>
+    </div>
+
+    <div id="lateReasonScreen"
+        class="hidden w-full max-w-sm bg-orange-950 p-6 rounded-xl shadow-2xl border-2 border-orange-500">
+        <div class="text-center mb-4">
+            <div class="text-5xl mb-2">⏰</div>
+            <h2 class="text-xl font-bold text-orange-300">Anda Lambat</h2>
+            <p id="lateTimeMsg" class="text-sm text-orange-200 mt-1"></p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-orange-300 text-xs font-bold mb-2 uppercase tracking-wider">Sebab Kelewatan</label>
+            <textarea id="lateReasonInput" rows="3"
+                placeholder="Contoh: Tersekat jalan, Kenderaan rosak, Urusan kecemasan..."
+                class="w-full p-3 rounded-lg bg-gray-900 border border-orange-600 text-white focus:outline-none focus:border-orange-400 resize-none text-sm"></textarea>
+            <p id="lateReasonError" class="text-red-400 text-xs mt-1 hidden">Sila masukkan sebab kelewatan.</p>
+        </div>
+        <button onclick="submitLateReason()"
+            class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 rounded-lg transition shadow-lg">
+            Hantar & Clock In Lewat
+        </button>
+    </div>
+
+    <div id="logoutSection" class="hidden fixed bottom-8 flex flex-col items-center space-y-3">
+        <p class="text-xs text-gray-500">Login sebagai: <span id="lblUser" class="text-gray-300 font-bold">...</span>
+        </p>
+
+        <button onclick="doLogout()" class="text-xs text-red-400 hover:text-red-300 underline">
+            Log Keluar (Logout)
+        </button>
+    </div>
+
+    <script>
+        // ===== CONFIG — isi sebelum deploy =====
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjwycP8S7eGC_dLML24louH75mM9pOsVxDhTJJ8qE_qSgzPcCKHJhd9hzilAaaMaoT/exec";
+        const WEBSITE_URL = "https://urus.wazza.my"; // tiada trailing slash
+        // =======================================
+
+        function callGAS(action, params, onSuccess, onError) {
+            const url = GAS_URL + "?data=" + encodeURIComponent(JSON.stringify(Object.assign({ action: action }, params || {})));
+            fetch(url)
+            .then(function(res) {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(function(data) { if (onSuccess) onSuccess(data); })
+            .catch(function(err) {
+                if (onError) onError(err);
+                else console.error("callGAS error:", action, err);
+            });
+        }
+
+        let scannedToken = "";
+        let userIP = "Unknown";
+
+        // --- FUNGSI KE PORTAL ---
+        function goToPortal() {
+            const btn = document.querySelector("button[onclick='goToPortal()']");
+            if (btn) btn.innerText = "Loading...";
+            window.top.location.href = WEBSITE_URL + "/portal";
+        }
+
+        function logStatus(msg) {
+            document.getElementById('statusText').innerText = msg;
+        }
+
+        function doLogout() {
+            if (confirm("Anda pasti nak Log Keluar?")) {
+                localStorage.removeItem("wazza_nama");
+
+                document.getElementById('userInput').value = "";
+                document.getElementById('passInput').value = "";
+
+                document.getElementById('successScreen').classList.add('hidden');
+                document.getElementById('errorScreen').classList.add('hidden');
+                document.getElementById('logoutSection').classList.add('hidden');
+                document.getElementById('loader').classList.add('hidden');
+
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('loginError').innerText = "Sila login semula.";
+            }
+        }
+
+        function showLoggedInUI(nama) {
+            document.getElementById('logoutSection').classList.remove('hidden');
+            document.getElementById('lblUser').innerText = nama;
+        }
+
+        function setLoginLoading(isLoading) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const spinner = document.getElementById('loginSpinner');
+            btn.disabled = isLoading;
+            btnText.innerText = isLoading ? "Memuat..." : "LOG MASUK";
+            spinner.style.display = isLoading ? "block" : "none";
+            if (isLoading) {
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+            } else {
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        window.onload = function () {
+            try {
+                logStatus("Mula semakan token...");
+
+                let tokenFromServer = "";
+                const urlParams = new URLSearchParams(window.location.search);
+                let tokenFromURL = urlParams.get('token');
+
+                if (tokenFromServer && tokenFromServer !== "undefined" && !tokenFromServer.includes("serverToken")) {
+                    scannedToken = tokenFromServer;
+                } else if (tokenFromURL) {
+                    scannedToken = tokenFromURL;
+                }
+
+                if (!scannedToken) {
+                    throw new Error("Token Tak Jumpa. Sila refresh Dashboard.");
+                }
+
+                // Fetch IP background
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => userIP = data.ip)
+                    .catch(e => console.log("IP Error"));
+
+                let savedNama = null;
+                try { savedNama = localStorage.getItem("wazza_nama"); } catch (e) { }
+
+                if (savedNama) {
+                    // Dah ada saved login — terus clock in, tak perlu load staff list
+                    showLoggedInUI(savedNama);
+                    performClockIn(savedNama);
+                } else {
+                    // Tunggu staff list siap load DULU, baru tunjuk login form
+                    logStatus("Memuatkan senarai staf...");
+                    callGAS("getStaffList", {}, function (names) {
+                        const select = document.getElementById('userInput');
+                        names.forEach(function (name) {
+                            let option = document.createElement('option');
+                            option.text = name;
+                            option.value = name;
+                            select.add(option);
+                        });
+                        document.getElementById('loader').classList.add('hidden');
+                        document.getElementById('loginForm').classList.remove('hidden');
+                    }, function (err) {
+                        document.getElementById('loader').classList.add('hidden');
+                        document.getElementById('errorScreen').classList.remove('hidden');
+                        document.getElementById('errorMsg').innerText = "Gagal muatkan senarai staf: " + err.message;
+                    });
+                }
+
+            } catch (err) {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('errorScreen').classList.remove('hidden');
+                document.getElementById('errorMsg').innerText = err.message;
+            }
+        };
+
+        function doLogin() {
+            const u = document.getElementById('userInput').value;
+            const p = document.getElementById('passInput').value;
+
+            if (!u || !p) {
+                document.getElementById('loginError').innerText = "Sila pilih nama dan masukkan password.";
+                return;
+            }
+
+            document.getElementById('loginError').innerText = "";
+            setLoginLoading(true);
+
+            callGAS("verifyLogin", { u: u, p: p }, function (res) {
+                if (res.status === 'SUCCESS') {
+                    try { localStorage.setItem("wazza_nama", res.nama); } catch (e) { }
+
+                    showLoggedInUI(res.nama);
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('loader').classList.remove('hidden');
+                    performClockIn(res.nama);
+                } else {
+                    document.getElementById('loginError').innerText = res.message;
+                    setLoginLoading(false);
+                }
+            }, function (err) {
+                document.getElementById('loginError').innerText = "Ralat rangkaian: " + err.message;
+                setLoginLoading(false);
+            });
+        }
+
+        function performClockIn(nama) {
+            logStatus("Mengesan Lokasi (WAJIB)...");
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        sendData(nama, pos.coords.latitude, pos.coords.longitude);
+                    },
+                    (err) => {
+                        let punca = "GPS Error.";
+                        if (err.code === 1) punca = "Sila Allow Location.";
+                        else if (err.code === 2) punca = "Tiada Signal GPS.";
+                        else if (err.code === 3) punca = "Timeout.";
+
+                        // Bila GPS error, kita tunjuk error screen tapi BAGI OPTION KE PORTAL
+                        showErrorWithPortal("GAGAL: " + punca);
+                    },
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                );
+            } else {
+                showErrorWithPortal("Tiada sokongan GPS.");
+            }
+        }
+
+        var _lateNama = "", _lateLat = null, _lateLng = null;
+
+        function sendData(nama, lat, lng, sebabLambat) {
+            logStatus("Menghantar Data...");
+
+            const payload = {
+                token: scannedToken,
+                nama: nama,
+                lat: lat,
+                lng: lng,
+                ip: userIP,
+                device: navigator.userAgent
+            };
+            if (sebabLambat) payload.sebabLambat = sebabLambat;
+
+            callGAS("processScan", { payload: payload }, function (res) {
+                // Sembunyikan semua screen dulu
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('loginForm').classList.add('hidden');
+
+                if (res.status === 'SUCCESS') {
+                    var screen = document.getElementById('successScreen');
+                    if (res.isLate) {
+                        screen.className = "text-center bg-orange-950 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-orange-500";
+                        screen.querySelector('.text-6xl').innerText = "⏰";
+                        screen.querySelector('h2').innerText = "CLOCK IN LEWAT";
+                        screen.querySelector('h2').className = "text-2xl font-bold text-orange-300";
+                        document.getElementById('successTime').style.color = "#fb923c";
+                    } else {
+                        screen.className = "text-center bg-green-900 p-8 rounded-xl shadow-2xl w-full max-w-sm border-2 border-green-600";
+                        screen.querySelector('.text-6xl').innerText = "✅";
+                        screen.querySelector('h2').innerText = "BERJAYA!";
+                        screen.querySelector('h2').className = "text-3xl font-bold text-white";
+                        document.getElementById('successTime').style.color = "";
+                    }
+                    screen.classList.remove('hidden');
+                    var displayName = res.message.replace('Hadir: ', '').replace('Lewat: ', '');
+                    document.getElementById('successName').innerText = displayName;
+                    document.getElementById('successTime').innerText = res.isLate ? '⏰ ' + res.time + ' (Lewat)' : res.time;
+
+                } else if (res.status === 'LATE_PROMPT') {
+                    _lateNama = nama;
+                    _lateLat = lat;
+                    _lateLng = lng;
+                    document.getElementById('lateReasonInput').value = "";
+                    document.getElementById('lateReasonError').classList.add('hidden');
+                    document.getElementById('lateTimeMsg').innerText =
+                        'Jam semasa: ' + res.lateTime + ' (Masa tepat: ' + res.lateStart + ')';
+                    document.getElementById('lateReasonScreen').classList.remove('hidden');
+
+                } else {
+                    showErrorWithPortal(res.message);
+                }
+            }, function (err) {
+                document.getElementById('loader').classList.add('hidden');
+                showErrorWithPortal("Ralat rangkaian: " + err.message);
+            });
+        }
+
+        function submitLateReason() {
+            var reason = document.getElementById('lateReasonInput').value.trim();
+            var errEl = document.getElementById('lateReasonError');
+            if (!reason) {
+                errEl.classList.remove('hidden');
+                return;
+            }
+            errEl.classList.add('hidden');
+            document.getElementById('lateReasonScreen').classList.add('hidden');
+            document.getElementById('loader').classList.remove('hidden');
+            sendData(_lateNama, _lateLat, _lateLng, reason);
+        }
+
+        function showErrorWithPortal(msg) {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('errorScreen').classList.remove('hidden');
+            document.getElementById('errorMsg').innerText = msg;
+
+            // Add portal button in error screen dynamically if not exist
+            if (!document.getElementById('btnErrorPortal')) {
+                let btn = document.createElement("button");
+                btn.id = "btnErrorPortal";
+                btn.innerText = "Buka Portal Staf";
+                btn.className = "mt-6 text-sm bg-red-800 hover:bg-red-700 text-white py-2 px-4 rounded-full border border-red-500 transition";
+                btn.onclick = goToPortal;
+                document.getElementById('errorScreen').appendChild(btn);
+            }
+
+            const savedNama = localStorage.getItem("wazza_nama");
+            if (savedNama) showLoggedInUI(savedNama);
+        }
+    </script>
+</body>
+
+</html>

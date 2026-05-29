@@ -1,0 +1,3175 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ms.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .nav-item.active {
+            background-color: #fbbf24;
+            color: #111827;
+            font-weight: bold;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* CALENDAR STYLES */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 4px;
+            height: 100%;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            background: #1f2937;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            position: relative;
+            overflow: visible;
+            min-width: 0;
+        }
+
+        .calendar-header {
+            font-weight: bold;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* TOOLTIP STYLES */
+        .event-badge {
+            font-size: 0.7rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: visible;
+            display: block;
+            font-weight: 600;
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .event-badge .badge-text {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .event-badge:hover {
+            z-index: 100;
+        }
+
+        .event-badge:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            bottom: 110%;
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000000;
+            color: #fff;
+            text-align: center;
+            border: 1px solid #fbbf24;
+            padding: 8px;
+            border-radius: 6px;
+            z-index: 999;
+            width: max-content;
+            max-width: 200px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.2s;
+            white-space: normal;
+            pointer-events: none;
+        }
+
+        .tooltip-arrow {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #fbbf24 transparent transparent transparent;
+        }
+
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #6b7280;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+        }
+
+        .today .day-number {
+            color: #fbbf24;
+        }
+
+        .today {
+            border: 2px solid #fbbf24;
+            background: #374151;
+        }
+
+        /* FADE IN ANIMATION */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* CONFIG INPUT STYLES */
+        .cfg-input {
+            background: #111827;
+            border: 1px solid #374151;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .cfg-input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 1px #fbbf24;
+        }
+
+        .cfg-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .cfg-card {
+            background: #1f2937;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #374151;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .wfh-day-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #111827;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            user-select: none;
+        }
+
+        .wfh-day-label:hover {
+            border-color: #fbbf24;
+        }
+
+        .wfh-day-label input:checked+span {
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .wfh-day-label:has(input:checked) {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.08);
+        }
+        /* Flatpickr dark theme */
+        .flatpickr-calendar { background:#1f2937; border:1px solid #374151; box-shadow:0 12px 40px rgba(0,0,0,0.6); border-radius:12px; font-family:inherit; }
+        .flatpickr-months { background:#111827; border-radius:12px 12px 0 0; padding:2px 0; }
+        .flatpickr-month { color:#f9fafb; fill:#f9fafb; }
+        .flatpickr-current-month { color:#f9fafb; font-weight:700; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months { background:#111827; color:#f9fafb; border:none; font-weight:700; appearance:none; -webkit-appearance:none; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months option { background:#1f2937; color:#f9fafb; }
+        .flatpickr-current-month input.cur-year { color:#f9fafb; font-weight:700; }
+        .numInputWrapper span { border-color:#374151; }
+        .numInputWrapper span svg path { fill:#9ca3af; }
+        .flatpickr-calendar .flatpickr-prev-month, .flatpickr-calendar .flatpickr-next-month { fill:#d1d5db !important; color:#d1d5db !important; }
+        .flatpickr-calendar .flatpickr-prev-month:hover, .flatpickr-calendar .flatpickr-next-month:hover { fill:#fbbf24 !important; color:#fbbf24 !important; background:rgba(251,191,36,0.1); border-radius:6px; }
+        .flatpickr-calendar .flatpickr-prev-month svg, .flatpickr-calendar .flatpickr-next-month svg { fill:inherit !important; }
+        .flatpickr-innerContainer { border-top:1px solid #374151; }
+        .flatpickr-rContainer { padding:4px; }
+        .flatpickr-weekdays { background:#111827; }
+        .flatpickr-calendar .flatpickr-weekdays .flatpickr-weekday { background:#111827 !important; color:#d1d5db !important; font-weight:700 !important; font-size:11px !important; }
+        .flatpickr-days { border-color:#374151; }
+        .dayContainer { padding:4px; gap:2px; }
+        .flatpickr-day { color:#d1d5db; border-radius:6px; border:none; font-size:13px; }
+        .flatpickr-day:hover, .flatpickr-day:focus { background:#374151; border-color:#374151; color:#fff; }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background:#eab308 !important; border-color:#eab308 !important; color:#000 !important; font-weight:700; }
+        .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover { background:#fbbf24 !important; border-color:#fbbf24 !important; }
+        .flatpickr-day.inRange { background:#78350f; border-color:#78350f; color:#fde68a; box-shadow:-5px 0 0 #78350f, 5px 0 0 #78350f; border-radius:0; }
+        .flatpickr-day.startRange { border-radius:6px 0 0 6px; }
+        .flatpickr-day.endRange { border-radius:0 6px 6px 0; }
+        .flatpickr-day.startRange.endRange { border-radius:6px; }
+        .flatpickr-day.today { border-color:#4b5563 !important; color:#fbbf24; }
+        .flatpickr-day.today:hover { background:#374151; color:#fbbf24; }
+        .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color:#374151; background:transparent; cursor:not-allowed; }
+        .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color:#4b5563; }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-100 h-screen overflow-hidden relative">
+
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div id="adminLoginOverlay" class="fixed inset-0 bg-gray-900 z-[999] flex flex-col items-center justify-center p-4">
+        <div class="bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-700 w-full max-w-sm animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-yellow-500/10 p-4 rounded-full mb-4">
+                    <span class="text-4xl">🔐</span>
+                </div>
+                <h1 class="text-2xl font-black tracking-widest text-white">WAZZA<span
+                        class="text-yellow-500">ADMIN</span></h1>
+                <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Kawasan Kawalan Keselamatan</p>
+            </div>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-gray-400 text-xs font-bold mb-2 uppercase">ID Pengguna</label>
+                    <input type="text" id="loginUser" required
+                        class="w-full p-3 bg-gray-900 border border-gray-600 text-white rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition">
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-xs font-bold mb-2 uppercase">Kata Laluan</label>
+                    <input type="password" id="loginPass" required
+                        class="w-full p-3 bg-gray-900 border border-gray-600 text-white rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition"
+                        onkeydown="if(event.key==='Enter') handleAdminLogin()">
+                </div>
+                <div id="loginError"
+                    class="hidden text-red-400 text-xs text-center font-bold bg-red-900/30 border border-red-800 rounded-lg p-2">
+                </div>
+                <button onclick="handleAdminLogin()" id="btnAdminLogin"
+                    class="w-full bg-yellow-600 hover:bg-yellow-500 text-gray-900 font-black py-3 rounded-xl shadow-lg transition tracking-widest uppercase mt-4">
+                    Akses Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN DASHBOARD ===== -->
+    <div id="mainDashboardWrapper" class="h-full flex hidden opacity-0 transition-opacity duration-500">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex-col hidden md:flex flex-shrink-0">
+            <div class="h-20 flex items-center justify-center border-b border-gray-700">
+                <h1 class="font-bold text-xl tracking-wide">WAZZA<span class="text-yellow-500">ADMIN</span></h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="switchPage('dashboard')" id="nav-dashboard"
+                    class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">🏠</span> Dashboard Utama
+                </button>
+                <button onclick="switchPage('history')" id="nav-history"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">📜</span> Rekod Terdahulu
+                </button>
+                <button onclick="switchPage('leave')" id="nav-leave"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">🗓️</span> Laporan Cuti
+                </button>
+                <button onclick="switchPage('allLeaveLog')" id="nav-allLeaveLog"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">📂</span> Senarai Cuti
+                </button>
+                <button onclick="switchPage('staff')" id="nav-staff"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">👥</span> Pengurusan Staf
+                </button>
+                <button onclick="switchPage('outstation')" id="nav-outstation"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">🗺️</span> Outstation
+                </button>
+                <button onclick="switchPage('config')" id="nav-config"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                    <span class="text-xl">⚙️</span> Tetapan Sistem
+                </button>
+            </nav>
+            <div class="px-4 py-3 border-t border-gray-700">
+                <button onclick="manualRefreshAll()" id="btnManualRefresh"
+                    class="w-full bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-2 transition">
+                    🔄 Refresh Sekarang
+                </button>
+                <div id="cacheStatusBar" class="hidden text-[10px] text-gray-500 text-center mt-2 space-y-0.5">
+                    <div>Dikemaskini: <span id="lastUpdatedTime" class="text-gray-400 font-mono">—</span></div>
+                    <div>Auto-refresh: <span id="countdownTimer" class="text-yellow-500 font-mono font-bold">15:00</span></div>
+                </div>
+            </div>
+            <div class="px-4 pb-4 border-t border-gray-700 pt-3">
+                <button onclick="logoutAdmin()"
+                    class="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-300 bg-gray-900 py-2 px-4 rounded-lg border border-red-900/50 w-full justify-center transition">
+                    Keluar Sistem
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
+
+            <!-- MOBILE HEADER -->
+            <header
+                class="md:hidden bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center flex-shrink-0">
+                <h1 class="font-bold text-lg">WAZZA<span class="text-yellow-500">ADMIN</span></h1>
+                <div class="flex gap-1 items-center flex-wrap">
+                    <button onclick="switchPage('dashboard')" class="bg-gray-700 p-2 rounded text-xs">🏠</button>
+                    <button onclick="switchPage('history')" class="bg-gray-700 p-2 rounded text-xs">📜</button>
+                    <button onclick="switchPage('leave')" class="bg-gray-700 p-2 rounded text-xs">🗓️</button>
+                    <button onclick="switchPage('allLeaveLog')" class="bg-gray-700 p-2 rounded text-xs">📂</button>
+                    <button onclick="switchPage('staff')" class="bg-gray-700 p-2 rounded text-xs">👥</button>
+                    <button onclick="switchPage('outstation')" class="bg-gray-700 p-2 rounded text-xs">🗺️</button>
+                    <button onclick="switchPage('config')" class="bg-gray-700 p-2 rounded text-xs">⚙️</button>
+                    <button onclick="logoutAdmin()"
+                        class="bg-red-900/50 text-red-400 p-2 rounded text-xs font-bold border border-red-800 ml-1">X</button>
+                </div>
+            </header>
+
+            <!-- ===== PAGE: DASHBOARD ===== -->
+            <div id="page-dashboard" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Dashboard Hari Ini</h2>
+                    <p class="text-gray-400 text-sm" id="liveDateDisplay">...</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+                        <p class="text-gray-500 text-xs uppercase font-bold">Total Staff</p>
+                        <h2 id="liveTotal" class="text-3xl font-bold text-white">...</h2>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl border-l-4 border-green-500 relative overflow-hidden">
+                        <p class="text-gray-500 text-xs uppercase font-bold">Hadir</p>
+                        <div class="flex items-end gap-2 mt-1">
+                            <h2 id="livePresent" class="text-3xl font-bold text-green-400">...</h2>
+                            <span class="text-sm text-gray-500 mb-1" id="liveTotalSmall">/ ...</span>
+                        </div>
+                        <div class="w-full bg-gray-700 h-2 rounded-full mt-2 overflow-hidden">
+                            <div id="progressBar" class="bg-green-500 h-full rounded-full transition-all duration-1000"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl border-l-4 border-yellow-500">
+                        <p class="text-gray-500 text-xs uppercase font-bold">Cuti (Hari Ini)</p>
+                        <h2 id="liveCuti" class="text-3xl font-bold text-white">0</h2>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-xl border-l-4 border-red-500">
+                        <p class="text-gray-500 text-xs uppercase font-bold">Lewat</p>
+                        <h2 id="liveLate" class="text-3xl font-bold text-white">0</h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start">
+                    <div class="xl:col-span-2 bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                        <div class="p-4 bg-gray-800 border-b border-gray-700 font-bold text-white flex justify-between items-center">
+                            <span>📡 Live Attendance Tracker</span>
+                            <span id="loaderLive" class="text-yellow-500 text-xs animate-pulse hidden">Updating...</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-3">Nama</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3">In / Out</th>
+                                        <th class="p-3">Koordinat</th>
+                                        <th class="p-3">Lokasi Terkini</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableLive" class="divide-y divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
+                        <div class="p-4 border-b border-gray-700 flex items-center gap-2">
+                            <span class="text-base">🗓️</span>
+                            <h3 class="text-white font-bold text-sm">Permohonan Cuti (Pending)</h3>
+                        </div>
+                        <div id="pendingLeaveList" class="space-y-2 p-4 max-h-[500px] overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: HISTORY ===== -->
+            <div id="page-history" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Semakan Rekod Lama</h2>
+                        <p class="text-gray-400 text-sm">Pilih tarikh atau julat tarikh untuk lihat kehadiran lepas.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="px-3 py-2.5 flex flex-wrap items-center gap-2">
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <button id="btnModeSingle" onclick="setHistoryMode('single')"
+                                class="px-3 py-1 rounded text-xs font-bold border transition bg-yellow-900 text-yellow-300 border-yellow-700">
+                                Tarikh Tunggal
+                            </button>
+                            <button id="btnModeRange" onclick="setHistoryMode('range')"
+                                class="px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-yellow-700">
+                                Julat Tarikh
+                            </button>
+                        </div>
+                        <div class="w-px h-5 bg-gray-600 flex-shrink-0"></div>
+                        <div id="historyModeSingle" style="display:flex" class="items-center gap-2 flex-1 flex-wrap">
+                            <input type="date" id="historyDateInput"
+                                class="bg-gray-900 border border-gray-700 text-white px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-yellow-500 cursor-pointer flex-shrink-0">
+                            <button id="btnSearchSingle" onclick="loadHistoryData()"
+                                class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow transition flex-shrink-0">
+                                Cari Rekod
+                            </button>
+                        </div>
+                        <div id="historyModeRange" style="display:none" class="items-center gap-2 flex-1 flex-wrap">
+                            <input type="text" id="historyDateRange" placeholder="Pilih julat tarikh..." readonly
+                                class="bg-gray-900 border border-gray-700 text-white px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-yellow-500 cursor-pointer w-48">
+                            <button id="btnSearchRange" onclick="loadHistoryRange()" disabled
+                                class="bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow transition flex-shrink-0 opacity-40 cursor-not-allowed">
+                                Cari Rekod
+                            </button>
+                            <span class="text-gray-600 text-[11px] flex-shrink-0">*maks 14 hari</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="historyResult" class="hidden space-y-4"></div>
+                <div id="historyEmptyState" class="flex flex-col items-center justify-center py-24 text-center">
+                    <div class="w-20 h-20 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center mb-5 shadow-inner">
+                        <span class="text-4xl">📋</span>
+                    </div>
+                    <h3 class="text-white font-bold text-base mb-2">Tiada Rekod Dipilih</h3>
+                    <p class="text-gray-500 text-sm max-w-xs leading-relaxed">Pilih tarikh di atas kemudian tekan <span class="text-yellow-400 font-semibold">Cari Rekod</span> untuk lihat rekod kehadiran.</p>
+                    <div class="mt-6 flex items-center gap-3 text-[11px] text-gray-600">
+                        <span class="px-2 py-1 bg-gray-800 rounded border border-gray-700">Tarikh Tunggal</span>
+                        <span>atau</span>
+                        <span class="px-2 py-1 bg-gray-800 rounded border border-gray-700">Julat hingga 14 hari</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: LEAVE CALENDAR ===== -->
+            <div id="page-leave" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900 flex flex-col">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-center border-b border-gray-700 pb-4 mb-2 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Kalendar Cuti Staff</h2>
+                        <p class="text-gray-400 text-sm">Paparan visual cuti yang telah diluluskan.</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-700 rounded text-gray-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <input type="month" id="calendarMonthPicker" onchange="jumpToMonth()"
+                            class="bg-transparent text-white font-bold text-center border-none outline-none focus:ring-0 cursor-pointer uppercase">
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-700 rounded text-gray-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl flex flex-col">
+                    <div class="grid grid-cols-7 gap-4 mb-4">
+                        <div class="calendar-header text-red-400">Ahad</div>
+                        <div class="calendar-header">Isnin</div>
+                        <div class="calendar-header">Selasa</div>
+                        <div class="calendar-header">Rabu</div>
+                        <div class="calendar-header">Khamis</div>
+                        <div class="calendar-header">Jumaat</div>
+                        <div class="calendar-header text-red-400">Sabtu</div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid flex-1"></div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: ALL LEAVE LOG ===== -->
+            <div id="page-allLeaveLog" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Senarai Cuti</h2>
+                        <p class="text-gray-400 text-sm">Pangkalan data semua rekod cuti & alasan.</p>
+                    </div>
+                    <button onclick="loadAllLeaveLog(true)"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="px-3 py-2.5 bg-gray-800 border-b border-gray-700 flex flex-wrap items-center gap-2">
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <button id="leaveFilterBtnLulus" onclick="setLeaveFilter('DILULUSKAN')" class="px-3 py-1 rounded text-xs font-bold border transition bg-green-900 text-green-300 border-green-700">LULUS</button>
+                            <button id="leaveFilterBtnDitolak" onclick="setLeaveFilter('DITOLAK')" class="px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-red-700">DITOLAK</button>
+                            <button id="leaveFilterBtnSemua" onclick="setLeaveFilter('SEMUA')" class="px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-yellow-600">SEMUA</button>
+                        </div>
+                        <div class="w-px h-5 bg-gray-600 flex-shrink-0"></div>
+                        <input type="text" id="searchLeaveLog" onkeyup="filterLeaveLog()"
+                            placeholder="Cari nama atau jenis cuti..."
+                            class="flex-1 min-w-[160px] bg-gray-900 border border-gray-700 text-white px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-yellow-500 placeholder-gray-500">
+                        <input type="date" id="dateLeaveLog" onchange="filterLeaveLog()"
+                            class="bg-gray-900 border border-gray-700 text-white px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-yellow-500 cursor-pointer flex-shrink-0">
+                        <select id="sortLeaveLog" onchange="filterLeaveLog()"
+                            class="bg-gray-900 border border-gray-700 text-white px-3 py-1.5 rounded-lg text-xs focus:outline-none focus:border-yellow-500 cursor-pointer flex-shrink-0">
+                            <option value="cuti_desc">↓ Baru ke Lama</option>
+                            <option value="cuti_asc">↑ Lama ke Baru</option>
+                            <option value="mohon_desc">⏱ Tarikh Mohon</option>
+                            <option value="nama_asc">A–Z Nama</option>
+                        </select>
+                        <button onclick="clearLeaveFilter()"
+                            class="text-gray-400 hover:text-white text-sm px-2.5 py-1.5 rounded border border-gray-700 hover:border-gray-500 transition flex-shrink-0" title="Clear filter">✕</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                <tr>
+                                    <th class="p-4 w-1/5">Info Cuti</th>
+                                    <th class="p-4 w-1/4">Tarikh (Mohon / Cuti)</th>
+                                    <th class="p-4 w-1/3">Sebab & Lampiran</th>
+                                    <th class="p-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableAllLeaveLog" class="divide-y divide-gray-700">
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-gray-500">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: STAFF MANAGEMENT ===== -->
+            <div id="page-staff" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Pengurusan Staf</h2>
+                        <p class="text-gray-400 text-sm">Tambah, Edit atau Tukar Status Pekerja.</p>
+                    </div>
+                    <button onclick="openStaffModal()"
+                        class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                        + Tambah Staf Baru
+                    </button>
+                </div>
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white">Senarai Semua Staf</span>
+                            <div class="flex gap-1 ml-2">
+                                <button id="filterBtnAktif" onclick="setStaffFilter('AKTIF')" class="px-3 py-1 rounded text-xs font-bold border transition bg-green-900 text-green-300 border-green-700">AKTIF</button>
+                                <button id="filterBtnBerhenti" onclick="setStaffFilter('BERHENTI')" class="px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-red-700">BERHENTI</button>
+                            </div>
+                        </div>
+                        <button onclick="loadStaffManagement(true)" class="text-xs text-yellow-500 hover:text-white">🔄 Refresh</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                <tr>
+                                    <th class="p-4">Staff ID</th>
+                                    <th class="p-4">Nama Penuh</th>
+                                    <th class="p-4">Jawatan & Username</th>
+                                    <th class="p-4 text-center">Status</th>
+                                    <th class="p-4 text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableStaff" class="divide-y divide-gray-700">
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-gray-500">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: OUTSTATION ===== -->
+            <div id="page-outstation" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-700 pb-4 gap-3">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">🗺️ Pengecualian Outstation</h2>
+                        <p class="text-gray-400 text-sm">Tetapkan pengecualian radius GPS untuk staf yang bertugas di luar pejabat.</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="processAutoClockInToday(event)"
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                            ⚡ Proses Auto Clock-In Hari Ini
+                        </button>
+                        <button onclick="openOutstationModal()"
+                            class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                            + Tambah Pengecualian
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-4 bg-blue-950/50 border-b md:border-b-0 md:border-r border-blue-900/30">
+                            <p class="text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/25 text-blue-300 text-[10px] font-black flex-shrink-0">i</span>
+                                Cara Kerja
+                            </p>
+                            <div class="space-y-2.5">
+                                <div class="flex gap-2.5 items-start">
+                                    <span class="flex-shrink-0 text-blue-400 text-sm mt-0.5">📍</span>
+                                    <p class="text-xs text-blue-300/80 leading-relaxed">Staf yang disenaraikan akan <strong class="text-blue-200">dikecualikan dari semakan radius GPS</strong> pada tarikh tersebut.</p>
+                                </div>
+                                <div class="flex gap-2.5 items-start">
+                                    <span class="flex-shrink-0 text-blue-400 text-sm mt-0.5">⚡</span>
+                                    <p class="text-xs text-blue-300/80 leading-relaxed">Jika <strong class="text-blue-200">Auto Clock-In</strong> diaktifkan, sistem akan daftarkan kehadiran secara automatik pada masa yang ditetapkan.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-yellow-950/25">
+                            <p class="text-[11px] font-bold text-yellow-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                <span>⚙️</span> Auto Trigger Harian
+                            </p>
+                            <p class="text-xs text-yellow-400/70 mb-3 leading-relaxed">Trigger jalan sekali sehari. Sistem akan clock-in semua outstation mengikut masa masing-masing yang dikonfigure.</p>
+                            <div class="flex gap-2 items-end">
+                                <div class="flex-1">
+                                    <label class="block text-yellow-600 text-[10px] font-bold uppercase mb-1">Masa Trigger</label>
+                                    <input type="time" id="outstationTriggerTime" value="09:00"
+                                        class="w-full p-2 bg-gray-950 border border-yellow-700/40 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                                </div>
+                                <button onclick="saveTriggerTime(event)"
+                                    class="bg-yellow-600 hover:bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm transition shadow flex-shrink-0">
+                                    💾 Simpan
+                                </button>
+                            </div>
+                            <p id="triggerSetupMsg" class="text-[10px] mt-2 hidden"></p>
+                            <div class="bg-black/20 rounded-lg p-2 mt-2.5 border border-yellow-900/30">
+                                <p class="text-[10px] text-yellow-600/80 leading-relaxed">📋 Selepas simpan → Pergi Google Sheet → <strong class="text-yellow-500">⚡ WAZZA MENU → Setup Auto Trigger Outstation</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="outstationNotif" class="hidden rounded-lg px-4 py-3 text-sm font-bold border"></div>
+
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="px-4 py-3 bg-gray-800 border-b border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="font-bold text-white text-sm">Senarai Pengecualian</span>
+                            <div class="flex bg-gray-900 rounded-lg p-0.5 border border-gray-700">
+                                <button id="tab-upcoming" onclick="switchOutstationTab('upcoming')"
+                                    class="ost-tab px-3 py-1 rounded-md text-xs font-bold transition bg-blue-600 text-white">
+                                    Akan Datang
+                                </button>
+                                <button id="tab-previous" onclick="switchOutstationTab('previous')"
+                                    class="ost-tab px-3 py-1 rounded-md text-xs font-bold transition text-gray-400 hover:text-white">
+                                    Lepas
+                                </button>
+                                <button id="tab-all" onclick="switchOutstationTab('all')"
+                                    class="ost-tab px-3 py-1 rounded-md text-xs font-bold transition text-gray-400 hover:text-white">
+                                    Semua
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <label class="text-[10px] text-gray-500 font-bold uppercase whitespace-nowrap">Tapis Tarikh:</label>
+                            <input type="date" id="outstationDateFilter" onchange="onOutstationDateChange()"
+                                class="bg-gray-900 border border-gray-600 text-white text-xs px-2 py-1.5 rounded-lg focus:outline-none focus:border-yellow-500 cursor-pointer">
+                            <button onclick="clearOutstationFilter()" title="Padam filter" class="text-gray-500 hover:text-white text-sm px-1">✕</button>
+                            <button onclick="loadOutstationList(true)" class="text-yellow-500 hover:text-white text-xs font-bold ml-1">🔄</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                <tr>
+                                    <th class="p-4">Nama Staf</th>
+                                    <th class="p-4">Tarikh Outstation</th>
+                                    <th class="p-4">Auto Clock-In</th>
+                                    <th class="p-4">Sebab / Tugasan</th>
+                                    <th class="p-4 text-center">Status</th>
+                                    <th class="p-4 text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableOutstation" class="divide-y divide-gray-700">
+                                <tr><td colspan="6" class="p-8 text-center text-gray-500">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: TETAPAN SISTEM (BARU) ===== -->
+            <div id="page-config" class="hidden flex-1 overflow-y-auto p-6 bg-gray-900">
+                <div class="max-w-4xl mx-auto space-y-6">
+
+                    <!-- Header -->
+                    <div class="flex justify-between items-end border-b border-gray-700 pb-5">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">⚙️ Tetapan <span
+                                    class="text-yellow-500">Sistem</span></h2>
+                            <p class="text-gray-400 text-sm mt-1">Konfigurasi masa, lokasi, dan jadual kerja staf.</p>
+                        </div>
+                        <button onclick="saveConfigSettings()" id="btnSaveConfig"
+                            class="bg-yellow-600 hover:bg-yellow-500 text-gray-900 font-bold px-6 py-2 rounded-lg transition shadow-lg flex items-center gap-2">
+                            💾 Simpan Semua
+                        </button>
+                    </div>
+
+                    <!-- Notif bar -->
+                    <div id="configNotif" class="hidden rounded-lg px-4 py-3 text-sm font-bold border"></div>
+
+                    <!-- Loading state -->
+                    <div id="configLoader" class="text-center py-16 text-yellow-500 animate-pulse">
+                        ⏳ Membaca tetapan dari pangkalan data...
+                    </div>
+
+                    <!-- Content (hidden until loaded) -->
+                    <div id="configContent" class="hidden space-y-6">
+
+                        <!-- Row 1: QR Time + Admin Credentials -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Masa QR -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-4 flex items-center gap-2">
+                                    🕒 Masa Operasi QR
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="cfg-label">Masa Mula (Start-QR)</label>
+                                        <input type="time" id="cfg_startQr" class="cfg-input">
+                                    </div>
+                                    <div>
+                                        <label class="cfg-label">Masa Tamat (End-QR)</label>
+                                        <input type="time" id="cfg_endQr" class="cfg-input">
+                                    </div>
+                                    <div>
+                                        <label class="cfg-label">Had Masa Tepat (Late Threshold)</label>
+                                        <input type="time" id="cfg_lateStart" class="cfg-input">
+                                        <p class="text-[10px] text-gray-500 mt-1">*Lebih dari masa ini → dikira <strong class="text-red-400">LEWAT</strong> dan perlu bagi sebab. Token tetap buka hingga End-QR. Kosong = tiada had lewat.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Akaun Admin -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-4 flex items-center gap-2">
+                                    🔐 Akaun Admin
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="cfg-label">Username Admin</label>
+                                        <input type="text" id="cfg_adminUser" class="cfg-input"
+                                            placeholder="Cth: admin">
+                                    </div>
+                                    <div>
+                                        <label class="cfg-label">Password Admin</label>
+                                        <input type="password" id="cfg_adminPass" class="cfg-input"
+                                            placeholder="Kosong = tidak berubah">
+                                        <p class="text-[10px] text-gray-500 mt-1">*Biarkan kosong jika tidak mahu tukar
+                                            password.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Folder + Geofencing -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Link Folder -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-4 flex items-center gap-2">
+                                    📁 Google Drive Folder
+                                </h3>
+                                <div>
+                                    <label class="cfg-label">Folder ID (untuk simpan lampiran cuti)</label>
+                                    <input type="text" id="cfg_linkFolder" class="cfg-input"
+                                        placeholder="Cth: 1saXvtuXv7Ei...">
+                                    <p class="text-[10px] text-gray-500 mt-1">*Salin ID folder dari URL Google Drive
+                                        anda.</p>
+                                    <button onclick="openDriveFolder()" class="mt-3 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold py-2 px-4 rounded-lg transition">
+                                        📂 Buka Google Drive Folder
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Lokasi & Radius -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-4 flex items-center gap-2">
+                                    📍 Lokasi & Radius Pejabat
+                                </h3>
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="cfg-label">Latitude</label>
+                                            <input type="text" id="cfg_officeLat" class="cfg-input"
+                                                placeholder="Cth: 2.9342...">
+                                        </div>
+                                        <div>
+                                            <label class="cfg-label">Longitude</label>
+                                            <input type="text" id="cfg_officeLng" class="cfg-input"
+                                                placeholder="Cth: 101.654...">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="cfg-label">Radius Had Sah (Meter)</label>
+                                        <input type="number" id="cfg_officeRadius" class="cfg-input" min="0"
+                                            placeholder="Cth: 100">
+                                        <p class="text-[10px] text-gray-500 mt-1">*Set <strong
+                                                class="text-yellow-500">0</strong> untuk benarkan scan dari mana-mana
+                                            (matikan geofencing).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: WFH Schedule -->
+                        <div class="cfg-card">
+                            <h3 class="text-base font-bold text-yellow-500 mb-1 flex items-center gap-2">
+                                🏠 Jadual WFH Automatik
+                            </h3>
+                            <p class="text-gray-500 text-xs mb-5">Pada hari/tarikh WFH, radius geofencing akan diabaikan
+                                secara automatik (dianggap radius = 0).</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                                <!-- Hari Tetap WFH -->
+                                <div>
+                                    <label class="cfg-label mb-3">Hari WFH Tetap (Mingguan)</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="wfh-day-label">
+                                            <input type="checkbox" id="wfh_isnin" value="Isnin"
+                                                class="w-4 h-4 accent-yellow-500">
+                                            <span class="text-sm">Isnin</span>
+                                        </label>
+                                        <label class="wfh-day-label">
+                                            <input type="checkbox" id="wfh_selasa" value="Selasa"
+                                                class="w-4 h-4 accent-yellow-500">
+                                            <span class="text-sm">Selasa</span>
+                                        </label>
+                                        <label class="wfh-day-label">
+                                            <input type="checkbox" id="wfh_rabu" value="Rabu"
+                                                class="w-4 h-4 accent-yellow-500">
+                                            <span class="text-sm">Rabu</span>
+                                        </label>
+                                        <label class="wfh-day-label">
+                                            <input type="checkbox" id="wfh_khamis" value="Khamis"
+                                                class="w-4 h-4 accent-yellow-500">
+                                            <span class="text-sm">Khamis</span>
+                                        </label>
+                                        <label class="wfh-day-label col-span-2">
+                                            <input type="checkbox" id="wfh_jumaat" value="Jumaat"
+                                                class="w-4 h-4 accent-yellow-500">
+                                            <span class="text-sm">Jumaat</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Tarikh Override WFH -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="cfg-label">Tarikh Khas WFH (Override Tiba-tiba)</label>
+                                        <div class="flex gap-2">
+                                            <input type="date" id="wfhDateInput" class="cfg-input flex-1">
+                                            <button onclick="addWfhDate()"
+                                                class="bg-yellow-600 hover:bg-yellow-500 text-gray-900 px-4 rounded-lg font-bold transition flex-shrink-0">+</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Senarai Tarikh
+                                            Override:</p>
+                                        <div id="wfhDatesList" class="flex flex-wrap gap-2 min-h-[36px]">
+                                            <span class="text-gray-600 text-xs italic">Tiada tarikh override.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Hari Bekerja + Cuti Umum -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Hari Bekerja -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-1 flex items-center gap-2">
+                                    📅 Hari Bekerja
+                                </h3>
+                                <p class="text-gray-500 text-xs mb-4">Tandakan hari-hari yang dikira sebagai hari bekerja. Hari lain akan ditunjukkan sebagai <strong class="text-gray-400">REHAT</strong> dalam rekod kehadiran.</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_ahad" value="Ahad" class="w-4 h-4 accent-yellow-500">
+                                        <span class="text-sm">Ahad</span>
+                                    </label>
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_isnin" value="Isnin" class="w-4 h-4 accent-yellow-500" checked>
+                                        <span class="text-sm">Isnin</span>
+                                    </label>
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_selasa" value="Selasa" class="w-4 h-4 accent-yellow-500" checked>
+                                        <span class="text-sm">Selasa</span>
+                                    </label>
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_rabu" value="Rabu" class="w-4 h-4 accent-yellow-500" checked>
+                                        <span class="text-sm">Rabu</span>
+                                    </label>
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_khamis" value="Khamis" class="w-4 h-4 accent-yellow-500" checked>
+                                        <span class="text-sm">Khamis</span>
+                                    </label>
+                                    <label class="wfh-day-label">
+                                        <input type="checkbox" id="wd_jumaat" value="Jumaat" class="w-4 h-4 accent-yellow-500" checked>
+                                        <span class="text-sm">Jumaat</span>
+                                    </label>
+                                    <label class="wfh-day-label col-span-2">
+                                        <input type="checkbox" id="wd_sabtu" value="Sabtu" class="w-4 h-4 accent-yellow-500">
+                                        <span class="text-sm">Sabtu</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Cuti Umum / Public Holidays -->
+                            <div class="cfg-card">
+                                <h3 class="text-base font-bold text-yellow-500 mb-1 flex items-center gap-2">
+                                    🎌 Cuti Umum
+                                </h3>
+                                <p class="text-gray-500 text-xs mb-4">Tambah hari cuti umum syarikat. Hari ini akan ditunjukkan sebagai <strong class="text-purple-400">CUTI UMUM</strong> dalam rekod kehadiran.</p>
+                                <div class="space-y-3">
+                                    <div class="flex gap-2">
+                                        <input type="date" id="phDateInput" class="cfg-input flex-1">
+                                        <input type="text" id="phNameInput" placeholder="Nama cuti..." class="cfg-input flex-1">
+                                        <button onclick="addPublicHoliday()" class="bg-yellow-600 hover:bg-yellow-500 text-gray-900 px-3 rounded-lg font-bold transition flex-shrink-0">+</button>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Senarai Cuti Umum:</p>
+                                        <div id="publicHolidaysList" class="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
+                                            <span class="text-gray-600 text-xs italic">Tiada cuti umum.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div><!-- /configContent -->
+                </div>
+            </div><!-- /page-config -->
+
+        </main>
+    </div>
+
+    <!-- ===== STAFF MODAL ===== -->
+    <div id="staffModal"
+        class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center p-4 animate-fade-in">
+        <div class="bg-gray-800 rounded-2xl w-full max-w-3xl p-6 border border-gray-700 shadow-2xl">
+            <h2 id="staffModalTitle" class="text-xl font-bold text-yellow-500 mb-4 uppercase tracking-wider">Tambah Staf Baru</h2>
+            <div id="staffForm">
+                <input type="hidden" id="sf_rowIndex">
+                <!-- 2-column layout: info kiri, had cuti kanan -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Kiri: Info Staf -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Nama Penuh</label>
+                            <input type="text" id="sf_nama" required placeholder="Cth: Abu Bakar"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Jawatan</label>
+                            <input type="text" id="sf_jawatan" required placeholder="Cth: Editor"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Username</label>
+                                <input type="text" id="sf_username" required placeholder="Cth: abu"
+                                    class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500">
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Kata Laluan</label>
+                                <input type="text" id="sf_password" required placeholder="Cth: 990101..."
+                                    class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Status Pekerja</label>
+                            <select id="sf_status"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 appearance-none">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Berhenti">Berhenti</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Had Cuti Tahunan -->
+                    <div class="border-t md:border-t-0 md:border-l border-gray-700 pt-4 md:pt-0 md:pl-6">
+                    <p class="text-yellow-500 text-xs font-bold uppercase mb-2">Had Cuti Tahunan</p>
+
+                    <!-- Legend -->
+                    <div class="bg-gray-900 border border-gray-700 rounded-lg p-2 mb-3 space-y-1">
+                        <p class="text-[9px] font-bold text-gray-500 uppercase mb-1">Panduan</p>
+                        <div class="flex items-center gap-1.5"><input type="checkbox" checked disabled class="w-3 h-3 accent-yellow-500"><span class="text-[10px] text-gray-300"><strong class="text-yellow-400">Tiada Had</strong> — Staff boleh mohon tanpa had (∞ unlimited)</span></div>
+                        <div class="flex items-center gap-1.5"><span class="text-yellow-400 font-bold text-[10px] w-3 text-center">0</span><span class="text-[10px] text-gray-300"><strong class="text-yellow-400">0</strong> — Tidak berkenaan, cuti ini disembunyi untuk staff ini</span></div>
+                        <div class="flex items-center gap-1.5"><span class="text-yellow-400 font-bold text-[10px] w-3 text-center">n</span><span class="text-[10px] text-gray-300"><strong class="text-yellow-400">&gt; 0</strong> — Bilangan hari yang dibenarkan setahun</span></div>
+                    </div>
+
+                    <!-- Baki Semasa — hanya papar bila edit staf sedia ada -->
+                    <div id="sfBalanceDisplay" class="hidden mb-3 p-2 bg-gray-900 rounded-lg border border-gray-700">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-2">Baki Semasa (Tahun Ini)</p>
+                        <div id="sfBalanceContent" class="text-xs text-gray-500 italic">Memuatkan...</div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2">
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">AL (+ HAL)</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_al_unlimited" onchange="toggleLimitUnlimited('al')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_alLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">MC</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_mc_unlimited" onchange="toggleLimitUnlimited('mc')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_mcLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">EL (+ HEL)</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_el_unlimited" onchange="toggleLimitUnlimited('el')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_elLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">BL</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_bl_unlimited" onchange="toggleLimitUnlimited('bl')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_blLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">HL</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_hl_unlimited" onchange="toggleLimitUnlimited('hl')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_hlLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">ML</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_ml_unlimited" onchange="toggleLimitUnlimited('ml')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_mlLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-[10px] font-bold mb-1">PL</label>
+                            <label class="flex items-center gap-1 mb-1 cursor-pointer">
+                                <input type="checkbox" id="sf_pl_unlimited" onchange="toggleLimitUnlimited('pl')" class="w-3 h-3 accent-yellow-500">
+                                <span class="text-[9px] text-gray-500">Tiada Had</span>
+                            </label>
+                            <input type="number" id="sf_plLimit" min="0" value="0"
+                                class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-yellow-500 text-sm">
+                        </div>
+                    </div>
+
+                    </div><!-- /kanan -->
+                </div><!-- /grid -->
+
+                <!-- Papar dalam Tracker -->
+                <div class="flex items-center justify-between bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 mt-2">
+                    <div>
+                        <p class="text-white text-sm font-bold">Papar dalam Tracker & Rekod</p>
+                        <p class="text-gray-500 text-xs mt-0.5">Nyahtanda untuk sembunyikan staf dari Dashboard, Scorecard & Rekod Terdahulu</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer ml-4 flex-shrink-0">
+                        <input type="checkbox" id="sf_paparTracker" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                    </label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-4 mt-2 border-t border-gray-700">
+                    <button onclick="closeStaffModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition">Batal</button>
+                    <button onclick="submitStaffForm()" id="btnSaveStaff"
+                        class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-gray-900 font-bold py-2 rounded-lg transition shadow-lg">Simpan</button>
+                </div>
+            </div><!-- /staffForm -->
+        </div>
+    </div>
+
+    <!-- ===== OUTSTATION MODAL ===== -->
+    <div id="outstationModal"
+        class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center p-4 animate-fade-in">
+        <div class="bg-gray-800 rounded-2xl w-full max-w-md p-6 border border-gray-700 shadow-2xl">
+            <h2 id="outstationModalTitle" class="text-xl font-bold text-blue-400 mb-5 uppercase tracking-wider">Tambah Pengecualian Outstation</h2>
+            <div class="space-y-4">
+                <input type="hidden" id="ost_rowIndex">
+                <div>
+                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Nama Staf</label>
+                    <select id="ost_nama"
+                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">-- Pilih Staf --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Tarikh Outstation</label>
+                    <input type="date" id="ost_tarikh"
+                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Sebab / Tugasan</label>
+                    <input type="text" id="ost_sebab" placeholder="Cth: Lawatan kilang, Program luar, Roadshow..."
+                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <label class="flex items-start gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition">
+                    <input type="checkbox" id="ost_autoClockIn" class="w-5 h-5 accent-blue-500 mt-0.5 flex-shrink-0"
+                        onchange="toggleAutoClockInTime()">
+                    <div>
+                        <span class="text-sm font-bold text-white block">Auto Clock-In</span>
+                        <span class="text-[10px] text-gray-500">Sistem akan daftarkan kehadiran secara automatik apabila admin tekan butang proses. Staf tidak perlu scan sendiri.</span>
+                    </div>
+                </label>
+                <div id="autoClockInTimeSection" class="hidden">
+                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Masa Clock-In Automatik</label>
+                    <input type="time" id="ost_masaClockIn" value="08:00"
+                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
+                    <p class="text-[10px] text-gray-500 mt-1">*Masa ini akan direkodkan sebagai masa masuk dalam Log_Kehadiran.</p>
+                </div>
+                <div class="flex gap-3 pt-4 border-t border-gray-700">
+                    <button onclick="closeOutstationModal()"
+                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition">Batal</button>
+                    <button onclick="submitOutstationForm()" id="btnSaveOutstation"
+                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg transition shadow-lg">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== STAFF DETAIL MODAL ===== -->
+    <div id="staffDetailModal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border border-gray-700 shadow-2xl">
+            <div class="p-5 border-b border-gray-700 flex justify-between items-start flex-shrink-0">
+                <div>
+                    <h2 id="staffDetailName" class="text-xl font-bold text-yellow-400">-</h2>
+                    <p id="staffDetailRange" class="text-gray-400 text-xs mt-1">-</p>
+                </div>
+                <button onclick="closeStaffDetailModal()" class="text-gray-400 hover:text-white text-2xl font-bold leading-none ml-4 flex-shrink-0">×</button>
+            </div>
+            <div class="p-5 overflow-y-auto flex-1 space-y-4">
+                <div id="staffDetailSummary" class="grid grid-cols-4 gap-3"></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                            <tr>
+                                <th class="p-3 text-left">Tarikh</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Masuk</th>
+                                <th class="p-3 text-left">Keluar</th>
+                                <th class="p-3 text-left">Lokasi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffDetailTable" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ===== CONFIG — isi sebelum deploy =====
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzjwycP8S7eGC_dLML24louH75mM9pOsVxDhTJJ8qE_qSgzPcCKHJhd9hzilAaaMaoT/exec";
+        const WEBSITE_URL = "https://urus.wazza.my"; // tiada trailing slash
+        // =======================================
+
+        function callGAS(action, params, onSuccess, onError) {
+            const url = GAS_URL + "?data=" + encodeURIComponent(JSON.stringify(Object.assign({ action: action }, params || {})));
+            fetch(url)
+            .then(function(res) {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.json();
+            })
+            .then(function(data) { if (onSuccess) onSuccess(data); })
+            .catch(function(err) {
+                if (onError) onError(err);
+                else console.error("callGAS error:", action, err);
+            });
+        }
+
+        // ==========================================
+        // ADMIN LOGIN
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', function () {
+            var adminToken = localStorage.getItem('wazza_admin_access');
+            if (adminToken === 'VERIFIED') {
+                unlockDashboard();
+            }
+        });
+
+        function handleAdminLogin() {
+            var btn = document.getElementById('btnAdminLogin');
+            var errDiv = document.getElementById('loginError');
+            var u = document.getElementById('loginUser').value.trim();
+            var p = document.getElementById('loginPass').value;
+
+            if (!u || !p) {
+                errDiv.innerText = "Sila isi semua maklumat.";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            errDiv.classList.add('hidden');
+            btn.innerText = "MENYEMAK...";
+            btn.disabled = true;
+
+            callGAS("verifyAdminLogin", { username: u, password: p }, function (res) {
+                if (res.status === 'SUCCESS') {
+                    localStorage.setItem('wazza_admin_access', 'VERIFIED');
+                    unlockDashboard();
+                } else {
+                    errDiv.innerText = res.message || 'Akses ditolak.';
+                    errDiv.classList.remove('hidden');
+                    btn.innerText = "Akses Dashboard";
+                    btn.disabled = false;
+                    document.getElementById('loginPass').value = "";
+                }
+            }, function (err) {
+                errDiv.innerText = "Ralat sistem: " + err.message;
+                errDiv.classList.remove('hidden');
+                btn.innerText = "Akses Dashboard";
+                btn.disabled = false;
+            });
+        }
+
+        function unlockDashboard() {
+            document.getElementById('adminLoginOverlay').style.display = "none";
+            var wrapper = document.getElementById('mainDashboardWrapper');
+            wrapper.classList.remove('hidden');
+            setTimeout(function () {
+                wrapper.classList.remove('opacity-0');
+                wrapper.classList.add('opacity-100');
+            }, 50);
+            // Set nav & page state terus (tanpa fetch data)
+            document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); });
+            var navEl = document.getElementById('nav-dashboard');
+            if (navEl) navEl.classList.add('active');
+            allPages.forEach(function(p) { var el = document.getElementById('page-' + p); if (el) el.classList.add('hidden'); });
+            document.getElementById('page-dashboard').classList.remove('hidden');
+            updateMonthPickerInput();
+            initCacheAndLoad(); // Parallel fetch semua data sekaligus
+        }
+
+        function logoutAdmin() {
+            if (confirm("Pasti untuk log keluar dari Admin Dashboard?")) {
+                localStorage.removeItem('wazza_admin_access');
+                location.reload();
+            }
+        }
+
+        // ==========================================
+        // PAGE NAVIGATION
+        // ==========================================
+        var currentMonth = new Date().getMonth();
+        var currentYear = new Date().getFullYear();
+        var globalLeaveEvents = [];
+        var globalAllLeaveLog = [];
+        var globalStaffList = [];
+        var staffStatusFilter = 'AKTIF';
+        var leaveStatusFilter = 'DILULUSKAN';
+        var globalHistoryData = [];
+        var currentHistoryMode = 'single';
+        var historyCache = {}; // { 'YYYY-MM-DD': { data: {...}, ts: timestamp } }
+        var HISTORY_CACHE_TTL = 60 * 60 * 1000; // 1 jam — data lama tak berubah
+        var allPages = ['dashboard', 'history', 'leave', 'allLeaveLog', 'staff', 'outstation', 'config'];
+
+        // ==========================================
+        // CACHE SYSTEM (Looker Studio style)
+        // ==========================================
+        var appCache = {
+            dashboard:      { data: null, ts: 0 },
+            allLeaveLog:    { data: null, ts: 0 },
+            staffManagement:{ data: null, ts: 0 },
+            outstationList: { data: null, ts: 0 },
+            outstationTrigger: { data: null, ts: 0 },
+            staffList:      { data: null, ts: 0 },
+            config:         { data: null, ts: 0 }
+        };
+        var CACHE_TTL = 15 * 60 * 1000; // 15 minit
+        var autoRefreshIntervalId = null;
+        var countdownIntervalId = null;
+        var nextRefreshTs = 0;
+
+        function isCacheValid(key) {
+            return appCache[key] && appCache[key].data !== null && (Date.now() - appCache[key].ts) < CACHE_TTL;
+        }
+        function setCache(key, data) {
+            if (appCache[key]) { appCache[key].data = data; appCache[key].ts = Date.now(); }
+        }
+        function invalidateCache(key) {
+            if (appCache[key]) appCache[key].ts = 0;
+        }
+
+        // Parallel fetch semua data utama selepas login
+        function initCacheAndLoad() {
+            var loaded = 0; var total = 5;
+            document.getElementById('loaderLive').classList.remove('hidden');
+            function oneDone() {
+                loaded++;
+                if (loaded >= total) startAutoRefresh();
+            }
+            callGAS("getAdminDashboardData", {}, function(data) {
+                setCache('dashboard', data);
+                globalLeaveEvents = data.calendarEvents || [];
+                renderDashboard(data);
+                oneDone();
+            }, oneDone);
+            callGAS("getAllLeaveLog", {}, function(data) {
+                setCache('allLeaveLog', data);
+                oneDone();
+            }, oneDone);
+            callGAS("getStaffManagementData", {}, function(res) {
+                if (res.status === 'SUCCESS') { setCache('staffManagement', res.data); globalStaffList = res.data; }
+                oneDone();
+            }, oneDone);
+            callGAS("getSystemConfig", {}, function(res) {
+                if (res.status === 'SUCCESS') {
+                    setCache('config', res.data);
+                    var wd = Array.isArray(res.data.workDays) && res.data.workDays.length > 0 ? res.data.workDays : ['Isnin','Selasa','Rabu','Khamis','Jumaat'];
+                    globalWorkConfig = { workDays: wd, publicHolidays: Array.isArray(res.data.publicHolidays) ? res.data.publicHolidays : [] };
+                }
+                oneDone();
+            }, oneDone);
+            callGAS("getStaffList", {}, function(names) {
+                var list = Array.isArray(names) ? names : [];
+                setCache('staffList', list);
+                outstationStaffNames = list;
+                oneDone();
+            }, oneDone);
+        }
+
+        // Mulakan auto-refresh 15 minit + countdown timer
+        function startAutoRefresh() {
+            if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId);
+            if (countdownIntervalId) clearInterval(countdownIntervalId);
+            nextRefreshTs = Date.now() + CACHE_TTL;
+            updateCacheStatusBar();
+            document.getElementById('cacheStatusBar').classList.remove('hidden');
+            autoRefreshIntervalId = setInterval(refreshAllCache, CACHE_TTL);
+            countdownIntervalId = setInterval(updateCacheStatusBar, 1000);
+        }
+
+        // Auto-refresh background — update cache & re-render kalau user tengah kat page berkenaan
+        function refreshAllCache() {
+            nextRefreshTs = Date.now() + CACHE_TTL;
+            callGAS("getAdminDashboardData", {}, function(data) {
+                setCache('dashboard', data);
+                globalLeaveEvents = data.calendarEvents || [];
+                var dashPage = document.getElementById('page-dashboard');
+                if (dashPage && !dashPage.classList.contains('hidden')) renderDashboard(data);
+                updateCacheStatusBar();
+            });
+            callGAS("getAllLeaveLog", {}, function(data) {
+                setCache('allLeaveLog', data);
+                var logPage = document.getElementById('page-allLeaveLog');
+                if (logPage && !logPage.classList.contains('hidden')) { globalAllLeaveLog = data; filterLeaveLog(); }
+            });
+        }
+
+        // Manual refresh dari button dashboard — refresh dashboard + leave log
+        function manualRefreshAll() {
+            var btn = document.getElementById('btnManualRefresh');
+            btn.innerText = "⏳ Memuatkan...";
+            btn.disabled = true;
+            invalidateCache('dashboard');
+            invalidateCache('allLeaveLog');
+            if (autoRefreshIntervalId) clearInterval(autoRefreshIntervalId);
+            var btnDone = false;
+            callGAS("getAdminDashboardData", {}, function(data) {
+                setCache('dashboard', data);
+                globalLeaveEvents = data.calendarEvents || [];
+                renderDashboard(data);
+                if (!btnDone) { btnDone = true; btn.innerText = "🔄 Refresh Sekarang"; btn.disabled = false; }
+                nextRefreshTs = Date.now() + CACHE_TTL;
+                autoRefreshIntervalId = setInterval(refreshAllCache, CACHE_TTL);
+                updateCacheStatusBar();
+            }, function() {
+                if (!btnDone) { btnDone = true; btn.innerText = "🔄 Refresh Sekarang"; btn.disabled = false; }
+            });
+            callGAS("getAllLeaveLog", {}, function(data) {
+                setCache('allLeaveLog', data);
+                var logPage = document.getElementById('page-allLeaveLog');
+                if (logPage && !logPage.classList.contains('hidden')) { globalAllLeaveLog = data; filterLeaveLog(); }
+            });
+        }
+
+        // Update UI: masa terakhir dikemaskini + countdown timer
+        function updateCacheStatusBar() {
+            var lastTime = document.getElementById('lastUpdatedTime');
+            var countdown = document.getElementById('countdownTimer');
+            if (!lastTime || !countdown) return;
+            if (appCache.dashboard.ts > 0) {
+                var d = new Date(appCache.dashboard.ts);
+                lastTime.innerText = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+            }
+            var rem = Math.max(0, nextRefreshTs - Date.now());
+            countdown.innerText = Math.floor(rem / 60000) + ':' + String(Math.floor((rem % 60000) / 1000)).padStart(2,'0');
+        }
+
+        function switchPage(page) {
+            document.querySelectorAll('.nav-item').forEach(function (el) {
+                el.classList.remove('active');
+            });
+            var navEl = document.getElementById('nav-' + page);
+            if (navEl) navEl.classList.add('active');
+
+            allPages.forEach(function (p) {
+                var el = document.getElementById('page-' + p);
+                if (el) el.classList.add('hidden');
+            });
+
+            var target = document.getElementById('page-' + page);
+            if (target) target.classList.remove('hidden');
+
+            if (page === 'dashboard') {
+                if (isCacheValid('dashboard')) { renderDashboard(appCache.dashboard.data); }
+                else { loadLiveDashboard(); }
+            }
+            if (page === 'allLeaveLog') {
+                if (isCacheValid('allLeaveLog')) { globalAllLeaveLog = appCache.allLeaveLog.data; filterLeaveLog(); }
+                else { loadAllLeaveLog(); }
+            }
+            if (page === 'staff') {
+                if (isCacheValid('staffManagement')) { globalStaffList = appCache.staffManagement.data; renderStaffTable(appCache.staffManagement.data); }
+                else { loadStaffManagement(); }
+            }
+            if (page === 'outstation') loadOutstationPage();
+            if (page === 'config') {
+                if (isCacheValid('config')) {
+                    document.getElementById('configLoader').classList.add('hidden');
+                    document.getElementById('configNotif').classList.add('hidden');
+                    populateConfigForm(appCache.config.data);
+                    document.getElementById('configContent').classList.remove('hidden');
+                } else { loadSystemConfig(); }
+            }
+        }
+
+        // ==========================================
+        // DASHBOARD
+        // ==========================================
+        function loadLiveDashboard(forceRefresh) {
+            if (!forceRefresh && isCacheValid('dashboard')) { renderDashboard(appCache.dashboard.data); return; }
+            document.getElementById('loaderLive').classList.remove('hidden');
+            callGAS("getAdminDashboardData", {}, function(data) {
+                setCache('dashboard', data);
+                globalLeaveEvents = data.calendarEvents || [];
+                renderDashboard(data);
+                updateCacheStatusBar();
+            }, function() { document.getElementById('loaderLive').classList.add('hidden'); });
+        }
+
+        function renderDashboard(data) {
+            document.getElementById('liveDateDisplay').innerText = data.stats.date;
+            document.getElementById('liveTotal').innerText = data.stats.totalStaff;
+            document.getElementById('livePresent').innerText = data.stats.present;
+            document.getElementById('liveTotalSmall').innerText = "/ " + data.stats.totalStaff;
+            document.getElementById('liveCuti').innerText = data.stats.cuti;
+            document.getElementById('liveLate').innerText = data.stats.late;
+
+            var percent = data.stats.totalStaff > 0 ? (data.stats.present / data.stats.totalStaff) * 100 : 0;
+            document.getElementById('progressBar').style.width = percent + "%";
+
+            globalLeaveEvents = data.calendarEvents;
+            renderTable('tableLive', data.attendance, "Tiada data staff.", data.stats.date, globalLeaveEvents);
+            renderPendingLeave(data.pendingLeaves);
+            renderCalendar(currentYear, currentMonth);
+            document.getElementById('loaderLive').classList.add('hidden');
+        }
+
+        var fpRangeInstance = null;
+        var fpRangeStart = null;
+        var fpRangeEnd = null;
+
+        function initFlatpickrRange() {
+            if (fpRangeInstance) fpRangeInstance.destroy();
+            fpRangeStart = null; fpRangeEnd = null;
+            document.getElementById('historyDateRange').value = '';
+            document.getElementById('btnSearchRange').disabled = true;
+            document.getElementById('btnSearchRange').className = 'bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow transition flex-shrink-0 opacity-40 cursor-not-allowed';
+            fpRangeInstance = flatpickr('#historyDateRange', {
+                mode: 'range',
+                dateFormat: 'd/m/Y',
+                locale: 'ms',
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        var diff = Math.round((selectedDates[1] - selectedDates[0]) / 86400000);
+                        if (diff >= 14) {
+                            fpRangeInstance.clear();
+                            alert('Maksimum julat ialah 14 hari sahaja.');
+                            return;
+                        }
+                        fpRangeStart = flatpickr.formatDate(selectedDates[0], 'Y-m-d');
+                        fpRangeEnd = flatpickr.formatDate(selectedDates[1], 'Y-m-d');
+                        document.getElementById('btnSearchRange').disabled = false;
+                        document.getElementById('btnSearchRange').className = 'bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow transition flex-shrink-0 cursor-pointer';
+                    } else {
+                        fpRangeStart = null; fpRangeEnd = null;
+                        document.getElementById('btnSearchRange').disabled = true;
+                        document.getElementById('btnSearchRange').className = 'bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold shadow transition flex-shrink-0 opacity-40 cursor-not-allowed';
+                    }
+                }
+            });
+        }
+
+        function setHistoryMode(mode) {
+            currentHistoryMode = mode;
+            document.getElementById('historyModeSingle').style.display = mode === 'single' ? 'flex' : 'none';
+            document.getElementById('historyModeRange').style.display = mode === 'range' ? 'flex' : 'none';
+            document.getElementById('btnModeSingle').className = mode === 'single'
+                ? 'px-3 py-1 rounded text-xs font-bold border transition bg-yellow-900 text-yellow-300 border-yellow-700'
+                : 'px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-yellow-700';
+            document.getElementById('btnModeRange').className = mode === 'range'
+                ? 'px-3 py-1 rounded text-xs font-bold border transition bg-yellow-900 text-yellow-300 border-yellow-700'
+                : 'px-3 py-1 rounded text-xs font-bold border transition bg-gray-700 text-gray-400 border-gray-600 hover:border-yellow-700';
+            document.getElementById('historyResult').classList.add('hidden');
+            document.getElementById('historyEmptyState').classList.remove('hidden');
+            globalHistoryData = [];
+            if (mode === 'range') initFlatpickrRange();
+        }
+
+        // Semak jenis hari: 'KERJA', 'REHAT', atau 'PH'
+        function getDateType(dateRaw) {
+            var ph = globalWorkConfig.publicHolidays.find(function(h) { return h.date === dateRaw; });
+            if (ph) return { type: 'PH', holidayName: ph.name };
+            if (globalWorkConfig.workDays.length > 0) {
+                var d = new Date(dateRaw + 'T00:00:00');
+                var dayNames = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+                var dayName = dayNames[d.getDay()];
+                var isWork = globalWorkConfig.workDays.some(function(wd) { return wd.toLowerCase() === dayName.toLowerCase(); });
+                if (!isWork) return { type: 'REHAT', holidayName: null };
+            }
+            return { type: 'KERJA', holidayName: null };
+        }
+
+        function loadHistoryData() {
+            var dateVal = document.getElementById('historyDateInput').value;
+            if (!dateVal) { alert("Sila pilih tarikh dulu!"); return; }
+            var btn = document.getElementById('btnSearchSingle');
+            btn.innerText = "Mencari...";
+            btn.disabled = true;
+            globalHistoryData = [];
+
+            // Semak jenis hari dulu
+            var dayType = getDateType(dateVal);
+            if (dayType.type !== 'KERJA') {
+                var d = new Date(dateVal + 'T00:00:00');
+                var dayNames = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+                var p = dateVal.split('-');
+                var dateStr = p[2] + '/' + p[1] + '/' + p[0];
+                globalHistoryData = [{ dateRaw: dateVal, date: dateStr, dayType: dayType.type, holidayName: dayType.holidayName, attendance: [], calendarEvents: [] }];
+                renderHistoryPage();
+                btn.innerText = "Cari Rekod";
+                btn.disabled = false;
+                return;
+            }
+
+            // Guna cache kalau ada
+            if (historyCache[dateVal] && (Date.now() - historyCache[dateVal].ts) < HISTORY_CACHE_TTL) {
+                globalHistoryData = [historyCache[dateVal].data];
+                renderHistoryPage();
+                btn.innerText = "Cari Rekod";
+                btn.disabled = false;
+                return;
+            }
+
+            callGAS("getHistoryRange", { dates: [dateVal] }, function(res) {
+                if (res.status === 'SUCCESS' && res.results.length > 0) {
+                    var result = res.results[0];
+                    historyCache[dateVal] = { data: result, ts: Date.now() };
+                    globalHistoryData = [result];
+                } else { globalHistoryData = []; }
+                renderHistoryPage();
+                btn.innerText = "Cari Rekod";
+                btn.disabled = false;
+            }, function() {
+                btn.innerText = "Cari Rekod";
+                btn.disabled = false;
+                alert("Gagal memuatkan data.");
+            });
+        }
+
+        function loadHistoryRange() {
+            var fromVal = fpRangeStart;
+            var toVal = fpRangeEnd;
+            if (!fromVal || !toVal) { alert("Sila pilih julat tarikh dahulu!"); return; }
+            var diffDays = Math.round((new Date(toVal + 'T00:00:00') - new Date(fromVal + 'T00:00:00')) / 86400000) + 1;
+            if (diffDays > 14) { alert("Maksimum julat ialah 14 hari sahaja."); return; }
+
+            var btn = document.getElementById('btnSearchRange');
+            btn.innerText = "Mencari...";
+            btn.disabled = true;
+            globalHistoryData = [];
+
+            // Jana senarai semua tarikh dalam julat
+            var allDates = [];
+            var cur = new Date(fromVal + 'T00:00:00');
+            var end = new Date(toVal + 'T00:00:00');
+            while (cur <= end) {
+                allDates.push(cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0'));
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            // Asingkan setiap tarikh kepada 3 kategori
+            var results = {};
+            var toFetch = []; // tarikh kerja yang perlu GAS call
+
+            allDates.forEach(function(dateRaw) {
+                var dayType = getDateType(dateRaw);
+                if (dayType.type !== 'KERJA') {
+                    // Hari rehat/PH — placeholder, tiada GAS call
+                    var p = dateRaw.split('-');
+                    results[dateRaw] = { dateRaw: dateRaw, date: p[2]+'/'+p[1]+'/'+p[0], dayType: dayType.type, holidayName: dayType.holidayName, attendance: [], calendarEvents: [] };
+                } else if (historyCache[dateRaw] && (Date.now() - historyCache[dateRaw].ts) < HISTORY_CACHE_TTL) {
+                    results[dateRaw] = historyCache[dateRaw].data; // guna cache
+                } else {
+                    toFetch.push(dateRaw); // perlu fetch
+                }
+            });
+
+            function finalize() {
+                globalHistoryData = allDates.map(function(d) { return results[d]; }).filter(Boolean);
+                renderHistoryPage();
+                btn.innerText = "Cari Rekod";
+                btn.disabled = false;
+            }
+
+            // Kalau tiada yang perlu di-fetch — terus render
+            if (toFetch.length === 0) { finalize(); return; }
+
+            // SATU GAS call untuk semua tarikh kerja yang belum dicache
+            callGAS("getHistoryRange", { dates: toFetch }, function(res) {
+                if (res.status === 'SUCCESS') {
+                    res.results.forEach(function(r) {
+                        historyCache[r.dateRaw] = { data: r, ts: Date.now() };
+                        results[r.dateRaw] = r;
+                    });
+                }
+                finalize();
+            }, function() { finalize(); });
+        }
+
+        function getDayName(dateRaw) {
+            var dayNames = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+            return dayNames[new Date(dateRaw + 'T00:00:00').getDay()];
+        }
+
+        function buildScorecard() {
+            var kerjaDays = globalHistoryData.filter(function(d) { return d.dayType !== 'REHAT' && d.dayType !== 'PH'; });
+            if (kerjaDays.length === 0) return null;
+
+            var totalHadir = 0, totalLewat = 0, totalCuti = 0, totalTidakHadir = 0;
+            var totalKerja = kerjaDays.length;
+            var staffSet = new Set();
+
+            kerjaDays.forEach(function(day) {
+                day.attendance.forEach(function(s) {
+                    staffSet.add(s.nama);
+                    var st = s.status.toUpperCase();
+                    if (st === 'HADIR') totalHadir++;
+                    else if (st === 'LEWAT') totalLewat++;
+                    else if (st.indexOf('CUTI') === 0) totalCuti++;
+                    else totalTidakHadir++;
+                });
+            });
+
+            var totalStaff = staffSet.size;
+            var totalSlot = totalKerja * totalStaff;
+            var pct = totalSlot > 0 ? Math.round((totalHadir + totalLewat) / totalSlot * 100) : 0;
+            var pctColor = pct >= 90 ? '#4ade80' : pct >= 70 ? '#eab308' : '#f87171';
+
+            var el = document.createElement('div');
+            el.innerHTML =
+                '<p class="text-gray-500 text-xs uppercase font-bold mb-3">📊 Scorecard · ' + totalKerja + ' Hari Kerja</p>' +
+                '<div class="grid grid-cols-2 md:grid-cols-5 gap-4">' +
+                    '<div class="bg-gray-800 p-4 rounded-xl border-l-4 border-green-500">' +
+                        '<p class="text-gray-500 text-xs uppercase font-bold">Hadir</p>' +
+                        '<h2 class="text-3xl font-bold text-green-400 mt-1">' + totalHadir + '</h2>' +
+                    '</div>' +
+                    '<div class="bg-gray-800 p-4 rounded-xl border-l-4 border-red-500">' +
+                        '<p class="text-gray-500 text-xs uppercase font-bold">Lewat</p>' +
+                        '<h2 class="text-3xl font-bold text-red-400 mt-1">' + totalLewat + '</h2>' +
+                    '</div>' +
+                    '<div class="bg-gray-800 p-4 rounded-xl border-l-4 border-yellow-500">' +
+                        '<p class="text-gray-500 text-xs uppercase font-bold">Cuti</p>' +
+                        '<h2 class="text-3xl font-bold text-yellow-400 mt-1">' + totalCuti + '</h2>' +
+                    '</div>' +
+                    '<div class="bg-gray-800 p-4 rounded-xl border-l-4 border-gray-600">' +
+                        '<p class="text-gray-500 text-xs uppercase font-bold">Tidak Hadir</p>' +
+                        '<h2 class="text-3xl font-bold text-gray-400 mt-1">' + totalTidakHadir + '</h2>' +
+                    '</div>' +
+                    '<div class="bg-gray-800 p-4 rounded-xl border-l-4" style="border-left-color:' + pctColor + '">' +
+                        '<p class="text-gray-500 text-xs uppercase font-bold">% Kehadiran</p>' +
+                        '<h2 class="text-3xl font-bold mt-1" style="color:' + pctColor + '">' + pct + '%</h2>' +
+                    '</div>' +
+                '</div>';
+            return el;
+        }
+
+        function renderHistoryPage() {
+            var container = document.getElementById('historyResult');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+            document.getElementById('historyEmptyState').classList.add('hidden');
+            if (globalHistoryData.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-8 bg-gray-800 rounded-xl border border-gray-700">Tiada data dijumpai.</div>';
+                return;
+            }
+
+            // Scorecard di atas sekali
+            var scorecard = buildScorecard();
+            if (scorecard) container.appendChild(scorecard);
+
+            globalHistoryData.forEach(function(dayData) {
+                var div = document.createElement('div');
+
+                // Hari Rehat atau Cuti Umum — tunjuk card compact sahaja, tiada table staf
+                if (dayData.dayType === 'REHAT' || dayData.dayType === 'PH') {
+                    var isPH = dayData.dayType === 'PH';
+                    var label = isPH ? ('🎌 Cuti Umum — ' + (dayData.holidayName || '')) : '😴 Hari Rehat';
+                    var borderColor = isPH ? 'border-purple-700' : 'border-gray-600';
+                    var bgColor = isPH ? 'bg-purple-900/20' : 'bg-gray-800/60';
+                    var textColor = isPH ? 'text-purple-300' : 'text-gray-500';
+                    div.className = 'rounded-xl border ' + borderColor + ' ' + bgColor + ' px-5 py-3 flex items-center justify-between shadow';
+                    div.innerHTML = '<span class="text-sm font-bold ' + textColor + '">📅 ' + getDayName(dayData.dateRaw) + ', ' + dayData.date + '</span>' +
+                        '<span class="text-xs font-bold ' + textColor + ' uppercase tracking-wide">' + label + '</span>';
+                    container.appendChild(div);
+                    return;
+                }
+
+                // Hari Kerja — tunjuk table penuh
+                div.className = 'bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl';
+                div.innerHTML =
+                    '<div class="p-4 border-b border-gray-700 font-bold text-white flex items-center justify-between">' +
+                    '<span>📅 ' + getDayName(dayData.dateRaw) + ', ' + dayData.date + '</span>' +
+                    '<span class="text-xs text-gray-400 font-normal">' + dayData.attendance.length + ' staf</span>' +
+                    '</div>' +
+                    '<div class="overflow-x-auto"><table class="w-full text-left text-sm">' +
+                    '<thead class="bg-gray-900 text-gray-400 text-xs uppercase"><tr>' +
+                    '<th class="p-4">Nama</th><th class="p-4">Status</th><th class="p-4">Masuk</th><th class="p-4">Keluar</th><th class="p-4">Lokasi</th>' +
+                    '</tr></thead>' +
+                    '<tbody id="htbl_' + dayData.dateRaw + '" class="divide-y divide-gray-700"></tbody>' +
+                    '</table></div>';
+                container.appendChild(div);
+                renderHistoryRows('htbl_' + dayData.dateRaw, dayData.attendance, dayData.date, dayData.calendarEvents);
+            });
+        }
+
+        function renderHistoryRows(tbodyId, list, dateStr, leaveEvents) {
+            var tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Tiada rekod.</td></tr>';
+                return;
+            }
+            var targetYMD = '';
+            if (dateStr) {
+                var p = dateStr.split('/');
+                if (p.length === 3) targetYMD = p[2] + '-' + p[1] + '-' + p[0];
+            }
+            list.forEach(function(s) {
+                var cutiEvent = (targetYMD && leaveEvents) ? leaveEvents.find(function(e) { return e.start === targetYMD && e.title === s.nama; }) : null;
+                var badge = buildHistoryStatusBadge(s.status, cutiEvent, targetYMD);
+                var loc = s.alamatIn ? '<div class="text-[10px] text-gray-400 max-w-[160px] truncate" title="' + s.alamatIn + '">📍 ' + s.alamatIn + '</div>' : '';
+                var safeName = s.nama.replace(/'/g, "\\'");
+                tbody.innerHTML +=
+                    '<tr class="hover:bg-gray-700/50 transition border-b border-gray-700/50">' +
+                    '<td class="p-3"><button onclick="openStaffDetailModal(\'' + safeName + '\')" class="font-semibold text-sm hover:text-yellow-400 text-white transition text-left">' + s.nama + '</button></td>' +
+                    '<td class="p-3">' + badge + '</td>' +
+                    '<td class="p-3 text-xs font-mono text-green-400">' + s.masaMasuk + '</td>' +
+                    '<td class="p-3 text-xs font-mono text-yellow-400">' + s.masaKeluar + '</td>' +
+                    '<td class="p-3">' + loc + '</td>' +
+                    '</tr>';
+            });
+        }
+
+        function buildHistoryStatusBadge(status, cutiEvent, dateRaw) {
+            if (status === 'HADIR') return '<span class="bg-green-900 text-green-300 px-2 py-0.5 rounded text-[10px] border border-green-700">HADIR</span>';
+            if (status === 'LEWAT' || status === 'LEWAT (MANUAL)') return '<span class="bg-red-900 text-red-300 px-2 py-0.5 rounded text-[10px] border border-red-700">LEWAT</span>';
+            if (String(status).includes('CUTI') || cutiEvent) {
+                var jenis = cutiEvent ? cutiEvent.type : status.replace('CUTI - ', '');
+                return '<span class="bg-yellow-900 text-yellow-300 px-2 py-0.5 rounded text-[10px] border border-yellow-700 uppercase">CUTI - ' + jenis + '</span>';
+            }
+            // TIDAK HADIR — semak cuti umum & hari rehat
+            if (dateRaw) {
+                var holiday = globalWorkConfig.publicHolidays.find(function(h) { return h.date === dateRaw; });
+                if (holiday) return '<span class="bg-purple-900/60 text-purple-300 px-2 py-0.5 rounded text-[10px] border border-purple-700/60 uppercase">PH - ' + holiday.name + '</span>';
+                if (globalWorkConfig.workDays.length > 0) {
+                    var d = new Date(dateRaw + 'T00:00:00');
+                    var dayNames = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+                    var dayName = dayNames[d.getDay()];
+                    if (!globalWorkConfig.workDays.some(function(wd) { return wd.toLowerCase() === dayName.toLowerCase(); })) {
+                        return '<span class="bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-[10px] border border-gray-700">REHAT</span>';
+                    }
+                }
+            }
+            return '<span class="bg-gray-700 text-gray-400 px-2 py-0.5 rounded text-[10px] border border-gray-600">ABSENT</span>';
+        }
+
+        function openStaffDetailModal(nama) {
+            document.getElementById('staffDetailName').innerText = nama;
+            var rangeEl = document.getElementById('staffDetailRange');
+            var summaryEl = document.getElementById('staffDetailSummary');
+            var tbody = document.getElementById('staffDetailTable');
+
+            if (!globalHistoryData || globalHistoryData.length === 0) {
+                rangeEl.innerText = 'Tiada data dimuatkan.';
+                summaryEl.innerHTML = '';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Sila cari rekod dahulu.</td></tr>';
+            } else {
+                var first = globalHistoryData[0].date;
+                var last = globalHistoryData[globalHistoryData.length - 1].date;
+                rangeEl.innerText = 'Julat: ' + (globalHistoryData.length === 1 ? first : first + ' — ' + last);
+
+                var records = [];
+                globalHistoryData.forEach(function(day) {
+                    var rec = day.attendance.find(function(s) { return s.nama === nama; });
+                    if (rec) records.push({ date: day.date, staff: rec, calendarEvents: day.calendarEvents });
+                });
+
+                var counts = { hadir: 0, lewat: 0, cuti: 0, absent: 0 };
+                records.forEach(function(r) {
+                    var st = r.staff.status;
+                    var p2 = r.date.split('/');
+                    var dateRaw = p2.length === 3 ? p2[2] + '-' + p2[1] + '-' + p2[0] : '';
+                    if (st === 'HADIR') counts.hadir++;
+                    else if (st === 'LEWAT' || st === 'LEWAT (MANUAL)') counts.lewat++;
+                    else if (String(st).includes('CUTI')) counts.cuti++;
+                    else {
+                        var isOffDay = false;
+                        if (dateRaw) {
+                            if (globalWorkConfig.publicHolidays.find(function(h) { return h.date === dateRaw; })) {
+                                isOffDay = true;
+                            } else if (globalWorkConfig.workDays.length > 0) {
+                                var d2 = new Date(dateRaw + 'T00:00:00');
+                                var dayNames2 = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+                                var dayName2 = dayNames2[d2.getDay()];
+                                if (!globalWorkConfig.workDays.some(function(wd) { return wd.toLowerCase() === dayName2.toLowerCase(); })) {
+                                    isOffDay = true;
+                                }
+                            }
+                        }
+                        if (!isOffDay) counts.absent++;
+                    }
+                });
+
+                summaryEl.innerHTML =
+                    '<div class="bg-green-900/30 border border-green-700/50 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-green-400">' + counts.hadir + '</div><div class="text-[10px] text-gray-400 uppercase mt-1">Hadir</div></div>' +
+                    '<div class="bg-red-900/30 border border-red-700/50 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-red-400">' + counts.lewat + '</div><div class="text-[10px] text-gray-400 uppercase mt-1">Lewat</div></div>' +
+                    '<div class="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-yellow-400">' + counts.cuti + '</div><div class="text-[10px] text-gray-400 uppercase mt-1">Cuti</div></div>' +
+                    '<div class="bg-gray-700/30 border border-gray-600/50 rounded-lg p-3 text-center"><div class="text-2xl font-bold text-gray-400">' + counts.absent + '</div><div class="text-[10px] text-gray-400 uppercase mt-1">Absent</div></div>';
+
+                tbody.innerHTML = '';
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Tiada rekod untuk staf ini dalam tempoh ini.</td></tr>';
+                } else {
+                    records.forEach(function(r) {
+                        var p2 = r.date.split('/');
+                        var targetYMD = p2.length === 3 ? p2[2] + '-' + p2[1] + '-' + p2[0] : '';
+                        var cutiEvent = r.calendarEvents ? r.calendarEvents.find(function(e) { return e.start === targetYMD && e.title === nama; }) : null;
+                        var badge = buildHistoryStatusBadge(r.staff.status, cutiEvent, targetYMD);
+                        var loc = r.staff.alamatIn ? '<div class="text-[10px] text-gray-400 max-w-[140px] truncate" title="' + r.staff.alamatIn + '">📍 ' + r.staff.alamatIn + '</div>' : '-';
+                        tbody.innerHTML +=
+                            '<tr class="hover:bg-gray-700/30 transition border-b border-gray-700/50">' +
+                            '<td class="p-3 text-sm text-gray-200">' + r.date + '</td>' +
+                            '<td class="p-3">' + badge + '</td>' +
+                            '<td class="p-3 text-xs font-mono text-green-400">' + r.staff.masaMasuk + '</td>' +
+                            '<td class="p-3 text-xs font-mono text-yellow-400">' + r.staff.masaKeluar + '</td>' +
+                            '<td class="p-3">' + loc + '</td>' +
+                            '</tr>';
+                    });
+                }
+            }
+
+            var modal = document.getElementById('staffDetailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeStaffDetailModal() {
+            var modal = document.getElementById('staffDetailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        var trackerExpanded = false;
+        var TRACKER_LIMIT = 7;
+
+        function toggleTracker() {
+            trackerExpanded = !trackerExpanded;
+            var tbody = document.getElementById('tableLive');
+            if (!tbody) return;
+            tbody.querySelectorAll('.tracker-extra').forEach(function(el) {
+                el.classList.toggle('hidden', !trackerExpanded);
+            });
+            var btn = document.getElementById('trackerToggleBtn');
+            if (btn) {
+                var extras = tbody.querySelectorAll('.tracker-extra').length;
+                btn.innerHTML = trackerExpanded
+                    ? '▲ Sembunyikan'
+                    : '▼ Lihat Semua (' + extras + ' orang lagi)';
+            }
+        }
+
+        function renderTable(tableId, list, emptyMsg, dateStrDDMMYYYY, leaveEventsArray) {
+            var tbody = document.getElementById(tableId);
+            tbody.innerHTML = "";
+            if (tableId === 'tableLive') trackerExpanded = false;
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">' + emptyMsg + '</td></tr>';
+                return;
+            }
+
+            var targetYMD = "";
+            if (dateStrDDMMYYYY) {
+                var parts = dateStrDDMMYYYY.split("/");
+                if (parts.length === 3) targetYMD = parts[2] + "-" + parts[1] + "-" + parts[0];
+            }
+
+            var mapBase = "https://maps.google.com/?q=";
+
+            list.forEach(function (staff, index) {
+                var statusBadge = "";
+                var cutiEvent = null;
+
+                if (targetYMD && leaveEventsArray) {
+                    cutiEvent = leaveEventsArray.find(function (e) { return e.start === targetYMD && e.title === staff.nama; });
+                }
+
+                if (staff.status === "HADIR") {
+                    statusBadge = '<span class="bg-green-900 text-green-300 px-2 py-0.5 rounded text-[10px] border border-green-700">HADIR</span>';
+                } else if (staff.status === "LEWAT" || staff.status === "LEWAT (MANUAL)") {
+                    statusBadge = '<div class="flex items-center gap-1.5 flex-wrap">' +
+                        '<span class="bg-red-900 text-red-300 px-2 py-0.5 rounded text-[10px] border border-red-700 whitespace-nowrap">LEWAT</span>' +
+                        '<button onclick="convertLateToPresent(\'' + staff.nama.replace(/'/g, "\\'") + '\')" class="text-[10px] text-green-400 hover:text-white border border-green-600/50 bg-green-600/10 hover:bg-green-600/20 px-2 py-0.5 rounded whitespace-nowrap transition">✓ Tukar Awal</button>' +
+                        '</div>';
+                } else if (String(staff.status).includes("CUTI") || cutiEvent) {
+                    var jenisCuti = cutiEvent ? cutiEvent.type : staff.status.replace("CUTI - ", "");
+                    statusBadge = '<span class="bg-yellow-900 text-yellow-300 px-2 py-0.5 rounded text-[10px] border border-yellow-700 font-bold uppercase">CUTI - ' + jenisCuti + '</span>';
+                } else {
+                    statusBadge = '<div class="flex items-center gap-1.5 flex-wrap">' +
+                        '<span class="bg-gray-700 text-gray-400 px-2 py-0.5 rounded text-[10px] border border-gray-600 whitespace-nowrap">ABSENT</span>' +
+                        '<button onclick="markPresent(\'' + staff.nama.replace(/'/g, "\\'") + '\')" class="text-[10px] text-green-400 hover:text-white border border-green-600/50 bg-green-600/10 hover:bg-green-600/20 px-2 py-0.5 rounded whitespace-nowrap transition">✓ Mark Hadir</button>' +
+                        '</div>';
+                }
+
+                var coordText = '<div class="text-[10px] font-mono text-gray-400 flex flex-col gap-0.5">';
+                if (staff.coordsIn) coordText += '<a href="' + mapBase + staff.coordsIn + '" target="_blank" class="hover:text-green-400 text-green-600 block max-w-[150px] truncate">IN: ' + staff.coordsIn + '</a>';
+                if (staff.coordsOut) coordText += '<a href="' + mapBase + staff.coordsOut + '" target="_blank" class="hover:text-yellow-400 text-yellow-600 block max-w-[150px] truncate">OUT: ' + staff.coordsOut + '</a>';
+                coordText += '</div>';
+
+                var locText = '<div class="text-[10px] text-gray-400 flex flex-col gap-0.5 max-w-[180px]">';
+                if (staff.alamatIn) locText += '<span class="truncate block" title="' + staff.alamatIn + '">📍 ' + staff.alamatIn + '</span>';
+                if (staff.alamatOut) locText += '<span class="truncate block" title="' + staff.alamatOut + '">🏁 ' + staff.alamatOut + '</span>';
+                locText += '</div>';
+
+                var isExtra = (tableId === 'tableLive' && index >= TRACKER_LIMIT);
+                var rowClass = 'hover:bg-gray-700/50 border-b border-gray-700/50 transition' + (isExtra ? ' tracker-extra hidden' : '');
+
+                tbody.innerHTML += '<tr class="' + rowClass + '">' +
+                    '<td class="p-3 font-semibold text-white text-sm">' + staff.nama + '</td>' +
+                    '<td class="p-3">' + statusBadge + '</td>' +
+                    '<td class="p-3 text-xs font-mono"><div class="text-green-400">' + staff.masaMasuk + '</div><div class="text-yellow-400 mt-0.5">' + staff.masaKeluar + '</div></td>' +
+                    '<td class="p-3">' + coordText + '</td>' +
+                    '<td class="p-3">' + locText + '</td>' +
+                    '</tr>';
+            });
+
+            if (tableId === 'tableLive' && list.length > TRACKER_LIMIT) {
+                var extraCount = list.length - TRACKER_LIMIT;
+                tbody.innerHTML += '<tr id="trackerToggleRow" class="border-t border-gray-700/50 bg-gray-900/30">' +
+                    '<td colspan="5" class="py-2.5 px-4 text-center">' +
+                    '<button id="trackerToggleBtn" onclick="toggleTracker()" ' +
+                    'class="text-xs text-yellow-500 hover:text-yellow-400 font-bold transition">' +
+                    '▼ Lihat Semua (' + extraCount + ' orang lagi)</button>' +
+                    '</td></tr>';
+            }
+        }
+
+        function updateMonthPickerInput() {
+            var monthStr = String(currentMonth + 1).padStart(2, '0');
+            document.getElementById('calendarMonthPicker').value = currentYear + "-" + monthStr;
+        }
+
+        function jumpToMonth() {
+            var val = document.getElementById('calendarMonthPicker').value;
+            if (val) {
+                var parts = val.split("-");
+                currentYear = parseInt(parts[0]);
+                currentMonth = parseInt(parts[1]) - 1;
+                renderCalendar(currentYear, currentMonth);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            updateMonthPickerInput();
+            renderCalendar(currentYear, currentMonth);
+        }
+
+        function renderCalendar(year, month) {
+            var grid = document.getElementById('calendarGrid');
+            grid.innerHTML = "";
+            var firstDay = new Date(year, month, 1).getDay();
+            var daysInMonth = new Date(year, month + 1, 0).getDate();
+            var today = new Date();
+
+            for (var i = 0; i < firstDay; i++) grid.innerHTML += '<div class="bg-transparent"></div>';
+
+            for (var day = 1; day <= daysInMonth; day++) {
+                var dateStr = year + "-" + String(month + 1).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+                var dayEvents = globalLeaveEvents.filter(function (e) { return e.start === dateStr; });
+                var isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+                var ph = globalWorkConfig && globalWorkConfig.publicHolidays
+                    ? globalWorkConfig.publicHolidays.find(function(h) { return h.date === dateStr; })
+                    : null;
+
+                var phHtml = ph
+                    ? '<span class="event-badge bg-purple-950 text-purple-300 border border-purple-700"><span class="badge-text">🎌 ' + ph.name + '</span>' +
+                      '<div class="tooltip-content"><strong class="block text-purple-300 text-xs mb-1">Cuti Umum</strong>' + ph.name + '<div class="tooltip-arrow"></div></div></span>'
+                    : '';
+
+                var eventsHtml = dayEvents.map(function (e) {
+                    return '<span class="event-badge bg-yellow-900 text-yellow-200 border border-yellow-700"><span class="badge-text">' + e.title + '</span>' +
+                        '<div class="tooltip-content"><strong class="block text-yellow-400 text-xs mb-1">' + e.type + '</strong>' + e.title + '<div class="tooltip-arrow"></div></div></span>';
+                }).join('');
+
+                grid.innerHTML += '<div class="calendar-day ' + (isToday ? 'today' : '') + (ph ? ' bg-purple-950/20' : '') + '">' +
+                    '<span class="day-number ' + (ph ? 'text-purple-400' : '') + '">' + day + '</span>' + phHtml + eventsHtml + '</div>';
+            }
+        }
+
+        function renderPendingLeave(list) {
+            var div = document.getElementById('pendingLeaveList');
+            div.innerHTML = "";
+            if (list.length === 0) {
+                div.innerHTML = '<div class="text-gray-500 text-xs text-center italic p-4">Tiada permohonan baru.</div>';
+                return;
+            }
+            list.forEach(function (l) {
+                var attachHtml = "";
+                if (l.attachment && l.attachment !== "Tiada" && l.attachment !== "") {
+                    attachHtml = '<a href="' + l.attachment + '" target="_blank" class="mt-1 inline-block bg-gray-800 border border-gray-600 text-blue-400 text-[10px] px-2 py-0.5 rounded hover:bg-gray-700 transition">🔗 Lampiran</a>';
+                }
+
+                var balHtml = "";
+                if (l.pool && l.balanceInfo && l.balanceInfo.balance !== null) {
+                    var b = l.balanceInfo;
+                    var bColor = b.balance <= 0 ? '#f87171' : b.balance <= 2 ? '#eab308' : '#4ade80';
+                    var bText = b.balance <= 0 ? 'HABIS' : b.balance + ' / ' + b.limit + ' hari';
+                    balHtml = '<div style="margin-top:4px;"><span style="font-size:10px;color:#6b7280;">Baki ' + l.pool + ': </span>' +
+                              '<span style="font-size:10px;font-weight:700;color:' + bColor + ';">' + bText + '</span></div>';
+                } else if (l.pool) {
+                    balHtml = '<div style="margin-top:4px;"><span style="font-size:10px;color:#6b7280;">Baki ' + l.pool + ': </span><span style="font-size:10px;color:#6b7280;">Tiada Had</span></div>';
+                }
+
+                div.innerHTML += '<div class="bg-gray-900 p-3 rounded border border-gray-600 flex justify-between items-start gap-3" id="card-' + l.rowIndex + '">' +
+                    '<div class="flex-1 min-w-0">' +
+                    '<div class="text-sm font-bold text-white">' + l.nama + '</div>' +
+                    '<div class="text-xs text-yellow-500 font-bold">' + l.jenis + ' <span class="text-gray-400 font-normal">(' + l.tarikh + ')</span></div>' +
+                    balHtml +
+                    '<div class="text-xs text-gray-500 italic mt-1">"' + l.sebab + '"</div>' + attachHtml +
+                    '</div>' +
+                    '<div class="flex flex-col gap-1.5 flex-shrink-0">' +
+                    '<button onclick="processLeave(' + l.rowIndex + ', \'DILULUSKAN\')" class="bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 rounded text-xs font-bold transition">LULUS</button>' +
+                    '<button onclick="processLeave(' + l.rowIndex + ', \'DITOLAK\')" class="bg-red-900 hover:bg-red-800 text-red-200 px-3 py-1.5 rounded text-xs font-bold transition">TOLAK</button>' +
+                    '<button onclick="openChangeLeaveModal(' + l.rowIndex + ', \'' + l.nama.replace(/'/g, "\\'") + '\', \'' + l.jenis + '\', \'' + l.tarikh + '\')" class="bg-blue-900 hover:bg-blue-800 text-blue-200 px-3 py-1.5 rounded text-xs font-bold transition">TUKAR</button>' +
+                    '</div></div>';
+            });
+        }
+
+        function processLeave(idx, status) {
+            if (confirm(status === 'DILULUSKAN' ? "Luluskan permohonan ini?" : "Tolak permohonan ini?")) {
+                document.getElementById('card-' + idx).style.opacity = "0.5";
+                callGAS("processLeaveStatus", { rowIndex: idx, status: status }, function () {
+                    document.getElementById('card-' + idx).remove();
+                    invalidateCache('dashboard');
+                    invalidateCache('allLeaveLog');
+                    if (status === 'DILULUSKAN') loadLiveDashboard(true);
+                });
+            }
+        }
+
+        function markPresent(nama) {
+            if (confirm("Tandakan '" + nama + "' sebagai HADIR?")) {
+                callGAS("setStaffPresent", { nama: nama }, function(res) {
+                    if (res && res.status === "ERROR") { alert("Gagal: " + res.message); }
+                    invalidateCache('dashboard');
+                    loadLiveDashboard(true);
+                });
+            }
+        }
+
+        function convertLateToPresent(nama) {
+            if (confirm("Tukar status '" + nama + "' dari LEWAT kepada HADIR (Tukar Awal)?")) {
+                callGAS("setLateToPresent", { nama: nama }, function(res) {
+                    if (res && res.status === "ERROR") { alert("Gagal: " + res.message); }
+                    invalidateCache('dashboard');
+                    loadLiveDashboard(true);
+                });
+            }
+        }
+
+        // ==========================================
+        // ALL LEAVE LOG
+        // ==========================================
+        function loadAllLeaveLog(forceRefresh) {
+            if (!forceRefresh && isCacheValid('allLeaveLog')) { globalAllLeaveLog = appCache.allLeaveLog.data; filterLeaveLog(); return; }
+            var tbody = document.getElementById('tableAllLeaveLog');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-yellow-500 animate-pulse">Menarik Rekod dari Pangkalan Data...</td></tr>';
+            callGAS("getAllLeaveLog", {}, function (data) {
+                setCache('allLeaveLog', data);
+                globalAllLeaveLog = data;
+                filterLeaveLog();
+            });
+        }
+
+        function renderAllLeaveLogTable(list) {
+            var tbody = document.getElementById('tableAllLeaveLog');
+            tbody.innerHTML = "";
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Tiada rekod cuti dijumpai.</td></tr>';
+                return;
+            }
+            list.forEach(function (log) {
+                var statusBadge = "";
+                if (log.status === "DILULUSKAN") statusBadge = '<span class="bg-green-900 text-green-300 px-3 py-1 rounded-lg text-xs font-bold border border-green-700">LULUS</span>';
+                else if (log.status === "DITOLAK") statusBadge = '<span class="bg-red-900 text-red-300 px-3 py-1 rounded-lg text-xs font-bold border border-red-700">DITOLAK</span>';
+                else statusBadge = '<span class="bg-yellow-900 text-yellow-300 px-3 py-1 rounded-lg text-xs font-bold border border-yellow-700">PROSES</span>';
+
+                var attachHtml = "";
+                if (log.lampiran && log.lampiran !== "Tiada" && log.lampiran !== "") {
+                    attachHtml = '<a href="' + log.lampiran + '" target="_blank" class="mt-2 inline-block bg-blue-900 border border-blue-600 text-blue-200 text-[11px] px-3 py-1 rounded shadow hover:bg-blue-800 transition">📎 Buka Dokumen</a>';
+                }
+
+                tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
+                    '<td class="p-4"><div class="font-bold text-white text-sm">' + log.nama + '</div><div class="text-xs text-yellow-500 font-bold mt-1 uppercase">' + log.jenis + '</div></td>' +
+                    '<td class="p-4"><div class="text-[11px] text-gray-500 uppercase">Tarikh Cuti:</div><div class="text-sm font-mono text-gray-200 mb-1">' + log.tarikhCuti + '</div><div class="text-[10px] text-gray-600">Mohon: ' + log.timestamp + '</div></td>' +
+                    '<td class="p-4"><div class="text-xs text-gray-400 italic bg-gray-900 p-2 rounded border border-gray-700">"' + log.sebab + '"</div>' + attachHtml + '</td>' +
+                    '<td class="p-4"><div style="display:flex; align-items:center; justify-content:center; gap:6px;">' +
+                    statusBadge +
+                    (log.status !== 'DITOLAK' ? '<button onclick="openChangeLeaveModal(' + log.rowIndex + ', \'' + log.nama.replace(/'/g, "\\'") + '\', \'' + log.jenis + '\', \'' + log.tarikhCuti + '\')" title="Tukar Jenis Cuti" class="bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white w-7 h-7 rounded flex items-center justify-center border border-gray-600 hover:border-gray-400 transition cursor-pointer flex-shrink-0">✏️</button>' : '') +
+                    '</div></td></tr>';
+            });
+        }
+
+        function setLeaveFilter(filter) {
+            leaveStatusFilter = filter;
+            var btns = {
+                'DILULUSKAN': { id: 'leaveFilterBtnLulus',   active: 'bg-green-900 text-green-300 border-green-700',   inactive: 'bg-gray-700 text-gray-400 border-gray-600 hover:border-green-700' },
+                'DITOLAK':    { id: 'leaveFilterBtnDitolak', active: 'bg-red-900 text-red-300 border-red-700',          inactive: 'bg-gray-700 text-gray-400 border-gray-600 hover:border-red-700' },
+                'SEMUA':      { id: 'leaveFilterBtnSemua',   active: 'bg-yellow-900 text-yellow-300 border-yellow-700', inactive: 'bg-gray-700 text-gray-400 border-gray-600 hover:border-yellow-600' }
+            };
+            ['DILULUSKAN', 'DITOLAK', 'SEMUA'].forEach(function(f) {
+                var el = document.getElementById(btns[f].id);
+                if (!el) return;
+                el.className = 'px-3 py-1 rounded text-xs font-bold border transition ' + (f === filter ? btns[f].active : btns[f].inactive);
+            });
+            filterLeaveLog();
+        }
+
+        function filterLeaveLog() {
+            var textInput = document.getElementById('searchLeaveLog').value.toLowerCase();
+            var dateInput = document.getElementById('dateLeaveLog').value;
+            var sortType = document.getElementById('sortLeaveLog').value;
+            var targetDateStr = "";
+            if (dateInput) {
+                var parts = dateInput.split("-");
+                if (parts.length === 3) targetDateStr = parts[2] + "/" + parts[1] + "/" + parts[0];
+            }
+            var workingList = globalAllLeaveLog.filter(function (log) {
+                var matchText = !textInput || (String(log.nama).toLowerCase().includes(textInput) || String(log.jenis).toLowerCase().includes(textInput) || String(log.sebab).toLowerCase().includes(textInput));
+                var matchDate = !targetDateStr || log.tarikhCuti === targetDateStr;
+                var matchStatus = leaveStatusFilter === 'SEMUA' || log.status === leaveStatusFilter;
+                return matchText && matchDate && matchStatus;
+            });
+            workingList.sort(function (a, b) {
+                if (sortType === 'cuti_desc') return b.sortTime - a.sortTime;
+                if (sortType === 'cuti_asc') return a.sortTime - b.sortTime;
+                if (sortType === 'mohon_desc') return parseTimestampToTime(b.timestamp) - parseTimestampToTime(a.timestamp);
+                if (sortType === 'nama_asc') return a.nama.toUpperCase().localeCompare(b.nama.toUpperCase());
+                return 0;
+            });
+            renderAllLeaveLogTable(workingList);
+        }
+
+        function parseTimestampToTime(timeStr) {
+            if (!timeStr) return 0;
+            var parts = timeStr.split(" ");
+            if (parts.length < 2) return 0;
+            var dPart = parts[0].split("/");
+            var tPart = parts[1].split(":");
+            if (dPart.length === 3 && tPart.length >= 2) return new Date(dPart[2], dPart[1] - 1, dPart[0], tPart[0], tPart[1]).getTime();
+            return 0;
+        }
+
+        function clearLeaveFilter() {
+            document.getElementById('searchLeaveLog').value = "";
+            document.getElementById('dateLeaveLog').value = "";
+            document.getElementById('sortLeaveLog').value = "cuti_desc";
+            filterLeaveLog();
+        }
+
+        // ==========================================
+        // STAFF MANAGEMENT
+        // ==========================================
+        function loadStaffManagement(forceRefresh) {
+            if (!forceRefresh && isCacheValid('staffManagement')) { globalStaffList = appCache.staffManagement.data; renderStaffTable(appCache.staffManagement.data); return; }
+            var tbody = document.getElementById('tableStaff');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-yellow-500 animate-pulse">Menarik Data Staf...</td></tr>';
+            callGAS("getStaffManagementData", {}, function (res) {
+                if (res.status === 'SUCCESS') {
+                    setCache('staffManagement', res.data);
+                    globalStaffList = res.data;
+                    renderStaffTable(res.data);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-red-500">' + res.message + '</td></tr>';
+                }
+            });
+        }
+
+        function setStaffFilter(filter) {
+            staffStatusFilter = filter;
+            var btns = {
+                'AKTIF':    { id: 'filterBtnAktif',    active: 'bg-green-900 text-green-300 border-green-700',  inactive: 'bg-gray-700 text-gray-400 border-gray-600 hover:border-green-700' },
+                'BERHENTI': { id: 'filterBtnBerhenti', active: 'bg-red-900 text-red-300 border-red-700',        inactive: 'bg-gray-700 text-gray-400 border-gray-600 hover:border-red-700' }
+            };
+            ['AKTIF', 'BERHENTI'].forEach(function(f) {
+                var el = document.getElementById(btns[f].id);
+                if (!el) return;
+                el.className = 'px-3 py-1 rounded text-xs font-bold border transition ' + (f === filter ? btns[f].active : btns[f].inactive);
+            });
+            renderStaffTable(globalStaffList);
+        }
+
+        function renderStaffTable(list) {
+            var tbody = document.getElementById('tableStaff');
+            tbody.innerHTML = "";
+            var filtered = list.filter(function(s) {
+                return s.status.toUpperCase() === staffStatusFilter;
+            });
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">Tiada staf dengan status ini.</td></tr>';
+                return;
+            }
+            filtered.forEach(function (staf) {
+                var statusBadge = staf.status.toUpperCase() === "AKTIF"
+                    ? '<span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs font-bold border border-green-700">AKTIF</span>'
+                    : '<span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs font-bold border border-red-700">BERHENTI</span>';
+                tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
+                    '<td class="p-4 font-mono text-gray-400">' + staf.id + '</td>' +
+                    '<td class="p-4 font-bold text-white">' + staf.nama + '</td>' +
+                    '<td class="p-4"><div class="text-xs text-yellow-500 font-bold uppercase">' + staf.jawatan + '</div><div class="text-[11px] text-gray-500">User: ' + staf.username + ' | Pass: ' + staf.password + '</div></td>' +
+                    '<td class="p-4 text-center">' + statusBadge + '</td>' +
+                    '<td class="p-4 text-center"><button onclick="openStaffModal(' + staf.rowIndex + ')" class="bg-blue-900 hover:bg-blue-800 text-blue-200 border border-blue-700 px-3 py-1 rounded text-xs font-bold transition shadow">Edit</button></td>' +
+                    '</tr>';
+            });
+        }
+
+        function toggleLimitUnlimited(type) {
+            var chk = document.getElementById('sf_' + type + '_unlimited');
+            var inp = document.getElementById('sf_' + type + 'Limit');
+            if (chk.checked) {
+                inp.disabled = true;
+                inp.value = '';
+                inp.placeholder = '∞';
+                inp.classList.add('opacity-40');
+            } else {
+                inp.disabled = false;
+                inp.value = 0;
+                inp.placeholder = '0';
+                inp.classList.remove('opacity-40');
+            }
+        }
+
+        function setLimitField(type, value) {
+            var chk = document.getElementById('sf_' + type + '_unlimited');
+            var inp = document.getElementById('sf_' + type + 'Limit');
+            if (value === -1) {
+                chk.checked = true;
+                inp.disabled = true;
+                inp.value = '';
+                inp.placeholder = '∞';
+                inp.classList.add('opacity-40');
+            } else {
+                chk.checked = false;
+                inp.disabled = false;
+                inp.value = value || 0;
+                inp.placeholder = '0';
+                inp.classList.remove('opacity-40');
+            }
+        }
+
+        function getLimitValue(type) {
+            var chk = document.getElementById('sf_' + type + '_unlimited');
+            if (chk && chk.checked) return -1;
+            return parseInt(document.getElementById('sf_' + type + 'Limit').value) || 0;
+        }
+
+        function openStaffModal(rowIndex) {
+            var modal = document.getElementById('staffModal');
+            document.getElementById('sf_rowIndex').value = "";
+            document.getElementById('sf_nama').value = "";
+            document.getElementById('sf_jawatan').value = "";
+            document.getElementById('sf_username').value = "";
+            document.getElementById('sf_password').value = "";
+            document.getElementById('sf_status').value = "Aktif";
+            document.getElementById('sf_paparTracker').checked = true;
+            ['al','mc','el','bl','hl','ml','pl'].forEach(function(t) { setLimitField(t, 0); });
+
+            if (rowIndex !== undefined && rowIndex !== null) {
+                var staf = globalStaffList.find(function (s) { return s.rowIndex === rowIndex; });
+                if (staf) {
+                    document.getElementById('staffModalTitle').innerText = "Kemaskini Data Staf";
+                    document.getElementById('sf_rowIndex').value = staf.rowIndex;
+                    document.getElementById('sf_nama').value = staf.nama;
+                    document.getElementById('sf_jawatan').value = staf.jawatan;
+                    document.getElementById('sf_username').value = staf.username;
+                    document.getElementById('sf_password').value = staf.password;
+                    document.getElementById('sf_status').value = staf.status;
+                    setLimitField('al', staf.alLimit); setLimitField('mc', staf.mcLimit);
+                    setLimitField('el', staf.elLimit); setLimitField('bl', staf.blLimit);
+                    setLimitField('hl', staf.hlLimit); setLimitField('ml', staf.mlLimit);
+                    setLimitField('pl', staf.plLimit);
+                    document.getElementById('sf_paparTracker').checked = staf.paparTracker !== false;
+
+                    // Fetch dan papar baki semasa
+                    var balDisplay = document.getElementById('sfBalanceDisplay');
+                    var balContent = document.getElementById('sfBalanceContent');
+                    balDisplay.classList.remove('hidden');
+                    balContent.innerHTML = '<span class="loading-pulse text-yellow-600">Memuatkan baki...</span>';
+                    callGAS("getLeaveBalance", { staffName: staf.nama }, function(res) {
+                        if (res.status !== "SUCCESS") { balContent.innerHTML = '<span class="text-red-400">Gagal muatkan baki.</span>'; return; }
+                        var bal = res.data;
+                        var tKeys = [
+                            { key: 'AL', label: 'AL' }, { key: 'MC', label: 'MC' }, { key: 'EL', label: 'EL' },
+                            { key: 'HL', label: 'HL' }, { key: 'ML', label: 'ML' }, { key: 'PL', label: 'PL' }, { key: 'BL', label: 'BL' }
+                        ];
+                        var bHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
+                        tKeys.forEach(function(t) {
+                            var b = bal[t.key];
+                            if (!b || b.limit === 0) {
+                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
+                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
+                                    '<div style="font-size:10px;color:#4b5563;">—</div></div>';
+                            } else if (b.limit === -1) {
+                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
+                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
+                                    '<div style="font-size:11px;font-weight:700;color:#eab308;">∞</div></div>';
+                            } else {
+                                var bColor = b.balance <= 0 ? '#f87171' : b.balance <= Math.ceil(b.limit * 0.2) ? '#eab308' : '#4ade80';
+                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
+                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
+                                    '<div style="font-size:11px;font-weight:700;color:' + bColor + ';">' + b.balance + '</div>' +
+                                    '<div style="font-size:8px;color:#4b5563;">/ ' + b.limit + '</div></div>';
+                            }
+                        });
+                        bHtml += '</div>';
+                        balContent.innerHTML = bHtml;
+                    });
+                }
+            } else {
+                document.getElementById('staffModalTitle').innerText = "Tambah Staf Baru";
+                document.getElementById('sfBalanceDisplay').classList.add('hidden');
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeStaffModal() {
+            var modal = document.getElementById('staffModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitStaffForm() {
+            var btn = document.getElementById('btnSaveStaff');
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            var rowVal = document.getElementById('sf_rowIndex').value;
+            var payload = {
+                rowIndex: rowVal ? parseInt(rowVal) : null,
+                nama: document.getElementById('sf_nama').value,
+                jawatan: document.getElementById('sf_jawatan').value,
+                username: document.getElementById('sf_username').value,
+                password: document.getElementById('sf_password').value,
+                status: document.getElementById('sf_status').value,
+                alLimit: getLimitValue('al'),
+                mcLimit: getLimitValue('mc'),
+                elLimit: getLimitValue('el'),
+                blLimit: getLimitValue('bl'),
+                hlLimit: getLimitValue('hl'),
+                paparTracker: document.getElementById('sf_paparTracker').checked,
+                mlLimit: getLimitValue('ml'),
+                plLimit: getLimitValue('pl')
+            };
+
+            callGAS("saveStaffData", { payload: payload }, function (res) {
+                btn.innerText = "Simpan";
+                btn.disabled = false;
+                if (res.status === 'SUCCESS') {
+                    closeStaffModal();
+                    invalidateCache('staffManagement');
+                    invalidateCache('staffList');
+                    outstationStaffNames = [];
+                    loadStaffManagement(true);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        // ==========================================
+        // TETAPAN SISTEM (CONFIG) — BAHAGIAN BARU
+        // ==========================================
+        var wfhDatesArray = [];
+        var publicHolidaysArray = [];
+        var globalWorkConfig = { workDays: [], publicHolidays: [] };
+
+        function loadSystemConfig() {
+            document.getElementById('configLoader').classList.remove('hidden');
+            document.getElementById('configContent').classList.add('hidden');
+            document.getElementById('configNotif').classList.add('hidden');
+            callGAS("getSystemConfig", {}, function (res) {
+                document.getElementById('configLoader').classList.add('hidden');
+                if (res.status === 'SUCCESS') {
+                    setCache('config', res.data);
+                    populateConfigForm(res.data);
+                    document.getElementById('configContent').classList.remove('hidden');
+                } else {
+                    document.getElementById('configLoader').innerText = "⚠️ Gagal baca tetapan: " + res.message;
+                    document.getElementById('configLoader').classList.remove('hidden');
+                }
+            }, function (err) {
+                document.getElementById('configLoader').innerText = "⚠️ Ralat: " + err.message;
+            });
+        }
+
+        function populateConfigForm(data) {
+            // Masa QR
+            document.getElementById('cfg_startQr').value = data.startQr || "";
+            document.getElementById('cfg_endQr').value = data.endQr || "";
+            document.getElementById('cfg_lateStart').value = data.lateStart || "";
+
+            // Admin credentials
+            document.getElementById('cfg_adminUser').value = data.adminUser || "";
+            document.getElementById('cfg_adminPass').value = ""; // sengaja kosong untuk keselamatan
+
+            // Folder & Geofencing
+            document.getElementById('cfg_linkFolder').value = data.linkFolder || "";
+            document.getElementById('cfg_officeLat').value = data.officeLat || "";
+            document.getElementById('cfg_officeLng').value = data.officeLng || "";
+            document.getElementById('cfg_officeRadius').value = data.officeRadius != null ? data.officeRadius : 0;
+
+            // WFH Hari Tetap — tick checkbox yang berkenaan
+            var dayMap = {
+                'isnin': 'wfh_isnin', 'selasa': 'wfh_selasa', 'rabu': 'wfh_rabu',
+                'khamis': 'wfh_khamis', 'jumaat': 'wfh_jumaat'
+            };
+            Object.keys(dayMap).forEach(function (day) {
+                var el = document.getElementById(dayMap[day]);
+                if (el) el.checked = data.wfhDays.map(function (d) { return d.toLowerCase(); }).includes(day);
+            });
+
+            // WFH Tarikh Override
+            wfhDatesArray = Array.isArray(data.wfhDates) ? data.wfhDates.slice() : [];
+            renderWfhDates();
+
+            // Hari Bekerja
+            var wdMap = { 'ahad': 'wd_ahad', 'isnin': 'wd_isnin', 'selasa': 'wd_selasa', 'rabu': 'wd_rabu', 'khamis': 'wd_khamis', 'jumaat': 'wd_jumaat', 'sabtu': 'wd_sabtu' };
+            var loadedWorkDays = Array.isArray(data.workDays) && data.workDays.length > 0 ? data.workDays : ['Isnin','Selasa','Rabu','Khamis','Jumaat'];
+            Object.keys(wdMap).forEach(function(day) {
+                var el = document.getElementById(wdMap[day]);
+                if (el) el.checked = loadedWorkDays.some(function(d) { return d.toLowerCase() === day; });
+            });
+
+            // Cuti Umum
+            publicHolidaysArray = Array.isArray(data.publicHolidays) ? data.publicHolidays.slice() : [];
+            renderPublicHolidaysList();
+        }
+
+        function addWfhDate() {
+            var input = document.getElementById('wfhDateInput');
+            var val = input.value.trim();
+            if (!val) { alert("Sila pilih tarikh terlebih dahulu."); return; }
+            if (wfhDatesArray.includes(val)) { alert("Tarikh ini sudah ada dalam senarai."); return; }
+            wfhDatesArray.push(val);
+            wfhDatesArray.sort(); // susun ikut tarikh
+            renderWfhDates();
+            input.value = "";
+        }
+
+        function removeWfhDate(dateStr) {
+            wfhDatesArray = wfhDatesArray.filter(function (d) { return d !== dateStr; });
+            renderWfhDates();
+        }
+
+        function renderWfhDates() {
+            var container = document.getElementById('wfhDatesList');
+            if (wfhDatesArray.length === 0) {
+                container.innerHTML = '<span class="text-gray-600 text-xs italic">Tiada tarikh override.</span>';
+                return;
+            }
+            container.innerHTML = wfhDatesArray.map(function (d) {
+                // Tukar yyyy-mm-dd ke dd/mm/yyyy untuk paparan
+                var parts = d.split("-");
+                var display = parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : d;
+                return '<span class="bg-yellow-600/20 text-yellow-400 border border-yellow-600/50 px-2 py-1 rounded text-xs flex items-center gap-2">' +
+                    display + ' <button onclick="removeWfhDate(\'' + d + '\')" class="hover:text-white font-bold text-base leading-none">×</button></span>';
+            }).join('');
+        }
+
+        function loadWorkConfig() {
+            callGAS("getSystemConfig", {}, function(res) {
+                if (res.status === 'SUCCESS' && res.data) {
+                    var wd = Array.isArray(res.data.workDays) && res.data.workDays.length > 0
+                        ? res.data.workDays
+                        : ['Isnin','Selasa','Rabu','Khamis','Jumaat'];
+                    globalWorkConfig = {
+                        workDays: wd,
+                        publicHolidays: Array.isArray(res.data.publicHolidays) ? res.data.publicHolidays : []
+                    };
+                }
+            });
+        }
+
+        function addPublicHoliday() {
+            var dateVal = document.getElementById('phDateInput').value.trim();
+            var nameVal = document.getElementById('phNameInput').value.trim();
+            if (!dateVal) { alert("Sila pilih tarikh cuti umum."); return; }
+            if (!nameVal) { alert("Sila isi nama cuti umum."); return; }
+            if (publicHolidaysArray.find(function(h) { return h.date === dateVal; })) {
+                alert("Tarikh ini sudah ada dalam senarai."); return;
+            }
+            publicHolidaysArray.push({ date: dateVal, name: nameVal });
+            publicHolidaysArray.sort(function(a, b) { return a.date.localeCompare(b.date); });
+            renderPublicHolidaysList();
+            document.getElementById('phDateInput').value = "";
+            document.getElementById('phNameInput').value = "";
+        }
+
+        function removePublicHoliday(dateStr) {
+            publicHolidaysArray = publicHolidaysArray.filter(function(h) { return h.date !== dateStr; });
+            renderPublicHolidaysList();
+        }
+
+        function renderPublicHolidaysList() {
+            var container = document.getElementById('publicHolidaysList');
+            if (!container) return;
+            if (publicHolidaysArray.length === 0) {
+                container.innerHTML = '<span class="text-gray-600 text-xs italic">Tiada cuti umum.</span>';
+                return;
+            }
+            container.innerHTML = publicHolidaysArray.map(function(h) {
+                var p = h.date.split('-');
+                var display = p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : h.date;
+                return '<div class="flex items-center justify-between bg-purple-900/20 border border-purple-700/40 px-3 py-1.5 rounded-lg">' +
+                    '<div><span class="text-purple-300 text-xs font-mono">' + display + '</span>' +
+                    '<span class="text-gray-400 text-xs ml-2">— ' + h.name + '</span></div>' +
+                    '<button onclick="removePublicHoliday(\'' + h.date + '\')" class="text-gray-500 hover:text-red-400 font-bold text-sm leading-none ml-2">×</button>' +
+                    '</div>';
+            }).join('');
+        }
+
+        function openDriveFolder() {
+            var folderId = document.getElementById('cfg_linkFolder').value.trim();
+            if (!folderId) {
+                alert('Sila masukkan Folder ID Google Drive dahulu.');
+                return;
+            }
+            window.open('https://drive.google.com/drive/folders/' + folderId, '_blank');
+        }
+
+        function saveConfigSettings() {
+            var btn = document.getElementById('btnSaveConfig');
+            var notif = document.getElementById('configNotif');
+            btn.innerText = "⏳ Menyimpan...";
+            btn.disabled = true;
+            notif.classList.add('hidden');
+
+            // Kumpul WFH days yang ditick
+            var selectedDays = [];
+            ['wfh_isnin', 'wfh_selasa', 'wfh_rabu', 'wfh_khamis', 'wfh_jumaat'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el && el.checked) selectedDays.push(el.value);
+            });
+
+            var payload = {
+                startQr: document.getElementById('cfg_startQr').value.trim(),
+                endQr: document.getElementById('cfg_endQr').value.trim(),
+                lateStart: document.getElementById('cfg_lateStart').value.trim(),
+                linkFolder: document.getElementById('cfg_linkFolder').value.trim(),
+                adminUser: document.getElementById('cfg_adminUser').value.trim(),
+                adminPass: document.getElementById('cfg_adminPass').value.trim(), // kosong = tak berubah
+                officeLat: document.getElementById('cfg_officeLat').value.trim(),
+                officeLng: document.getElementById('cfg_officeLng').value.trim(),
+                officeRadius: parseInt(document.getElementById('cfg_officeRadius').value) || 0,
+                wfhDays: selectedDays,
+                wfhDates: wfhDatesArray.slice(),
+                workDays: (function() {
+                    var days = [];
+                    ['wd_ahad','wd_isnin','wd_selasa','wd_rabu','wd_khamis','wd_jumaat','wd_sabtu'].forEach(function(id) {
+                        var el = document.getElementById(id);
+                        if (el && el.checked) days.push(el.value);
+                    });
+                    return days;
+                })(),
+                publicHolidays: publicHolidaysArray.slice()
+            };
+
+            callGAS("saveSystemConfig", { payload: payload }, function (res) {
+                btn.innerText = "💾 Simpan Semua";
+                btn.disabled = false;
+                notif.classList.remove('hidden');
+                if (res.status === 'SUCCESS') {
+                    notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-green-900/40 border-green-700 text-green-300";
+                    notif.innerText = "✅ " + res.message;
+                    document.getElementById('cfg_adminPass').value = "";
+                    // Kemaskini globalWorkConfig supaya rekod history terus guna nilai baru
+                    globalWorkConfig = { workDays: payload.workDays, publicHolidays: payload.publicHolidays };
+                } else {
+                    notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-red-900/40 border-red-700 text-red-300";
+                    notif.innerText = "❌ " + res.message;
+                }
+                // Auto sembunyi notif selepas 5 saat
+                setTimeout(function () { notif.classList.add('hidden'); }, 5000);
+            }, function (err) {
+                btn.innerText = "💾 Simpan Semua";
+                btn.disabled = false;
+                notif.classList.remove('hidden');
+                notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-red-900/40 border-red-700 text-red-300";
+                notif.innerText = "❌ Ralat sistem: " + err.message;
+            });
+        }
+
+        // ==========================================
+        // OUTSTATION EXCEPTIONS
+        // ==========================================
+        var globalOutstationList = [];
+        var outstationStaffNames = [];
+        var outstationModalReqId = 0;
+        var currentOutstationTab = 'upcoming';
+
+        function switchOutstationTab(tab) {
+            currentOutstationTab = tab;
+            ['upcoming', 'previous', 'all'].forEach(function(t) {
+                var el = document.getElementById('tab-' + t);
+                if (!el) return;
+                el.className = t === tab
+                    ? 'ost-tab px-3 py-1 rounded-md text-xs font-bold transition bg-blue-600 text-white'
+                    : 'ost-tab px-3 py-1 rounded-md text-xs font-bold transition text-gray-400 hover:text-white';
+            });
+            filterAndRenderOutstation();
+        }
+
+        function filterAndRenderOutstation() {
+            var dateInput = document.getElementById('outstationDateFilter');
+            var dateFilter = dateInput ? dateInput.value : '';
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+            var filtered = globalOutstationList.filter(function(rec) {
+                if (dateFilter && rec.tarikh !== dateFilter) return false;
+                if (currentOutstationTab === 'upcoming') return rec.tarikh >= todayStr;
+                if (currentOutstationTab === 'previous') return rec.tarikh < todayStr;
+                return true;
+            });
+            renderOutstationTable(filtered);
+        }
+
+        function onOutstationDateChange() {
+            var input = document.getElementById('outstationDateFilter');
+            var dateVal = input ? input.value : '';
+            if (dateVal) {
+                switchOutstationTab('all');
+            } else {
+                switchOutstationTab('upcoming');
+            }
+        }
+
+        function clearOutstationFilter() {
+            var input = document.getElementById('outstationDateFilter');
+            if (input) input.value = '';
+            switchOutstationTab('upcoming');
+        }
+
+        function loadOutstationList(forceRefresh) {
+            if (!forceRefresh && isCacheValid('outstationList')) { globalOutstationList = appCache.outstationList.data; filterAndRenderOutstation(); return; }
+            var tbody = document.getElementById('tableOutstation');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-yellow-500 animate-pulse">Menarik Data Outstation...</td></tr>';
+            callGAS("getOutstationList", {}, function (res) {
+                if (res.status === 'SUCCESS') {
+                    setCache('outstationList', res.data);
+                    globalOutstationList = res.data;
+                    filterAndRenderOutstation();
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500">' + (res.message || 'Ralat') + '</td></tr>';
+                }
+            });
+        }
+
+        function renderOutstationTable(list) {
+            var tbody = document.getElementById('tableOutstation');
+            tbody.innerHTML = "";
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500">Tiada rekod pengecualian outstation.</td></tr>';
+                return;
+            }
+
+            list.sort(function (a, b) { return b.tarikh.localeCompare(a.tarikh); });
+
+            var today = new Date();
+            var todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, '0') + "-" + String(today.getDate()).padStart(2, '0');
+
+            list.forEach(function (rec) {
+                var statusBadge = "";
+                if (rec.status === "DONE") {
+                    statusBadge = '<span class="bg-green-900 text-green-300 px-2 py-1 rounded text-xs font-bold border border-green-700">SELESAI</span>';
+                } else if (rec.tarikh < todayStr) {
+                    statusBadge = '<span class="bg-gray-700 text-gray-500 px-2 py-1 rounded text-xs font-bold border border-gray-600">TAMAT</span>';
+                } else {
+                    statusBadge = '<span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs font-bold border border-blue-700">AKTIF</span>';
+                }
+
+                var parts = rec.tarikh.split("-");
+                var tarikhDisplay = parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : rec.tarikh;
+                var isToday = rec.tarikh === todayStr;
+
+                var autoHtml = rec.autoClockIn
+                    ? '<span class="bg-blue-900 text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-700 font-bold">✓ ' + (rec.masaClockIn || "08:00") + '</span>'
+                    : '<span class="text-gray-600 text-xs">—</span>';
+
+                var todayBadge = isToday ? ' <span class="text-[10px] bg-yellow-500 text-gray-900 px-1.5 py-0.5 rounded font-bold ml-1">HARI INI</span>' : '';
+
+                tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition' + (isToday ? ' bg-blue-900/10' : '') + '">' +
+                    '<td class="p-4 font-bold text-white">' + rec.nama + '</td>' +
+                    '<td class="p-4"><span class="font-mono text-sm ' + (isToday ? 'text-yellow-400 font-bold' : 'text-gray-300') + '">' + tarikhDisplay + todayBadge + '</span></td>' +
+                    '<td class="p-4">' + autoHtml + '</td>' +
+                    '<td class="p-4 text-xs text-gray-400 italic max-w-[200px]"><span class="line-clamp-2">' + (rec.sebab || '—') + '</span></td>' +
+                    '<td class="p-4 text-center">' + statusBadge + '</td>' +
+                    '<td class="p-4 text-center flex gap-1 justify-center">' +
+                    '<button onclick="openOutstationModal(' + rec.rowIndex + ')" class="bg-yellow-900 hover:bg-yellow-800 text-yellow-200 border border-yellow-700 px-3 py-1 rounded text-xs font-bold transition">Edit</button>' +
+                    '<button onclick="deleteOutstationRecord(' + rec.rowIndex + ')" class="bg-red-900 hover:bg-red-800 text-red-200 border border-red-700 px-3 py-1 rounded text-xs font-bold transition">Padam</button>' +
+                    '</td></tr>';
+            });
+        }
+
+        function openOutstationModal(rowIndex) {
+            // Reset form
+            document.getElementById('ost_rowIndex').value = "";
+            document.getElementById('ost_tarikh').value = "";
+            document.getElementById('ost_autoClockIn').checked = false;
+            document.getElementById('ost_masaClockIn').value = "08:00";
+            document.getElementById('ost_sebab').value = "";
+            document.getElementById('autoClockInTimeSection').classList.add('hidden');
+
+            // Resolve edit record
+            var editRec = (rowIndex !== undefined && rowIndex !== null)
+                ? globalOutstationList.find(function (r) { return r.rowIndex === rowIndex; })
+                : null;
+
+            if (editRec) {
+                document.getElementById('outstationModalTitle').innerText = "Kemaskini Pengecualian";
+                document.getElementById('ost_rowIndex').value = editRec.rowIndex;
+                document.getElementById('ost_tarikh').value = editRec.tarikh;
+                document.getElementById('ost_autoClockIn').checked = editRec.autoClockIn;
+                document.getElementById('ost_masaClockIn').value = editRec.masaClockIn || "08:00";
+                document.getElementById('ost_sebab').value = editRec.sebab || "";
+                if (editRec.autoClockIn) document.getElementById('autoClockInTimeSection').classList.remove('hidden');
+            } else {
+                document.getElementById('outstationModalTitle').innerText = "Tambah Pengecualian Outstation";
+            }
+
+            // Open modal
+            var modal = document.getElementById('outstationModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Populate staff select — guard against stale callbacks with request ID
+            var sel = document.getElementById('ost_nama');
+            var reqId = ++outstationModalReqId;
+
+            function fillSelect(names) {
+                if (reqId !== outstationModalReqId) return;
+                sel.disabled = false;
+                sel.innerHTML = '<option value="">-- Pilih Staf --</option>';
+                names.forEach(function (n) {
+                    sel.innerHTML += '<option value="' + n + '">' + n + '</option>';
+                });
+                if (editRec) sel.value = editRec.nama;
+            }
+
+            if (outstationStaffNames.length > 0) {
+                fillSelect(outstationStaffNames);
+            } else {
+                sel.disabled = true;
+                sel.innerHTML = '<option value="">⏳ Memuatkan senarai staf...</option>';
+                callGAS("getStaffList", {}, function (names) {
+                    outstationStaffNames = Array.isArray(names) ? names : [];
+                    fillSelect(outstationStaffNames);
+                });
+            }
+        }
+
+        function closeOutstationModal() {
+            var modal = document.getElementById('outstationModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function toggleAutoClockInTime() {
+            var checked = document.getElementById('ost_autoClockIn').checked;
+            var section = document.getElementById('autoClockInTimeSection');
+            if (checked) section.classList.remove('hidden');
+            else section.classList.add('hidden');
+        }
+
+        function submitOutstationForm() {
+            var nama = document.getElementById('ost_nama').value;
+            var tarikh = document.getElementById('ost_tarikh').value;
+            if (!nama || !tarikh) { alert("Sila pilih nama staf dan tarikh outstation."); return; }
+
+            var btn = document.getElementById('btnSaveOutstation');
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            var rowVal = document.getElementById('ost_rowIndex').value;
+            var payload = {
+                rowIndex: rowVal ? parseInt(rowVal) : null,
+                nama: nama,
+                tarikh: tarikh,
+                autoClockIn: document.getElementById('ost_autoClockIn').checked,
+                masaClockIn: document.getElementById('ost_masaClockIn').value,
+                sebab: document.getElementById('ost_sebab').value.trim()
+            };
+
+            callGAS("saveOutstation", { payload: payload }, function (res) {
+                btn.innerText = "Simpan";
+                btn.disabled = false;
+                if (res.status === 'SUCCESS') {
+                    closeOutstationModal();
+                    invalidateCache('outstationList');
+                    loadOutstationList(true);
+                } else {
+                    alert(res.message || "Gagal simpan.");
+                }
+            });
+        }
+
+        function deleteOutstationRecord(rowIndex) {
+            if (!confirm("Padam rekod pengecualian outstation ini?")) return;
+            callGAS("deleteOutstation", { rowIndex: rowIndex }, function (res) {
+                if (res.status === 'SUCCESS') { invalidateCache('outstationList'); loadOutstationList(true); }
+                else alert(res.message || "Gagal padam.");
+            });
+        }
+
+        function loadOutstationPage() {
+            loadOutstationList();
+            if (isCacheValid('outstationTrigger')) {
+                document.getElementById('outstationTriggerTime').value = appCache.outstationTrigger.data;
+            } else {
+                callGAS("getOutstationTriggerTime", {}, function (res) {
+                    if (res.status === 'SUCCESS' && res.time) {
+                        setCache('outstationTrigger', res.time);
+                        document.getElementById('outstationTriggerTime').value = res.time;
+                    }
+                });
+            }
+            if (isCacheValid('staffList')) {
+                outstationStaffNames = appCache.staffList.data;
+            } else {
+                outstationStaffNames = [];
+                callGAS("getStaffList", {}, function (names) {
+                    outstationStaffNames = Array.isArray(names) ? names : [];
+                    setCache('staffList', outstationStaffNames);
+                });
+            }
+        }
+
+        function saveTriggerTime(event) {
+            var btn = event.target;
+            var timeVal = document.getElementById('outstationTriggerTime').value;
+            if (!timeVal) { alert("Sila set masa trigger."); return; }
+
+            var origText = btn.innerText;
+            btn.innerText = "⏳ Menyimpan...";
+            btn.disabled = true;
+
+            callGAS("saveOutstationTriggerTime_web", { triggerTime: timeVal }, function (res) {
+                btn.innerText = origText;
+                btn.disabled = false;
+                var msg = document.getElementById('triggerSetupMsg');
+                msg.classList.remove('hidden');
+                if (res.status === 'SUCCESS') {
+                    msg.className = "text-[10px] mt-2 text-green-400 font-bold";
+                    msg.innerText = "✅ Masa disimpan. Pergi WAZZA MENU → Setup Auto Trigger untuk apply.";
+                } else {
+                    msg.className = "text-[10px] mt-2 text-red-400 font-bold";
+                    msg.innerText = "❌ " + res.message;
+                }
+                setTimeout(function () { msg.classList.add('hidden'); }, 8000);
+            }, function (err) {
+                btn.innerText = origText;
+                btn.disabled = false;
+                alert("❌ Ralat: " + err.message);
+            });
+        }
+
+        function processAutoClockInToday(event) {
+            if (!confirm("Proses Auto Clock-In untuk semua staf outstation hari ini?\n\nHanya staf dengan 'Auto Clock-In' aktif dan status PENDING akan diproses.")) return;
+
+            var btn = event.target;
+            var origText = btn.innerText;
+            btn.innerText = "⏳ Memproses...";
+            btn.disabled = true;
+
+            var notif = document.getElementById('outstationNotif');
+
+            callGAS("processOutstationAutoClockIn", {}, function (res) {
+                btn.innerText = origText;
+                btn.disabled = false;
+                notif.classList.remove('hidden');
+
+                if (res.status === 'SUCCESS') {
+                    if (res.processed > 0) {
+                        notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-green-900/40 border-green-700 text-green-300";
+                        notif.innerText = "✅ Berjaya! " + res.processed + " staf telah diclock-in: " + res.names.join(", ");
+                        loadOutstationList();
+                    } else {
+                        notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-blue-900/40 border-blue-700 text-blue-300";
+                        notif.innerText = "ℹ️ Tiada staf outstation dengan Auto Clock-In yang perlu diproses hari ini.";
+                    }
+                } else {
+                    notif.className = "rounded-lg px-4 py-3 text-sm font-bold border bg-red-900/40 border-red-700 text-red-300";
+                    notif.innerText = "❌ Ralat: " + res.message;
+                }
+                setTimeout(function () { notif.classList.add('hidden'); }, 6000);
+            }, function (err) {
+                btn.innerText = origText;
+                btn.disabled = false;
+                alert("❌ Ralat sistem: " + err.message);
+            });
+        }
+
+        // ==========================================
+        // CHANGE LEAVE TYPE
+        // ==========================================
+        var clm_rowIndex = null;
+        var clm_staffName = "";
+        var clm_staffBalance = null;
+        var clm_poolMap = { AL:'AL', HAL:'AL', MC:'MC', HL:'HL', ML:'ML', PL:'PL', EL:'EL', HEL:'EL', BL:'BL' };
+
+        function openChangeLeaveModal(rowIndex, staffName, currentType, tarikh) {
+            clm_rowIndex = rowIndex;
+            clm_staffName = staffName;
+            document.getElementById('clm_staffName').innerText = staffName;
+            document.getElementById('clm_currentType').innerText = currentType.toUpperCase();
+            document.getElementById('clm_date').innerText = tarikh;
+            document.getElementById('clm_newType').value = "";
+            document.getElementById('clm_warning').style.display = 'none';
+            document.getElementById('clm_balance').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:8px; color:#6b7280; font-size:12px;">Memuatkan baki cuti...</div>';
+            document.getElementById('changeLeaveModal').style.display = 'flex';
+
+            callGAS("getLeaveBalance", { staffName: staffName }, function(res) {
+                if (res.status === "SUCCESS") {
+                    clm_staffBalance = res.data;
+                    renderModalBalance(res.data);
+                } else {
+                    document.getElementById('clm_balance').innerHTML = '<div style="color:#f87171; font-size:12px; grid-column:1/-1;">Gagal muat baki cuti.</div>';
+                }
+            });
+        }
+
+        function renderModalBalance(bal) {
+            var div = document.getElementById('clm_balance');
+            var types = [
+                { key: 'AL', label: 'AL' }, { key: 'MC', label: 'MC' }, { key: 'EL', label: 'EL' },
+                { key: 'HL', label: 'HL' }, { key: 'ML', label: 'ML' }, { key: 'PL', label: 'PL' }, { key: 'BL', label: 'BL' }
+            ];
+            var html = '';
+            types.forEach(function(t) {
+                var b = bal[t.key];
+                if (!b || b.limit === 0) return;
+                var balText, color;
+                if (b.unlimited || b.limit === -1) { balText = '∞'; color = '#9ca3af'; }
+                else {
+                    color = b.balance === 0 ? '#f87171' : b.balance <= 2 ? '#eab308' : '#4ade80';
+                    balText = b.balance + '/' + b.limit;
+                }
+                html += '<div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">' +
+                    '<span style="font-size:11px; font-weight:700; color:#9ca3af;">' + t.label + '</span>' +
+                    '<span style="font-size:12px; font-weight:700; color:' + color + ';">' + balText + '</span></div>';
+            });
+            if (bal['UL']) {
+                var ulUsed = bal['UL'].used || 0;
+                html += '<div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">' +
+                    '<span style="font-size:11px; font-weight:700; color:#9ca3af;">UL</span>' +
+                    '<span style="font-size:12px; font-weight:700; color:' + (ulUsed > 0 ? '#f87171' : '#6b7280') + ';">' + ulUsed + ' hari</span></div>';
+            }
+            div.innerHTML = html || '<div style="grid-column:1/-1; text-align:center; font-size:12px; color:#6b7280; padding:8px;">Tiada had cuti ditetapkan.</div>';
+        }
+
+        function checkNewTypeBalance() {
+            var newType = document.getElementById('clm_newType').value;
+            var warningDiv = document.getElementById('clm_warning');
+            warningDiv.style.display = 'none';
+            if (!newType || !clm_staffBalance) return;
+            var pool = clm_poolMap[newType.toUpperCase()] || null;
+            if (!pool) return;
+            var b = clm_staffBalance[pool];
+            if (!b || b.balance === null) return;
+            var isHalf = (newType.toUpperCase() === 'HAL' || newType.toUpperCase() === 'HEL');
+            var needed = isHalf ? 0.5 : 1;
+            if (b.balance < needed) {
+                warningDiv.innerHTML = '⚠️ Baki cuti <strong>' + pool + '</strong> tidak mencukupi (' + b.balance + ' hari berbaki). Admin boleh tetap teruskan jika perlu.';
+                warningDiv.style.display = 'block';
+            }
+        }
+
+        function submitChangeLeaveType() {
+            var newType = document.getElementById('clm_newType').value;
+            if (!newType) { alert("Sila pilih jenis cuti baru."); return; }
+            if (!clm_rowIndex) { alert("Ralat: Tiada rekod dipilih."); return; }
+            var btn = document.getElementById('clm_submitBtn');
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+            callGAS("changeLeaveType", { rowIndex: clm_rowIndex, newLeaveType: newType, staffName: clm_staffName }, function(res) {
+                btn.innerText = "Simpan Perubahan"; btn.disabled = false;
+                if (res.status === "SUCCESS") {
+                    closeChangeLeaveModal();
+                    invalidateCache('dashboard');
+                    invalidateCache('allLeaveLog');
+                    loadLiveDashboard(true);
+                    if (typeof globalAllLeaveLog !== 'undefined' && globalAllLeaveLog.length > 0) loadAllLeaveLog(true);
+                } else {
+                    alert("Gagal: " + res.message);
+                }
+            });
+        }
+
+        function closeChangeLeaveModal() {
+            document.getElementById('changeLeaveModal').style.display = 'none';
+            clm_rowIndex = null;
+            clm_staffBalance = null;
+        }
+
+    </script>
+
+<!-- ══════════ CHANGE LEAVE TYPE MODAL ══════════ -->
+<div id="changeLeaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#1f2937; border:1px solid #374151; border-top:3px solid #3b82f6; border-radius:16px; width:100%; max-width:440px; padding:24px; max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:15px; font-weight:700; color:#f9fafb;">Tukar Jenis Cuti</h3>
+            <button onclick="closeChangeLeaveModal()" style="color:#6b7280; font-size:20px; background:none; border:none; cursor:pointer; line-height:1;">✕</button>
+        </div>
+        <div style="background:#111827; border:1px solid #374151; border-radius:8px; padding:12px; margin-bottom:16px;">
+            <div style="font-size:13px; font-weight:700; color:#f9fafb;" id="clm_staffName">-</div>
+            <div style="font-size:11px; color:#eab308; font-weight:600; margin-top:4px;">
+                Jenis Asal: <span id="clm_currentType">-</span>
+                &nbsp;|&nbsp;
+                Tarikh: <span id="clm_date" style="font-family:monospace;">-</span>
+            </div>
+        </div>
+        <p style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:8px;">Baki Cuti Staff</p>
+        <div id="clm_balance" style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:16px;"></div>
+        <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#9ca3af; margin-bottom:6px;">Tukar Kepada</label>
+            <select id="clm_newType" onchange="checkNewTypeBalance()" style="width:100%; background:#111827; border:1px solid #374151; border-radius:8px; padding:10px 14px; color:#f9fafb; font-size:14px; outline:none; appearance:none;">
+                <option value="">-- Pilih Jenis Baru --</option>
+                <option value="AL">AL — Cuti Tahunan</option>
+                <option value="HAL">HAL — ½ Hari AL</option>
+                <option value="MC">MC — Cuti Sakit</option>
+                <option value="EL">EL — Cuti Kecemasan</option>
+                <option value="HEL">HEL — ½ Hari EL</option>
+                <option value="HL">HL — Hospitalisasi</option>
+                <option value="ML">ML — Cuti Bersalin</option>
+                <option value="PL">PL — Cuti Isteri Bersalin</option>
+                <option value="BL">BL — Cuti Ihsan</option>
+                <option value="UL">UL — Tanpa Gaji</option>
+                <option value="HUL">HUL — ½ Hari UL</option>
+            </select>
+        </div>
+        <div id="clm_warning" style="display:none; background:rgba(234,179,8,0.08); border:1px solid rgba(234,179,8,0.3); border-radius:8px; padding:10px 12px; font-size:12px; color:#eab308; margin-bottom:16px;"></div>
+        <div style="display:flex; gap:8px;">
+            <button onclick="closeChangeLeaveModal()" style="flex:1; background:#374151; border:1px solid #4b5563; color:#d1d5db; font-size:13px; font-weight:600; padding:10px; border-radius:8px; cursor:pointer;">Batal</button>
+            <button onclick="submitChangeLeaveType()" id="clm_submitBtn" style="flex:2; background:#3b82f6; color:#fff; font-size:13px; font-weight:700; padding:10px; border-radius:8px; cursor:pointer; border:none;">Simpan Perubahan</button>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

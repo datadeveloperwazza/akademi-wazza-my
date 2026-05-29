@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link type="text/css" href="css/calendar-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" /> 
+<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+
+
+<script type="text/javascript">
+var dates = [new Date(2011, 9 - 1, 19),
+             new Date(2011, 9 - 1, 20),
+             new Date(2011, 9 - 1, 20),
+             new Date(2011, 9 - 1, 21),
+             new Date(2011, 10 - 1, 31)];
+
+$(function() {
+
+    $('#datepicker').datepicker({
+        numberOfMonths: [1, 1],
+        beforeShowDay: highlightDays,
+    });
+
+
+    $('#datepicker').click(function() {
+        // put your selected date into the data object
+        var data = $('#datepicker').val();
+
+        $.get('getdata.php?date=' + data, function(data) {
+            $('#events').html(data).show('slow');
+        });
+    });
+
+    function highlightDays(date) {
+        for (var i = 0; i < dates.length; i++) {
+            if (dates[i].getTime() == date.getTime()) {
+                return [true, 'highlight'];
+            }
+        }
+        return [true, ''];
+    }
+});
+</script>
+
+<style>
+#highlight, .highlight {
+    background-color: #000000;
+}
+</style>  
+
+</head>
+<body>
+
+
+<div id="datepicker" style="float:left;margin: 0 10px 0 0;font-size: 72.5%;"></div>
+
+<div id="events" style="float:left;font-size: 10pt;">
+<p>Select a date on the calendar to see events.</p>
+</div>
+
+<div style="clear:both"></div>
+</body>
+</html>
