@@ -597,7 +597,7 @@
             <p style="text-align:center; font-size:11px; color:#6b7280;">Terlupa password? Hubungi <span style="color:#eab308; font-weight:600;">Admin</span>.</p>
         </form>
         <div style="margin-top:14px; padding-top:12px; border-top:1px solid #374151; text-align:center;">
-            <a href="admin.html" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#6b7280; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='#eab308'" onmouseout="this.style.color='#6b7280'">
+            <a href="admin" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#6b7280; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='#eab308'" onmouseout="this.style.color='#6b7280'">
                 ⚙️ Pergi ke Admin Panel
             </a>
         </div>
