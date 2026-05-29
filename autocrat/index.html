@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wazza Academy – Autocrat</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #08080d;
+            color: #e8e8ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Redirect immediately – this page just bounces to login */
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('wazza_session')) {
+            window.location.replace('course.html?id=senarai-video-autocrat');
+        } else {
+            window.location.replace('login.html');
+        }
+    </script>
+</body>
+
+</html>

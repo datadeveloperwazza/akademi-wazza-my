@@ -1,0 +1,99 @@
+{
+  "courses": [
+    {
+      "id": "senarai-video-autocrat",
+      "title": "Kuasai AUTOCRAT: Jana 1000 Sijil, Surat, E-mel & Invois",
+      "category": "Autocrat",
+      "price": "RM 99",
+      "badge": "New",
+      "badgeColor": "yellow",
+      "thumbnail": "autocrat-bg",
+      "description": "Modul lengkap pengenalan Autocrat untuk menjana sijil, invois, dan dokumen secara automatik dengan mudah.",
+      "icon": "grid",
+      "materials": 
+      [
+        {
+          "name": "Fail Modul Autocrat (Google Sheets)",
+          "url": "ezy.la/praktisautocrat",
+          "icon": "📊",
+          "label": "Buka ↗"
+        }
+      ],
+      "sections": [
+        {
+          "title": "Modul 1 - Pengenalan & Asas Autocrat",
+          "lessons": [
+            {
+              "id": "m1-01",
+              "title": "1.1 Pengenalan & Make a Copy Fail Modul",
+              "duration": 2,
+              "videoUrl": "https://www.youtube.com/watch?v=YNyASI_jcgg",
+              "description": "Video ini memperkenalkan penggunaan Autocrat untuk memudahkan kerja pengurusan data terutamanya bagi guru, bahagian HR, dan admin. Coach Wassil dari Wazza Digital menerangkan peralihan syarikat kepada perunding data yang memfokuskan Google Workspace dan Looker Studio. Beliau juga membimbing peserta langkah demi langkah tentang cara menggunakan fungsi 'make a copy' bagi menyimpan fail modul Autocrat ke dalam folder masing-masing sebagai persediaan kelas.",
+              "tip": "Pastikan anda 'Make a copy' fail modul yang diberikan sebelum mula mengedit supaya fail asal tidak terjejas.",
+              "resources": []
+            },
+            {
+              "id": "m1-02",
+              "title": "1.2 Apa itu Autocrat & Fungsi Mail Merge",
+              "duration": 4,
+              "videoUrl": "https://www.youtube.com/watch?v=MNFk24hzOZg",
+              "description": "Tutorial ini menerangkan Autocrat sebagai aplikasi pihak ketiga (third-party) yang percuma dari Google Marketplace. Ia bertindak sebagai alternatif 'Mail Merge' bagi Google Sheets untuk menyelesaikan masalah ketiadaan fungsi tersebut secara terbina dalam. Pengguna dapat menjana beratus-ratus dokumen seperti sijil, surat, dan invois secara serentak dengan satu klik, termasuk sokongan fungsi auto-emel dan notifikasi. Sistem sumber terbuka ini sangat stabil dan kini digunakan oleh lebih 83 juta pengguna Google.",
+              "tip": "Autocrat sangat berguna dan menjimatkan masa jika anda perlu menjana sijil pukal untuk ratusan peserta secara serentak.",
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Modul 2 - Praktikal Autocrat",
+          "lessons": [
+            {
+              "id": "m2-01",
+              "title": "2.1 Cara Install Autocrat & Setting Folder",
+              "duration": 6,
+              "videoUrl": "https://www.youtube.com/watch?v=zqVzghsg9aA",
+              "description": "Ketahui cara untuk mencari dan memasang (install) aplikasi (third-party) Autocrat melalui bahagian Extensions di Google Sheets. Video ini turut menerangkan proses membenarkan (allow) akses kebenaran (permissions) dan persediaan awal yang penting, iaitu membina folder khas di dalam Google Drive. Folder ini akan digunakan untuk menyimpan segala dokumen PDF (invois, surat, sijil) yang dijana nanti supaya kerja anda lebih tersusun.",
+              "tip": "Gunakan butang 'Refresh' jika anda menghadapi kesukaran semasa proses pemasangan (install) Autocrat di Google Chrome.",
+              "resources": []
+            },
+            {
+              "id": "m2-02",
+              "title": "2.2 Praktis 1: Membina Job & Jana Invois",
+              "duration": 14,
+              "videoUrl": "https://www.youtube.com/watch?v=9gjcL40qhKU",
+              "description": "Langkah pertama membina 'Job' di Autocrat. Anda akan belajar menghubungkan data Google Sheets dengan templat Google Docs menggunakan sistem penandaan (mapping/tagging) '<< >>'. Tutorial ini meliputi penetapan nama fail, format output kepada PDF, serta pemilihan destinasi folder di Google Drive. Di akhir video, anda akan belajar bagaimana menjana fail PDF secara pukal dari data Google Sheets.",
+              "tip": "Pilih format PDF berbanding Google Docs untuk dokumen rasmi seperti invois kerana ia lebih mudah untuk dicetak.",
+              "resources": []
+            },
+            {
+              "id": "m2-03",
+              "title": "2.3 Cara Betulkan Dokumen Jika Tersalah Maklumat",
+              "duration": 5,
+              "videoUrl": "https://www.youtube.com/watch?v=GONqJnBZa6k",
+              "description": "Apa perlu buat jika terdapat kesilapan ejaan atau maklumat pada dokumen yang telah dijana? Video ini menunjukkan penyelesaiannya. Dokumen PDF yang telah dijana tidak akan berubah secara automatik jika maklumat dalam Google Sheets ditukar. Anda perlu memadam pautan dokumen yang salah di dalam Google Sheets terlebih dahulu, diikuti memadam fail PDF yang salah di dalam Google Drive, sebelum mengemaskini maklumat dan menekan butang jana (run job) sekali lagi.",
+              "tip": "Jika anda hanya menukar maklumat dalam Google Sheets, anda tidak perlu menyunting (edit) Job Autocrat.",
+              "resources": []
+            },
+            {
+              "id": "m2-04",
+              "title": "2.4 Praktis 2: Jana Surat & Fungsi Auto-Hantar Emel",
+              "duration": 14,
+              "videoUrl": "https://www.youtube.com/watch?v=1RRv1qOwyCo",
+              "description": "Belajar membina 'Job' baru untuk menjana surat. Video ini juga merungkai punca masalah biasa iaitu ralat 'Empty Header' yang disebabkan oleh kedudukan tajuk data (header) yang tidak bermula pada barisan pertama (Row 1) dan cara untuk mengatasinya. Seterusnya, ketahui cara mengaktifkan fungsi 'Share Document' bagi menghantar emel secara automatik kepada penerima. Anda akan belajar cara menetapkan subjek emel dan menggunakan penanda (tagging) untuk memperibadikan emel tersebut.",
+              "tip": "Pastikan ruang sebelah kanan jadual data anda di Google Sheets dibiarkan kosong tanpa sebarang gangguan untuk mengelakkan ralat (error) semasa menjana dokumen.",
+              "resources": []
+            },
+            {
+              "id": "m2-05",
+              "title": "2.5 Praktis 3: Auto-Jana Sijil Guna Google Form",
+              "duration": 10,
+              "videoUrl": "https://www.youtube.com/watch?v=BH_lSggq9MY",
+              "description": "Video ini menunjukkan integrasi tiga elemen: Google Form (untuk mengumpul maklumat peserta), Google Slides (sebagai templat sijil), dan Google Sheets (sebagai pangkalan data). Anda akan belajar menambah kotak teks dan penanda '<< >>' pada templat di Google Slides. Paling penting, fungsi 'Run on form trigger' diajar untuk memastikan sijil dijana secara automatik sejurus selepas seseorang menghantar jawapan di Google Form.",
+              "tip": "Apabila menggunakan Google Slides untuk sijil, jenis font dan gaya tulisan yang anda tetapkan pada templat akan dikekalkan pada sijil yang dijana.",
+              "resources": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
