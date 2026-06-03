@@ -230,6 +230,11 @@
             border-color: #fbbf24;
             background: rgba(251, 191, 36, 0.08);
         }
+        /* Hide scrollbar tapi masih boleh scroll */
+        .sidebar-nav { scrollbar-width: none; -ms-overflow-style: none; }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
+        /* Nav group collapsed */
+        .nav-group-collapsed { max-height: 0 !important; }
         /* Flatpickr dark theme */
         .flatpickr-calendar { background:#1f2937; border:1px solid #374151; box-shadow:0 12px 40px rgba(0,0,0,0.6); border-radius:12px; font-family:inherit; }
         .flatpickr-months { background:#111827; border-radius:12px 12px 0 0; padding:2px 0; }
@@ -308,34 +313,50 @@
             <div class="h-20 flex items-center justify-center border-b border-gray-700">
                 <h1 class="font-bold text-xl tracking-wide">WAZZA<span class="text-yellow-500">ADMIN</span></h1>
             </div>
-            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto sidebar-nav">
                 <button onclick="switchPage('dashboard')" id="nav-dashboard"
-                    class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">🏠</span> Dashboard Utama
+                    class="nav-item active w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>🏠</span> Dashboard Utama
                 </button>
+
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 pt-3 pb-1">Rekod</p>
                 <button onclick="switchPage('history')" id="nav-history"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">📜</span> Rekod Terdahulu
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>📜</span> Rekod Terdahulu
                 </button>
+                <button onclick="switchPage('laporanLewat')" id="nav-laporanLewat"
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>⏰</span> Laporan Kelewatan
+                </button>
+
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 pt-3 pb-1">Cuti</p>
                 <button onclick="switchPage('leave')" id="nav-leave"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">🗓️</span> Laporan Cuti
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>🗓️</span> Laporan Cuti
                 </button>
                 <button onclick="switchPage('allLeaveLog')" id="nav-allLeaveLog"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">📂</span> Senarai Cuti
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>📂</span> Senarai Cuti
                 </button>
+
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 pt-3 pb-1">Pengurusan</p>
                 <button onclick="switchPage('staff')" id="nav-staff"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">👥</span> Pengurusan Staf
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>👥</span> Pengurusan Staf
                 </button>
                 <button onclick="switchPage('outstation')" id="nav-outstation"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">🗺️</span> Outstation
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>🗺️</span> Outstation
+                </button>
+
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 pt-3 pb-1">Sistem</p>
+                <button onclick="switchPage('suratAmaran')" id="nav-suratAmaran"
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>📄</span> Surat Amaran
                 </button>
                 <button onclick="switchPage('config')" id="nav-config"
-                    class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
-                    <span class="text-xl">⚙️</span> Tetapan Sistem
+                    class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition text-sm">
+                    <span>⚙️</span> Tetapan Sistem
                 </button>
             </nav>
             <div class="px-4 py-3 border-t border-gray-700">
@@ -641,16 +662,10 @@
                         <h2 class="text-2xl font-bold text-white">🗺️ Pengecualian Outstation</h2>
                         <p class="text-gray-400 text-sm">Tetapkan pengecualian radius GPS untuk staf yang bertugas di luar pejabat.</p>
                     </div>
-                    <div class="flex gap-2 flex-wrap">
-                        <button onclick="processAutoClockInToday(event)"
-                            class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
-                            ⚡ Proses Auto Clock-In Hari Ini
-                        </button>
-                        <button onclick="openOutstationModal()"
-                            class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
-                            + Tambah Pengecualian
-                        </button>
-                    </div>
+                    <button onclick="openOutstationModal()"
+                        class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                        + Tambah Pengecualian
+                    </button>
                 </div>
 
                 <div class="rounded-xl overflow-hidden border border-gray-700/50 shadow-lg">
@@ -693,6 +708,13 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="processAutoClockInToday(event)"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow flex items-center gap-2">
+                        ⚡ Proses Auto Clock-In Hari Ini
+                    </button>
                 </div>
 
                 <div id="outstationNotif" class="hidden rounded-lg px-4 py-3 text-sm font-bold border"></div>
@@ -738,6 +760,112 @@
                             </thead>
                             <tbody id="tableOutstation" class="divide-y divide-gray-700">
                                 <tr><td colspan="6" class="p-8 text-center text-gray-500">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: LAPORAN KELEWATAN ===== -->
+            <div id="page-laporanLewat" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">⏰ Laporan Kelewatan</h2>
+                        <p class="text-gray-400 text-sm">Semak rekod kelewatan staff mengikut bulan.</p>
+                    </div>
+                </div>
+
+                <!-- Filter bar -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="px-4 py-3 flex flex-wrap items-end gap-3">
+                        <div class="flex-1 min-w-[160px]">
+                            <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Nama Staf</label>
+                            <select id="llStaffSelect" class="w-full bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-yellow-500">
+                                <option value="">-- Semua Staf --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Bulan</label>
+                            <input type="month" id="llMonth" class="bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-yellow-500 cursor-pointer">
+                        </div>
+                        <button onclick="loadLaporanLewat()" class="bg-yellow-500 hover:bg-yellow-400 text-black px-5 py-2 rounded-lg text-sm font-bold shadow transition">
+                            Cari
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary cards -->
+                <div id="llSummary" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center">
+                        <p class="text-gray-400 text-xs font-bold uppercase mb-1">Jumlah Hari Lewat</p>
+                        <p id="llTotalDays" class="text-3xl font-bold text-red-400">0</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center">
+                        <p class="text-gray-400 text-xs font-bold uppercase mb-1">Jumlah Minit Lewat</p>
+                        <p id="llTotalMinit" class="text-3xl font-bold text-yellow-400">0</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center">
+                        <p class="text-gray-400 text-xs font-bold uppercase mb-1">Purata Minit / Hari</p>
+                        <p id="llAvgMinit" class="text-3xl font-bold text-blue-400">0</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                <tr>
+                                    <th class="p-4">Nama Staf</th>
+                                    <th class="p-4">Tarikh</th>
+                                    <th class="p-4">Masa Masuk</th>
+                                    <th class="p-4 text-center">Minit Lewat</th>
+                                </tr>
+                            </thead>
+                            <tbody id="llTable" class="divide-y divide-gray-700">
+                                <tr><td colspan="4" class="p-8 text-center text-gray-500">Pilih bulan dan tekan Cari.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: SURAT AMARAN ===== -->
+            <div id="page-suratAmaran" class="hidden flex-1 overflow-y-auto p-6 space-y-6 bg-gray-900">
+                <div class="flex justify-between items-end border-b border-gray-700 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">📄 Surat Amaran</h2>
+                        <p class="text-gray-400 text-sm">Jana surat amaran untuk staff yang melebihi had violations.</p>
+                    </div>
+                </div>
+                <!-- Filter -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="px-4 py-3 flex flex-wrap items-end gap-3">
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Bulan</label>
+                            <input type="month" id="saMonth" class="bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-yellow-500">
+                        </div>
+                        <button onclick="loadSuratAmaranReport()" class="bg-yellow-500 hover:bg-yellow-400 text-black px-5 py-2 rounded-lg text-sm font-bold shadow transition">Semak</button>
+                    </div>
+                </div>
+                <!-- Summary -->
+                <div id="saSummary" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <!-- Table -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
+                                <tr>
+                                    <th class="p-4">Nama Staff</th>
+                                    <th class="p-4 text-center">Lewat</th>
+                                    <th class="p-4 text-center">T.Hadir</th>
+                                    <th class="p-4 text-center">Jumlah</th>
+                                    <th class="p-4 text-center">Status</th>
+                                    <th class="p-4 text-center">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saTable" class="divide-y divide-gray-700">
+                                <tr><td colspan="6" class="p-8 text-center text-gray-500">Pilih bulan dan tekan Semak.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -997,6 +1125,64 @@
 
                         </div>
 
+                        <!-- ===== TETAPAN SURAT AMARAN ===== -->
+                        <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 space-y-4">
+                            <div>
+                                <h3 class="text-yellow-400 font-bold text-sm flex items-center gap-2">⚠️ Tetapan Surat Amaran</h3>
+                                <p class="text-gray-500 text-xs mt-1">Konfigurasi sistem notifikasi dan surat amaran untuk kehadiran staff.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-3">
+                                    <p class="text-gray-400 text-xs font-bold uppercase">Trigger Amaran</p>
+                                    <label class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 transition">
+                                        <input type="checkbox" id="warn_triggerLewat" class="w-4 h-4 accent-yellow-500">
+                                        <div>
+                                            <span class="text-sm font-bold text-white block">Kelewatan</span>
+                                            <span class="text-[10px] text-gray-500">Kira bila staff clock in lewat</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 transition">
+                                        <input type="checkbox" id="warn_triggerTidakHadir" class="w-4 h-4 accent-yellow-500">
+                                        <div>
+                                            <span class="text-sm font-bold text-white block">Tidak Hadir</span>
+                                            <span class="text-[10px] text-gray-500">Kira bila tiada rekod pada hari bekerja</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Bilangan Violations → Surat Keluar</label>
+                                        <select id="warn_threshold" class="w-full p-2 bg-gray-900 border border-gray-700 text-white rounded-lg text-sm focus:outline-none focus:border-yellow-500">
+                                            <option value="1">1 violation</option>
+                                            <option value="2">2 violations</option>
+                                            <option value="3" selected>3 violations</option>
+                                            <option value="4">4 violations</option>
+                                            <option value="5">5 violations</option>
+                                        </select>
+                                    </div>
+                                    <label class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 transition">
+                                        <input type="checkbox" id="warn_autoPdf" class="w-4 h-4 accent-yellow-500">
+                                        <div>
+                                            <span class="text-sm font-bold text-white block">Auto Generate PDF</span>
+                                            <span class="text-[10px] text-gray-500">Sediakan PDF surat amaran apabila staff layak</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-gray-400 text-xs font-bold uppercase">Template Surat (Google Doc URL)</label>
+                                <input type="text" id="warn_templateUrl" placeholder="https://docs.google.com/document/d/..."
+                                    class="w-full p-2 bg-gray-900 border border-gray-700 text-white rounded-lg text-sm focus:outline-none focus:border-yellow-500">
+                                <p class="text-[10px] text-gray-600">*Buat Google Doc dengan placeholder {{SURAT_NO}}, {{TARIKH}}, {{NAMA_STAFF}}, {{JAWATAN}}, {{BULAN_TAHUN}}, {{VIOLATIONS}}. Paste URL di sini.</p>
+                            </div>
+                            <div class="pt-2 border-t border-gray-700">
+                                <button onclick="saveWarningSettings()" id="btnSaveWarning" class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
+                                    💾 Simpan Tetapan Amaran
+                                </button>
+                                <span id="warnSaveMsg" class="text-xs text-green-400 ml-3 hidden">✓ Disimpan</span>
+                            </div>
+                        </div>
+
                     </div><!-- /configContent -->
                 </div>
             </div><!-- /page-config -->
@@ -1161,47 +1347,104 @@
     <!-- ===== OUTSTATION MODAL ===== -->
     <div id="outstationModal"
         class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center p-4 animate-fade-in">
-        <div class="bg-gray-800 rounded-2xl w-full max-w-md p-6 border border-gray-700 shadow-2xl">
-            <h2 id="outstationModalTitle" class="text-xl font-bold text-blue-400 mb-5 uppercase tracking-wider">Tambah Pengecualian Outstation</h2>
-            <div class="space-y-4">
-                <input type="hidden" id="ost_rowIndex">
-                <div>
-                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Nama Staf</label>
+        <div class="bg-gray-800 rounded-2xl w-full max-w-3xl border border-gray-700 shadow-2xl flex flex-col" style="max-height:90vh;">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-700 flex-shrink-0">
+                <h2 id="outstationModalTitle" class="text-lg font-bold text-blue-400 uppercase tracking-wider">Tambah Pengecualian Outstation</h2>
+            </div>
+            <input type="hidden" id="ost_rowIndex">
+
+            <!-- Body: 2-column layout -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Kiri: staff selection -->
+                <div class="w-1/2 border-r border-gray-700 p-4 flex flex-col gap-3">
+                    <label class="block text-gray-400 text-xs font-bold uppercase">Nama Staf</label>
+                    <!-- Edit mode -->
                     <select id="ost_nama"
-                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
+                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
                         <option value="">-- Pilih Staf --</option>
                     </select>
-                </div>
-                <div>
-                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Tarikh Outstation</label>
-                    <input type="date" id="ost_tarikh"
-                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Sebab / Tugasan</label>
-                    <input type="text" id="ost_sebab" placeholder="Cth: Lawatan kilang, Program luar, Roadshow..."
-                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
-                </div>
-                <label class="flex items-start gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition">
-                    <input type="checkbox" id="ost_autoClockIn" class="w-5 h-5 accent-blue-500 mt-0.5 flex-shrink-0"
-                        onchange="toggleAutoClockInTime()">
-                    <div>
-                        <span class="text-sm font-bold text-white block">Auto Clock-In</span>
-                        <span class="text-[10px] text-gray-500">Sistem akan daftarkan kehadiran secara automatik apabila admin tekan butang proses. Staf tidak perlu scan sendiri.</span>
+                    <!-- Add mode -->
+                    <div id="ost_multiContainer" class="hidden flex flex-col gap-2 flex-1 min-h-0">
+                        <input type="text" id="ost_staffSearch" placeholder="Cari nama staf..."
+                            oninput="filterOstStaffList(this.value)"
+                            class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                        <label class="flex items-center gap-2 px-1 cursor-pointer">
+                            <input type="checkbox" id="ost_selectAll" onchange="toggleSelectAllOst(this)">
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wide">Pilih Semua</span>
+                        </label>
+                        <div id="ost_staffChecklist" class="flex-1 overflow-y-auto space-y-0.5 border border-gray-700 rounded-lg p-2 bg-gray-900/50 min-h-0">
+                            <p class="text-gray-500 text-xs text-center py-2">Memuatkan senarai staf...</p>
+                        </div>
+                        <div id="ost_selectedChips" class="hidden">
+                            <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Dipilih:</p>
+                            <div id="ost_chipsContainer" class="flex flex-wrap gap-1.5"></div>
+                        </div>
                     </div>
-                </label>
-                <div id="autoClockInTimeSection" class="hidden">
-                    <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Masa Clock-In Automatik</label>
-                    <input type="time" id="ost_masaClockIn" value="08:00"
-                        class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-blue-500">
-                    <p class="text-[10px] text-gray-500 mt-1">*Masa ini akan direkodkan sebagai masa masuk dalam Log_Kehadiran.</p>
                 </div>
-                <div class="flex gap-3 pt-4 border-t border-gray-700">
-                    <button onclick="closeOutstationModal()"
-                        class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition">Batal</button>
-                    <button onclick="submitOutstationForm()" id="btnSaveOutstation"
-                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg transition shadow-lg">Simpan</button>
+
+                <!-- Kanan: form fields -->
+                <div class="w-1/2 p-4 flex flex-col gap-3 overflow-y-auto">
+                    <!-- Tarikh single (edit) -->
+                    <div id="ost_tarikhSingleWrap">
+                        <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Tarikh Outstation</label>
+                        <input type="date" id="ost_tarikh"
+                            class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <!-- Tarikh range (add) -->
+                    <div id="ost_tarikhRangeWrap" class="hidden">
+                        <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Tarikh Outstation</label>
+                        <div class="flex items-center gap-2">
+                            <input type="date" id="ost_tarikhDari"
+                                class="flex-1 p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                            <span class="text-gray-500 text-sm flex-shrink-0">→</span>
+                            <input type="date" id="ost_tarikhHingga"
+                                class="flex-1 p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+                        <p class="text-[10px] text-gray-600 mt-1">*Rekod dibuat untuk setiap hari dalam julat ini</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Sebab / Tugasan</label>
+                        <input type="text" id="ost_sebab" placeholder="Cth: Lawatan kilang, Roadshow..."
+                            class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <label class="flex items-start gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition">
+                        <input type="checkbox" id="ost_autoClockIn" class="w-4 h-4 accent-blue-500 mt-0.5 flex-shrink-0"
+                            onchange="toggleAutoClockInTime()">
+                        <div>
+                            <span class="text-sm font-bold text-white block">Auto Clock-In (Tanpa GPS/QR)</span>
+                            <span class="text-[10px] text-gray-500">Staf tidak perlu scan sendiri — kehadiran didaftarkan automatik apabila admin tekan ⚡ Proses.</span>
+                        </div>
+                    </label>
+                    <div id="autoClockInTimeSection" class="hidden">
+                        <label class="block text-gray-400 text-xs font-bold mb-1 uppercase">Masa Clock-In Automatik</label>
+                        <input type="time" id="ost_masaClockIn" value="08:00"
+                            class="w-full p-2 bg-gray-900 border border-gray-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                        <p class="text-[10px] text-gray-500 mt-1">*Masa ini akan direkodkan dalam Log_Kehadiran.</p>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Footer buttons -->
+            <div class="px-6 py-4 border-t border-gray-700 flex gap-3 flex-shrink-0">
+                <button onclick="closeOutstationModal()"
+                    class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition text-sm">Batal</button>
+                <button onclick="submitOutstationForm()" id="btnSaveOutstation"
+                    class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg transition shadow-lg text-sm">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== REJECT LEAVE MODAL ===== -->
+    <div id="rejectLeaveModal" class="fixed inset-0 bg-black/80 z-[1001] hidden items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-2xl w-full max-w-md border border-gray-700 shadow-2xl p-6 space-y-4">
+            <h3 class="text-white font-bold text-lg">Tolak Permohonan Cuti</h3>
+            <p class="text-gray-400 text-sm">Sila nyatakan sebab penolakan. Ini akan dipaparkan kepada staf.</p>
+            <textarea id="rejectReasonInput" rows="3" placeholder="Contoh: Kekurangan staf pada tarikh tersebut..."
+                class="w-full bg-gray-900 border border-gray-600 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-red-500 resize-none placeholder-gray-600"></textarea>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeRejectModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 rounded-lg transition text-sm">Batal</button>
+                <button onclick="confirmRejectLeave()" class="flex-1 bg-red-700 hover:bg-red-600 text-white font-bold py-2 rounded-lg transition text-sm">Konfirm Tolak</button>
             </div>
         </div>
     </div>
@@ -1317,6 +1560,7 @@
             allPages.forEach(function(p) { var el = document.getElementById('page-' + p); if (el) el.classList.add('hidden'); });
             document.getElementById('page-dashboard').classList.remove('hidden');
             updateMonthPickerInput();
+            _qcLoad(); // restore query cache dari localStorage
             initCacheAndLoad(); // Parallel fetch semua data sekaligus
         }
 
@@ -1339,23 +1583,70 @@
         var leaveStatusFilter = 'DILULUSKAN';
         var globalHistoryData = [];
         var currentHistoryMode = 'single';
-        var historyCache = {}; // { 'YYYY-MM-DD': { data: {...}, ts: timestamp } }
-        var HISTORY_CACHE_TTL = 60 * 60 * 1000; // 1 jam — data lama tak berubah
-        var allPages = ['dashboard', 'history', 'leave', 'allLeaveLog', 'staff', 'outstation', 'config'];
+        var HISTORY_CACHE_TTL = 60 * 60 * 1000;
+        // historyCache — wrapper ke _qStore supaya persist across refresh
+        var historyCache = new Proxy({}, {
+            get: function(t, k) {
+                if (t[k]) return t[k];
+                var v = _qcGet('hist:' + k);
+                if (v) { t[k] = v; return v; }
+                return undefined;
+            },
+            set: function(t, k, v) {
+                t[k] = v;
+                _qcSet('hist:' + k, v);
+                return true;
+            }
+        });
+        var allPages = ['dashboard', 'history', 'leave', 'allLeaveLog', 'staff', 'outstation', 'laporanLewat', 'suratAmaran', 'config'];
 
         // ==========================================
-        // CACHE SYSTEM (Looker Studio style)
+        // CACHE SYSTEM — in-memory + localStorage (Looker Studio style)
         // ==========================================
+        var CACHE_TTL = 15 * 60 * 1000;
+        var ADMIN_CACHE_VER = 'av2';
+        var LS_KEY = 'wazza_admin_cache';
+
+        // ── Query cache (Laporan Kelewatan, Surat Amaran, Leave Balance) ──
+        // In-memory + localStorage, TTL 15 minit
+        var _qStore = {};
+        var _qLsKey = 'wazza_qcache';
+
+        function _qcLoad() {
+            try {
+                var raw = localStorage.getItem(_qLsKey);
+                if (!raw) return;
+                var obj = JSON.parse(raw);
+                if (obj.ver !== ADMIN_CACHE_VER) { localStorage.removeItem(_qLsKey); return; }
+                var now = Date.now();
+                Object.keys(obj.d).forEach(function(k) {
+                    if (now - obj.d[k].ts < CACHE_TTL) _qStore[k] = obj.d[k];
+                });
+            } catch(e) {}
+        }
+        function _qcGet(key) {
+            var e = _qStore[key];
+            if (!e || Date.now() - e.ts > CACHE_TTL) { if (e) { delete _qStore[key]; _qcSave(); } return null; }
+            return e.data;
+        }
+        function _qcSet(key, data) {
+            _qStore[key] = { ts: Date.now(), data: data };
+            _qcSave();
+        }
+        function _qcDel(key) { delete _qStore[key]; _qcSave(); }
+        function _qcSave() {
+            try { localStorage.setItem(_qLsKey, JSON.stringify({ ver: ADMIN_CACHE_VER, d: _qStore })); } catch(e) {}
+        }
+
         var appCache = {
-            dashboard:      { data: null, ts: 0 },
-            allLeaveLog:    { data: null, ts: 0 },
-            staffManagement:{ data: null, ts: 0 },
-            outstationList: { data: null, ts: 0 },
+            dashboard:         { data: null, ts: 0 },
+            allLeaveLog:       { data: null, ts: 0 },
+            staffManagement:   { data: null, ts: 0 },
+            outstationList:    { data: null, ts: 0 },
             outstationTrigger: { data: null, ts: 0 },
-            staffList:      { data: null, ts: 0 },
-            config:         { data: null, ts: 0 }
+            staffList:         { data: null, ts: 0 },
+            config:            { data: null, ts: 0 }
         };
-        var CACHE_TTL = 15 * 60 * 1000; // 15 minit
         var autoRefreshIntervalId = null;
         var countdownIntervalId = null;
         var nextRefreshTs = 0;
@@ -1365,47 +1656,171 @@
         }
         function setCache(key, data) {
             if (appCache[key]) { appCache[key].data = data; appCache[key].ts = Date.now(); }
+            _persistCache();
         }
         function invalidateCache(key) {
             if (appCache[key]) appCache[key].ts = 0;
         }
 
-        // Parallel fetch semua data utama selepas login
-        function initCacheAndLoad() {
-            var loaded = 0; var total = 5;
-            document.getElementById('loaderLive').classList.remove('hidden');
-            function oneDone() {
-                loaded++;
-                if (loaded >= total) startAutoRefresh();
+        function _persistCache() {
+            try {
+                var snapshot = {};
+                Object.keys(appCache).forEach(function(k) {
+                    if (appCache[k].data !== null) snapshot[k] = { data: appCache[k].data, ts: appCache[k].ts };
+                });
+                localStorage.setItem(LS_KEY, JSON.stringify({ ver: ADMIN_CACHE_VER, snapshot: snapshot }));
+            } catch(e) {}
+        }
+
+        function _loadCacheFromLS() {
+            try {
+                var raw = localStorage.getItem(LS_KEY);
+                if (!raw) return false;
+                var obj = JSON.parse(raw);
+                if (obj.ver !== ADMIN_CACHE_VER) { localStorage.removeItem(LS_KEY); return false; }
+                var anyValid = false;
+                Object.keys(obj.snapshot).forEach(function(k) {
+                    if (appCache[k] && obj.snapshot[k].data !== null) {
+                        appCache[k].data = obj.snapshot[k].data;
+                        appCache[k].ts = obj.snapshot[k].ts;
+                        if ((Date.now() - obj.snapshot[k].ts) < CACHE_TTL) anyValid = true;
+                    }
+                });
+                return anyValid;
+            } catch(e) { return false; }
+        }
+
+        // Render dari cache yang ada (untuk page load terus)
+        function renderFromCache() {
+            if (isCacheValid('config') && appCache.config.data) {
+                var wd = Array.isArray(appCache.config.data.workDays) && appCache.config.data.workDays.length > 0 ? appCache.config.data.workDays : ['Isnin','Selasa','Rabu','Khamis','Jumaat'];
+                globalWorkConfig = { workDays: wd, publicHolidays: Array.isArray(appCache.config.data.publicHolidays) ? appCache.config.data.publicHolidays : [] };
             }
+            if (isCacheValid('dashboard')) {
+                var d = appCache.dashboard.data;
+                globalLeaveEvents = d.calendarEvents || [];
+                renderDashboard(d);
+                // Re-render calendar dengan PH yang betul sekarang config dah loaded
+                renderCalendar(currentYear, currentMonth);
+            }
+            if (isCacheValid('staffManagement') && appCache.staffManagement.data) {
+                globalStaffList = appCache.staffManagement.data;
+            }
+            if (isCacheValid('staffList') && appCache.staffList.data) {
+                outstationStaffNames = appCache.staffList.data;
+            }
+        }
+
+        // Helper: fetch laporan + surat untuk 1 bulan dan simpan ke qcache
+        function _prefetchMonth(month, year) {
+            var llKey = '__all__|' + month + '|' + year;
+            var saKey = month + '|' + year;
+            if (!_qcGet('ll:' + llKey)) {
+                callGAS("getLaporanKelewatan", { staffName: '', month: month, year: year }, function(res) {
+                    _qcSet('ll:' + llKey, res);
+                });
+            }
+            if (!_qcGet('sa:' + saKey)) {
+                callGAS("getWarningReport", { month: month, year: year }, function(res) {
+                    _qcSet('sa:' + saKey, res);
+                });
+            }
+        }
+
+        // Background prefetch: 3 bulan sebelumnya, satu persatu senyap
+        function _backgroundPrefetch3Months() {
+            var now = new Date();
+            var months = [];
+            for (var i = 1; i <= 3; i++) {
+                var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push({ month: d.getMonth() + 1, year: d.getFullYear() });
+            }
+            // Sequential — satu bulan habis baru start yang lain, avoid overwhelming GAS
+            function fetchNext(idx) {
+                if (idx >= months.length) return;
+                var m = months[idx];
+                var llKey = '__all__|' + m.month + '|' + m.year;
+                var saKey = m.month + '|' + m.year;
+                var done = 0;
+                function next() { done++; if (done >= 2) fetchNext(idx + 1); }
+                if (!_qcGet('ll:' + llKey)) {
+                    callGAS("getLaporanKelewatan", { staffName: '', month: m.month, year: m.year }, function(res) { _qcSet('ll:' + llKey, res); next(); }, next);
+                } else { next(); }
+                if (!_qcGet('sa:' + saKey)) {
+                    callGAS("getWarningReport", { month: m.month, year: m.year }, function(res) { _qcSet('sa:' + saKey, res); next(); }, next);
+                } else { next(); }
+            }
+            fetchNext(0);
+        }
+
+        // Fetch semua data baru (background atau first load)
+        function fetchAllData(onComplete) {
+            var now = new Date();
+            var curMonth = now.getMonth() + 1, curYear = now.getFullYear();
+            var done = 0; var total = 8; // 6 existing + 2 current month
+            function tick() { done++; if (done >= total && onComplete) onComplete(); }
             callGAS("getAdminDashboardData", {}, function(data) {
                 setCache('dashboard', data);
                 globalLeaveEvents = data.calendarEvents || [];
-                renderDashboard(data);
-                oneDone();
-            }, oneDone);
-            callGAS("getAllLeaveLog", {}, function(data) {
-                setCache('allLeaveLog', data);
-                oneDone();
-            }, oneDone);
+                var dashPage = document.getElementById('page-dashboard');
+                if (dashPage && !dashPage.classList.contains('hidden')) renderDashboard(data);
+                tick();
+            }, tick);
+            callGAS("getAllLeaveLog", {}, function(data) { setCache('allLeaveLog', data); tick(); }, tick);
             callGAS("getStaffManagementData", {}, function(res) {
                 if (res.status === 'SUCCESS') { setCache('staffManagement', res.data); globalStaffList = res.data; }
-                oneDone();
-            }, oneDone);
+                tick();
+            }, tick);
             callGAS("getSystemConfig", {}, function(res) {
                 if (res.status === 'SUCCESS') {
                     setCache('config', res.data);
                     var wd = Array.isArray(res.data.workDays) && res.data.workDays.length > 0 ? res.data.workDays : ['Isnin','Selasa','Rabu','Khamis','Jumaat'];
                     globalWorkConfig = { workDays: wd, publicHolidays: Array.isArray(res.data.publicHolidays) ? res.data.publicHolidays : [] };
                 }
-                oneDone();
-            }, oneDone);
+                tick();
+            }, tick);
             callGAS("getStaffList", {}, function(names) {
                 var list = Array.isArray(names) ? names : [];
                 setCache('staffList', list);
                 outstationStaffNames = list;
-                oneDone();
-            }, oneDone);
+                tick();
+            }, tick);
+            callGAS("getOutstationList", {}, function(res) {
+                if (res.status === 'SUCCESS') setCache('outstationList', res.data);
+                tick();
+            }, tick);
+            // Stage 1: bulan semasa (parallel dengan calls lain)
+            callGAS("getLaporanKelewatan", { staffName: '', month: curMonth, year: curYear }, function(res) {
+                _qcSet('ll:__all__|' + curMonth + '|' + curYear, res); tick();
+            }, tick);
+            callGAS("getWarningReport", { month: curMonth, year: curYear }, function(res) {
+                _qcSet('sa:' + curMonth + '|' + curYear, res); tick();
+            }, tick);
+        }
+
+        // Init — check localStorage dulu, kalau ada render terus, fetch background
+        function initCacheAndLoad() {
+            var hasCache = _loadCacheFromLS();
+            if (hasCache) {
+                // Ada cache — render terus, fetch background senyap
+                renderFromCache();
+                document.getElementById('loaderLive').classList.add('hidden');
+                fetchAllData(function() {
+                    startAutoRefresh();
+                    // Stage 2: 3 bulan sebelumnya senyap
+                    setTimeout(_backgroundPrefetch3Months, 2000);
+                });
+            } else {
+                // Takda cache — show loader, fetch, render
+                document.getElementById('loaderLive').classList.remove('hidden');
+                fetchAllData(function() {
+                    renderFromCache();
+                    document.getElementById('loaderLive').classList.add('hidden');
+                    startAutoRefresh();
+                    // Stage 2: 3 bulan sebelumnya senyap (delay 3s bagi admin settle dulu)
+                    setTimeout(_backgroundPrefetch3Months, 3000);
+                });
+            }
         }
 
         // Mulakan auto-refresh 15 minit + countdown timer
@@ -1419,20 +1834,15 @@
             countdownIntervalId = setInterval(updateCacheStatusBar, 1000);
         }
 
-        // Auto-refresh background — update cache & re-render kalau user tengah kat page berkenaan
+        // Auto-refresh background — update semua cache
         function refreshAllCache() {
             nextRefreshTs = Date.now() + CACHE_TTL;
-            callGAS("getAdminDashboardData", {}, function(data) {
-                setCache('dashboard', data);
-                globalLeaveEvents = data.calendarEvents || [];
-                var dashPage = document.getElementById('page-dashboard');
-                if (dashPage && !dashPage.classList.contains('hidden')) renderDashboard(data);
-                updateCacheStatusBar();
-            });
-            callGAS("getAllLeaveLog", {}, function(data) {
-                setCache('allLeaveLog', data);
+            updateCacheStatusBar();
+            fetchAllData(function() {
+                // Re-render page yang sedang aktif
                 var logPage = document.getElementById('page-allLeaveLog');
-                if (logPage && !logPage.classList.contains('hidden')) { globalAllLeaveLog = data; filterLeaveLog(); }
+                if (logPage && !logPage.classList.contains('hidden')) { globalAllLeaveLog = appCache.allLeaveLog.data || []; filterLeaveLog(); }
+                updateCacheStatusBar();
             });
         }
 
@@ -1504,6 +1914,9 @@
                 else { loadStaffManagement(); }
             }
             if (page === 'outstation') loadOutstationPage();
+            if (page === 'laporanLewat') initLaporanLewat();
+            if (page === 'suratAmaran') initSuratAmaran();
+            if (page === 'config') loadWarningSettingsUI();
             if (page === 'config') {
                 if (isCacheValid('config')) {
                     document.getElementById('configLoader').classList.add('hidden');
@@ -1807,11 +2220,22 @@
                 }
 
                 // Hari Kerja — tunjuk table penuh
+                var hadirCount = dayData.attendance.filter(function(s) {
+                    var st = (s.status || '').toUpperCase();
+                    return st === 'HADIR' || st === 'LEWAT';
+                }).length;
+                var totalCount = dayData.attendance.length;
+                var pct = totalCount > 0 ? Math.round(hadirCount / totalCount * 100) : 0;
+                var pctColor = pct >= 90 ? '#4ade80' : pct >= 70 ? '#eab308' : '#f87171';
+
                 div.className = 'bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl';
                 div.innerHTML =
                     '<div class="p-4 border-b border-gray-700 font-bold text-white flex items-center justify-between">' +
                     '<span>📅 ' + getDayName(dayData.dateRaw) + ', ' + dayData.date + '</span>' +
-                    '<span class="text-xs text-gray-400 font-normal">' + dayData.attendance.length + ' staf</span>' +
+                    '<div class="flex items-center gap-2">' +
+                    '<span class="text-xs text-gray-400 font-normal">' + totalCount + ' staf</span>' +
+                    '<span style="background:' + pctColor + '22; color:' + pctColor + '; border:1px solid ' + pctColor + '55;" class="text-xs font-bold px-2 py-0.5 rounded-full">' + pct + '%</span>' +
+                    '</div>' +
                     '</div>' +
                     '<div class="overflow-x-auto"><table class="w-full text-left text-sm">' +
                     '<thead class="bg-gray-900 text-gray-400 text-xs uppercase"><tr>' +
@@ -2151,16 +2575,44 @@
             });
         }
 
+        var _rejectLeaveIdx = null;
+
         function processLeave(idx, status) {
-            if (confirm(status === 'DILULUSKAN' ? "Luluskan permohonan ini?" : "Tolak permohonan ini?")) {
+            if (status === 'DITOLAK') {
+                _rejectLeaveIdx = idx;
+                document.getElementById('rejectReasonInput').value = '';
+                var m = document.getElementById('rejectLeaveModal');
+                m.classList.remove('hidden'); m.classList.add('flex');
+                return;
+            }
+            if (confirm("Luluskan permohonan ini?")) {
                 document.getElementById('card-' + idx).style.opacity = "0.5";
-                callGAS("processLeaveStatus", { rowIndex: idx, status: status }, function () {
+                callGAS("processLeaveStatus", { rowIndex: idx, status: 'DILULUSKAN', reason: '' }, function () {
                     document.getElementById('card-' + idx).remove();
                     invalidateCache('dashboard');
                     invalidateCache('allLeaveLog');
-                    if (status === 'DILULUSKAN') loadLiveDashboard(true);
+                    loadLiveDashboard(true);
                 });
             }
+        }
+
+        function closeRejectModal() {
+            var m = document.getElementById('rejectLeaveModal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+            _rejectLeaveIdx = null;
+        }
+
+        function confirmRejectLeave() {
+            var reason = document.getElementById('rejectReasonInput').value.trim();
+            if (!reason) { alert("Sila isi sebab penolakan terlebih dahulu."); return; }
+            var idx = _rejectLeaveIdx;
+            closeRejectModal();
+            document.getElementById('card-' + idx).style.opacity = "0.5";
+            callGAS("processLeaveStatus", { rowIndex: idx, status: 'DITOLAK', reason: reason }, function () {
+                document.getElementById('card-' + idx).remove();
+                invalidateCache('dashboard');
+                invalidateCache('allLeaveLog');
+            });
         }
 
         function markPresent(nama) {
@@ -2186,6 +2638,243 @@
         // ==========================================
         // ALL LEAVE LOG
         // ==========================================
+        // ==========================================
+        // LAPORAN KELEWATAN
+        // ==========================================
+        function initLaporanLewat() {
+            // Set default bulan = bulan semasa
+            var now = new Date();
+            var m = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('llMonth').value = now.getFullYear() + '-' + m;
+
+            // Populate staff dropdown — hanya staff yang Papar_Tracker = true
+            var select = document.getElementById('llStaffSelect');
+            select.innerHTML = '<option value="">-- Semua Staf --</option>';
+            function fillLLStaff(list) {
+                list.filter(function(s) { return s.paparTracker !== false && s.status && s.status.toUpperCase() === 'AKTIF'; })
+                    .forEach(function(s) {
+                        var opt = document.createElement('option');
+                        opt.value = s.nama; opt.text = s.nama;
+                        select.add(opt);
+                    });
+            }
+            if (globalStaffList.length > 0) {
+                fillLLStaff(globalStaffList);
+            } else {
+                callGAS("getStaffManagementData", {}, function(res) {
+                    if (res.status === 'SUCCESS') {
+                        globalStaffList = res.data;
+                        fillLLStaff(res.data);
+                    }
+                });
+            }
+        }
+
+        // _laporanCache — now uses _qStore via _qcGet/_qcSet
+
+        function renderLaporanResult(res) {
+            var tbody = document.getElementById('llTable');
+            if (res.status !== 'SUCCESS') { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500">' + res.message + '</td></tr>'; return; }
+            document.getElementById('llTotalDays').innerText = res.summary.totalLewat;
+            document.getElementById('llTotalMinit').innerText = res.summary.totalMinit + ' min';
+            document.getElementById('llAvgMinit').innerText = res.summary.avgMinit + ' min';
+            document.getElementById('llSummary').classList.remove('hidden');
+            tbody.innerHTML = "";
+            if (res.records.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Tiada rekod kelewatan pada bulan ini.</td></tr>'; return; }
+            res.records.forEach(function(r) {
+                var minitColor = r.minitLewat >= 30 ? 'text-red-400' : r.minitLewat >= 15 ? 'text-yellow-400' : 'text-orange-400';
+                tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
+                    '<td class="p-4 font-bold text-white text-sm">' + r.nama + '</td>' +
+                    '<td class="p-4 text-gray-300 font-mono text-sm">' + r.tarikh + '</td>' +
+                    '<td class="p-4 text-gray-300 font-mono text-sm">' + r.masuk + '</td>' +
+                    '<td class="p-4 text-center"><span class="font-bold text-lg ' + minitColor + '">' + r.minitLewat + '</span><span class="text-gray-500 text-xs ml-1">min</span></td></tr>';
+            });
+        }
+
+        function loadLaporanLewat() {
+            var monthVal = document.getElementById('llMonth').value;
+            if (!monthVal) { alert("Sila pilih bulan."); return; }
+            var parts = monthVal.split('-');
+            var year = parseInt(parts[0]), month = parseInt(parts[1]);
+            var staffName = document.getElementById('llStaffSelect').value;
+            var cacheKey = (staffName || '__all__') + '|' + month + '|' + year;
+
+            // Check cache dulu — instant
+            var _lc = _qcGet('ll:' + cacheKey);
+            if (_lc) { renderLaporanResult(_lc); return; }
+            // Kalau pilih staff specific — check all-staff cache, filter client-side
+            if (staffName) {
+                var _allKey = '__all__|' + month + '|' + year;
+                var _allCache = _qcGet('ll:' + _allKey);
+                if (_allCache && _allCache.status === 'SUCCESS') {
+                    var filtered = { status: 'SUCCESS', summary: { totalLewat: 0, totalMinit: 0, avgMinit: 0, lateStart: _allCache.summary.lateStart }, records: [] };
+                    filtered.records = _allCache.records.filter(function(r) { return r.nama === staffName; });
+                    filtered.summary.totalLewat = filtered.records.length;
+                    filtered.summary.totalMinit = filtered.records.reduce(function(s,r){ return s + r.minitLewat; }, 0);
+                    filtered.summary.avgMinit = filtered.records.length > 0 ? Math.round(filtered.summary.totalMinit / filtered.records.length) : 0;
+                    _qcSet('ll:' + cacheKey, filtered);
+                    renderLaporanResult(filtered); return;
+                }
+            }
+
+            var tbody = document.getElementById('llTable');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-yellow-500 animate-pulse">Menarik data...</td></tr>';
+            document.getElementById('llSummary').classList.add('hidden');
+
+            callGAS("getLaporanKelewatan", { staffName: staffName, month: month, year: year }, function(res) {
+                _qcSet('ll:' + cacheKey, res);
+                renderLaporanResult(res);
+            });
+        }
+
+        // ==========================================
+        // SURAT AMARAN
+        // ==========================================
+        function loadWarningSettingsUI() {
+            // Baca dari cache config dulu — instant
+            if (isCacheValid('config') && appCache.config.data) {
+                var d = appCache.config.data;
+                document.getElementById('warn_triggerLewat').checked = d.warningTriggerLewat || false;
+                document.getElementById('warn_triggerTidakHadir').checked = d.warningTriggerTidakHadir || false;
+                document.getElementById('warn_threshold').value = String(d.warningThreshold || 3);
+                document.getElementById('warn_autoPdf').checked = d.warningAutoPdf || false;
+                document.getElementById('warn_templateUrl').value = d.warningTemplateUrl || '';
+                return;
+            }
+            // Fallback: GAS call
+            callGAS("getWarningSettings", {}, function(res) {
+                if (res.status !== 'SUCCESS') return;
+                var d = res.data;
+                document.getElementById('warn_triggerLewat').checked = d.triggerLewat;
+                document.getElementById('warn_triggerTidakHadir').checked = d.triggerTidakHadir;
+                document.getElementById('warn_threshold').value = String(d.threshold);
+                document.getElementById('warn_autoPdf').checked = d.autoPdf;
+                document.getElementById('warn_templateUrl').value = d.templateUrl || '';
+            });
+        }
+
+        function saveWarningSettings() {
+            var btn = document.getElementById('btnSaveWarning');
+            btn.innerText = "Menyimpan..."; btn.disabled = true;
+            var payload = {
+                triggerLewat: document.getElementById('warn_triggerLewat').checked,
+                triggerTidakHadir: document.getElementById('warn_triggerTidakHadir').checked,
+                threshold: parseInt(document.getElementById('warn_threshold').value),
+                autoPdf: document.getElementById('warn_autoPdf').checked,
+                templateUrl: document.getElementById('warn_templateUrl').value.trim()
+            };
+            callGAS("saveWarningSettings", { payload: payload }, function(res) {
+                btn.innerText = "💾 Simpan Tetapan Amaran"; btn.disabled = false;
+                var msg = document.getElementById('warnSaveMsg');
+                msg.classList.remove('hidden');
+                setTimeout(function() { msg.classList.add('hidden'); }, 3000);
+            });
+        }
+
+        function initSuratAmaran() {
+            var now = new Date();
+            document.getElementById('saMonth').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+
+        // _suratAmaranCache — now uses _qStore via _qcGet/_qcSet
+
+        function renderSuratAmaranResult(res, month, year) {
+            var tbody = document.getElementById('saTable');
+            if (res.status !== 'SUCCESS') { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500">' + res.message + '</td></tr>'; return; }
+            var data = res.data; var threshold = res.threshold;
+            var layak = data.filter(function(s) { return s.isLayak; }).length;
+            var hasSurat = data.filter(function(s) { return s.hasSurat; }).length;
+            var sum = document.getElementById('saSummary');
+            sum.innerHTML =
+                '<div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Staff Terlibat</p><p class="text-2xl font-bold text-white">' + data.length + '</p></div>' +
+                '<div class="bg-gray-800 rounded-xl border border-red-900/50 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Layak Surat</p><p class="text-2xl font-bold text-red-400">' + layak + '</p></div>' +
+                '<div class="bg-gray-800 rounded-xl border border-green-900/50 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Surat Dijana</p><p class="text-2xl font-bold text-green-400">' + hasSurat + '</p></div>' +
+                '<div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Threshold</p><p class="text-2xl font-bold text-yellow-400">' + threshold + 'x</p></div>';
+            sum.classList.remove('hidden');
+            tbody.innerHTML = '';
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500">Tiada violations pada bulan ini.</td></tr>'; return; }
+            data.forEach(function(s) {
+                var statusHtml = s.isReset ? '<span class="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-xs font-bold">RESET</span>'
+                    : s.hasSurat ? '<a href="' + s.suratUrl + '" target="_blank" class="bg-green-900 text-green-300 px-2 py-0.5 rounded text-xs font-bold border border-green-700">SURAT ✓</a>'
+                    : s.isLayak ? '<span class="bg-red-900 text-red-300 px-2 py-0.5 rounded text-xs font-bold border border-red-700">⚠️ LAYAK</span>'
+                    : '<span class="bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded text-xs font-bold">' + s.total + '/' + threshold + '</span>';
+                var safeNama = s.nama.replace(/'/g,"\\'");
+                var btnClass = 'inline-flex items-center justify-center px-3 py-1.5 rounded text-xs font-bold transition';
+                var col1 = s.hasSurat
+                    ? '<a href="' + s.suratUrl + '" target="_blank" class="' + btnClass + ' bg-green-800 hover:bg-green-700 text-white w-28">⬇️ Download</a>'
+                    : s.isLayak
+                    ? '<button onclick="doGenerateSurat(\'' + safeNama + '\',' + month + ',' + year + ')" class="' + btnClass + ' bg-blue-700 hover:bg-blue-600 text-white w-28">📄 Jana PDF</button>'
+                    : '<span class="' + btnClass + ' bg-transparent text-gray-600 w-28 cursor-default">—</span>';
+                var col2 = s.isReset
+                    ? '<span class="' + btnClass + ' bg-transparent text-gray-600 w-20 cursor-default">—</span>'
+                    : '<button onclick="doResetWarning(\'' + safeNama + '\',' + month + ',' + year + ')" class="' + btnClass + ' bg-gray-700 hover:bg-gray-600 text-gray-300 w-20">Reset</button>';
+                var aksiHtml = '<div class="flex gap-2 items-center justify-end">' + col1 + col2 + '</div>';
+                tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
+                    '<td class="p-4"><div class="font-bold text-white text-sm">' + s.nama + '</div><div class="text-xs text-gray-500">' + s.jawatan + '</div></td>' +
+                    '<td class="p-4 text-center"><span class="font-bold ' + (s.lewat > 0 ? 'text-orange-400' : 'text-gray-600') + '">' + s.lewat + 'x</span></td>' +
+                    '<td class="p-4 text-center"><span class="font-bold ' + (s.tidakHadir > 0 ? 'text-red-400' : 'text-gray-600') + '">' + s.tidakHadir + 'x</span></td>' +
+                    '<td class="p-4 text-center"><span class="font-bold text-white text-lg">' + s.total + '</span></td>' +
+                    '<td class="p-4 text-center">' + statusHtml + '</td>' +
+                    '<td class="p-4 text-center">' + aksiHtml + '</td></tr>';
+            });
+        }
+
+        function loadSuratAmaranReport() {
+            var monthVal = document.getElementById('saMonth').value;
+            if (!monthVal) { alert("Sila pilih bulan."); return; }
+            var parts = monthVal.split('-');
+            var year = parseInt(parts[0]), month = parseInt(parts[1]);
+            var cacheKey = month + '|' + year;
+
+            // Check cache — instant
+            var _sc = _qcGet('sa:' + cacheKey); if (_sc) { renderSuratAmaranResult(_sc, month, year); return; }
+
+            var tbody = document.getElementById('saTable');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-yellow-500 animate-pulse">Menganalisis data...</td></tr>';
+            document.getElementById('saSummary').classList.add('hidden');
+
+            callGAS("getWarningReport", { month: month, year: year }, function(res) {
+                _qcSet('sa:' + cacheKey, res);
+                renderSuratAmaranResult(res, month, year);
+            });
+        }
+
+        function toggleSaMenu(btn) {
+            // Close all other menus first
+            document.querySelectorAll('.sa-menu').forEach(function(m) { if (m !== btn.nextElementSibling) m.classList.add('hidden'); });
+            btn.nextElementSibling.classList.toggle('hidden');
+        }
+        function closeSaMenu(el) {
+            var menu = el.closest('.sa-menu');
+            if (menu) menu.classList.add('hidden');
+        }
+        // Close menu bila click luar
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative')) document.querySelectorAll('.sa-menu').forEach(function(m) { m.classList.add('hidden'); });
+        });
+
+        function doGenerateSurat(staffName, month, year) {
+            if (!confirm("Jana surat amaran untuk " + staffName + "?")) return;
+            callGAS("generateSuratAmaran", { staffName: staffName, month: month, year: year }, function(res) {
+                if (res.status === 'SUCCESS') {
+                    alert("Surat berjaya dijana! Klik OK untuk download.");
+                    window.open(res.url, '_blank');
+                    _qcDel('sa:' + month + '|' + year); // clear cache for this month
+                    loadSuratAmaranReport();
+                } else { alert("Gagal: " + res.message); }
+            });
+        }
+
+        function doResetWarning(staffName, month, year) {
+            if (!confirm("Reset rekod amaran " + staffName + " untuk bulan ini?")) return;
+            callGAS("resetStaffWarning", { staffName: staffName, month: month, year: year }, function(res) {
+                if (res.status === 'SUCCESS') {
+                    _qcDel('sa:' + month + '|' + year); // clear cache
+                    loadSuratAmaranReport();
+                } else { alert("Gagal: " + res.message); }
+            });
+        }
+
         function loadAllLeaveLog(forceRefresh) {
             if (!forceRefresh && isCacheValid('allLeaveLog')) { globalAllLeaveLog = appCache.allLeaveLog.data; filterLeaveLog(); return; }
             var tbody = document.getElementById('tableAllLeaveLog');
@@ -2215,10 +2904,15 @@
                     attachHtml = '<a href="' + log.lampiran + '" target="_blank" class="mt-2 inline-block bg-blue-900 border border-blue-600 text-blue-200 text-[11px] px-3 py-1 rounded shadow hover:bg-blue-800 transition">📎 Buka Dokumen</a>';
                 }
 
+                var sebabTolakHtml = "";
+                if (log.status === "DITOLAK" && log.sebabTolak) {
+                    sebabTolakHtml = '<div class="mt-2 bg-red-950/50 border border-red-900/50 rounded px-2 py-1.5 text-[11px] text-red-300"><span class="font-bold">Sebab ditolak: </span>' + log.sebabTolak + '</div>';
+                }
+
                 tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
                     '<td class="p-4"><div class="font-bold text-white text-sm">' + log.nama + '</div><div class="text-xs text-yellow-500 font-bold mt-1 uppercase">' + log.jenis + '</div></td>' +
                     '<td class="p-4"><div class="text-[11px] text-gray-500 uppercase">Tarikh Cuti:</div><div class="text-sm font-mono text-gray-200 mb-1">' + log.tarikhCuti + '</div><div class="text-[10px] text-gray-600">Mohon: ' + log.timestamp + '</div></td>' +
-                    '<td class="p-4"><div class="text-xs text-gray-400 italic bg-gray-900 p-2 rounded border border-gray-700">"' + log.sebab + '"</div>' + attachHtml + '</td>' +
+                    '<td class="p-4"><div class="text-xs text-gray-400 italic bg-gray-900 p-2 rounded border border-gray-700">"' + log.sebab + '"</div>' + attachHtml + sebabTolakHtml + '</td>' +
                     '<td class="p-4"><div style="display:flex; align-items:center; justify-content:center; gap:6px;">' +
                     statusBadge +
                     (log.status !== 'DITOLAK' ? '<button onclick="openChangeLeaveModal(' + log.rowIndex + ', \'' + log.nama.replace(/'/g, "\\'") + '\', \'' + log.jenis + '\', \'' + log.tarikhCuti + '\')" title="Tukar Jenis Cuti" class="bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white w-7 h-7 rounded flex items-center justify-center border border-gray-600 hover:border-gray-400 transition cursor-pointer flex-shrink-0">✏️</button>' : '') +
@@ -2406,39 +3100,19 @@
                     setLimitField('pl', staf.plLimit);
                     document.getElementById('sf_paparTracker').checked = staf.paparTracker !== false;
 
-                    // Fetch dan papar baki semasa
+                    // Fetch dan papar baki semasa — guna cache kalau ada
                     var balDisplay = document.getElementById('sfBalanceDisplay');
                     var balContent = document.getElementById('sfBalanceContent');
                     balDisplay.classList.remove('hidden');
-                    balContent.innerHTML = '<span class="loading-pulse text-yellow-600">Memuatkan baki...</span>';
+                    var _cachedBal = _qcGet('leavebal:' + staf.nama);
+                    if (_cachedBal) {
+                        renderLeaveBalance(balContent, _cachedBal);
+                    } else {
+                        balContent.innerHTML = '<span class="loading-pulse text-yellow-600">Memuatkan baki...</span>';
+                    }
                     callGAS("getLeaveBalance", { staffName: staf.nama }, function(res) {
-                        if (res.status !== "SUCCESS") { balContent.innerHTML = '<span class="text-red-400">Gagal muatkan baki.</span>'; return; }
-                        var bal = res.data;
-                        var tKeys = [
-                            { key: 'AL', label: 'AL' }, { key: 'MC', label: 'MC' }, { key: 'EL', label: 'EL' },
-                            { key: 'HL', label: 'HL' }, { key: 'ML', label: 'ML' }, { key: 'PL', label: 'PL' }, { key: 'BL', label: 'BL' }
-                        ];
-                        var bHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
-                        tKeys.forEach(function(t) {
-                            var b = bal[t.key];
-                            if (!b || b.limit === 0) {
-                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
-                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
-                                    '<div style="font-size:10px;color:#4b5563;">—</div></div>';
-                            } else if (b.limit === -1) {
-                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
-                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
-                                    '<div style="font-size:11px;font-weight:700;color:#eab308;">∞</div></div>';
-                            } else {
-                                var bColor = b.balance <= 0 ? '#f87171' : b.balance <= Math.ceil(b.limit * 0.2) ? '#eab308' : '#4ade80';
-                                bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;">' +
-                                    '<div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div>' +
-                                    '<div style="font-size:11px;font-weight:700;color:' + bColor + ';">' + b.balance + '</div>' +
-                                    '<div style="font-size:8px;color:#4b5563;">/ ' + b.limit + '</div></div>';
-                            }
-                        });
-                        bHtml += '</div>';
-                        balContent.innerHTML = bHtml;
+                        _qcSet('leavebal:' + staf.nama, res);
+                        renderLeaveBalance(balContent, res);
                     });
                 }
             } else {
@@ -2447,6 +3121,26 @@
             }
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+        }
+
+        function renderLeaveBalance(el, res) {
+            if (!el) return;
+            if (res.status !== "SUCCESS") { el.innerHTML = '<span class="text-red-400">Gagal muatkan baki.</span>'; return; }
+            var bal = res.data;
+            var tKeys = [{ key:'AL' },{ key:'MC' },{ key:'EL' },{ key:'HL' },{ key:'ML' },{ key:'PL' },{ key:'BL' }];
+            var bHtml = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
+            tKeys.forEach(function(t) {
+                var b = bal[t.key];
+                if (!b || b.limit === 0) {
+                    bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;"><div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div><div style="font-size:10px;color:#4b5563;">—</div></div>';
+                } else if (b.limit === -1) {
+                    bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;"><div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div><div style="font-size:11px;font-weight:700;color:#eab308;">∞</div></div>';
+                } else {
+                    var bColor = b.balance <= 0 ? '#f87171' : b.balance <= Math.ceil(b.limit * 0.2) ? '#eab308' : '#4ade80';
+                    bHtml += '<div style="text-align:center;padding:4px;background:#111827;border-radius:6px;border:1px solid #374151;"><div style="font-size:9px;font-weight:700;color:#6b7280;">' + t.key + '</div><div style="font-size:11px;font-weight:700;color:' + bColor + ';">' + b.balance + '</div><div style="font-size:8px;color:#4b5563;">/ ' + b.limit + '</div></div>';
+                }
+            });
+            el.innerHTML = bHtml + '</div>';
         }
 
         function closeStaffModal() {
@@ -2546,7 +3240,10 @@
             });
 
             // WFH Tarikh Override
-            wfhDatesArray = Array.isArray(data.wfhDates) ? data.wfhDates.slice() : [];
+            var today = new Date(); today.setHours(0,0,0,0);
+            wfhDatesArray = Array.isArray(data.wfhDates)
+                ? data.wfhDates.filter(function(d) { return new Date(d + 'T00:00:00') >= today; })
+                : [];
             renderWfhDates();
 
             // Hari Bekerja
@@ -2841,6 +3538,9 @@
                 ? globalOutstationList.find(function (r) { return r.rowIndex === rowIndex; })
                 : null;
 
+            var sel = document.getElementById('ost_nama');
+            var multiContainer = document.getElementById('ost_multiContainer');
+
             if (editRec) {
                 document.getElementById('outstationModalTitle').innerText = "Kemaskini Pengecualian";
                 document.getElementById('ost_rowIndex').value = editRec.rowIndex;
@@ -2849,37 +3549,73 @@
                 document.getElementById('ost_masaClockIn').value = editRec.masaClockIn || "08:00";
                 document.getElementById('ost_sebab').value = editRec.sebab || "";
                 if (editRec.autoClockIn) document.getElementById('autoClockInTimeSection').classList.remove('hidden');
+                // Edit: single select + single date
+                sel.classList.remove('hidden');
+                multiContainer.classList.add('hidden');
+                document.getElementById('ost_tarikhSingleWrap').classList.remove('hidden');
+                document.getElementById('ost_tarikhRangeWrap').classList.add('hidden');
             } else {
                 document.getElementById('outstationModalTitle').innerText = "Tambah Pengecualian Outstation";
+                document.getElementById('ost_tarikhDari').value = '';
+                document.getElementById('ost_tarikhHingga').value = '';
+                document.getElementById('ost_selectedChips').classList.add('hidden');
+                document.getElementById('ost_chipsContainer').innerHTML = '';
+                // Add: multi checkbox + date range
+                sel.classList.add('hidden');
+                multiContainer.classList.remove('hidden');
+                document.getElementById('ost_tarikhSingleWrap').classList.add('hidden');
+                document.getElementById('ost_tarikhRangeWrap').classList.remove('hidden');
             }
 
-            // Open modal
             var modal = document.getElementById('outstationModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
 
-            // Populate staff select — guard against stale callbacks with request ID
-            var sel = document.getElementById('ost_nama');
             var reqId = ++outstationModalReqId;
+
+            // Filter: aktif + paparTracker = true sahaja
+            function getVisibleStaffNames(list) {
+                if (list && list.length > 0 && typeof list[0] === 'object') {
+                    return list.filter(function(s) { return s.paparTracker !== false && s.status && s.status.toUpperCase() === 'AKTIF'; }).map(function(s) { return s.nama; });
+                }
+                return list || [];
+            }
 
             function fillSelect(names) {
                 if (reqId !== outstationModalReqId) return;
                 sel.disabled = false;
                 sel.innerHTML = '<option value="">-- Pilih Staf --</option>';
-                names.forEach(function (n) {
-                    sel.innerHTML += '<option value="' + n + '">' + n + '</option>';
-                });
+                names.forEach(function(n) { sel.innerHTML += '<option value="' + n + '">' + n + '</option>'; });
                 if (editRec) sel.value = editRec.nama;
             }
 
-            if (outstationStaffNames.length > 0) {
+            function fillChecklist(names) {
+                if (reqId !== outstationModalReqId) return;
+                var list = document.getElementById('ost_staffChecklist');
+                list.innerHTML = names.map(function(n) {
+                    return '<label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-700 cursor-pointer ost-staff-item">' +
+                        '<input type="checkbox" class="ost-staff-check" value="' + n + '" onchange="updateOstChips()">' +
+                        '<span class="text-sm text-white">' + n + '</span></label>';
+                }).join('');
+            }
+
+            // Guna globalStaffList dulu (ada paparTracker info), fallback ke outstationStaffNames
+            if (globalStaffList.length > 0) {
+                var visible = getVisibleStaffNames(globalStaffList);
+                fillSelect(visible);
+                fillChecklist(visible);
+            } else if (outstationStaffNames.length > 0) {
                 fillSelect(outstationStaffNames);
+                fillChecklist(outstationStaffNames);
             } else {
                 sel.disabled = true;
-                sel.innerHTML = '<option value="">⏳ Memuatkan senarai staf...</option>';
-                callGAS("getStaffList", {}, function (names) {
-                    outstationStaffNames = Array.isArray(names) ? names : [];
-                    fillSelect(outstationStaffNames);
+                sel.innerHTML = '<option value="">⏳ Memuatkan...</option>';
+                callGAS("getStaffManagementData", {}, function(res) {
+                    if (res.status === 'SUCCESS') { globalStaffList = res.data; }
+                    var visible = getVisibleStaffNames(globalStaffList);
+                    outstationStaffNames = visible;
+                    fillSelect(visible);
+                    fillChecklist(visible);
                 });
             }
         }
@@ -2890,6 +3626,33 @@
             modal.classList.remove('flex');
         }
 
+        function filterOstStaffList(query) {
+            var items = document.querySelectorAll('#ost_staffChecklist .ost-staff-item');
+            items.forEach(function(item) {
+                var name = item.querySelector('span').innerText.toLowerCase();
+                item.style.display = name.includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        function toggleSelectAllOst(cb) {
+            document.querySelectorAll('#ost_staffChecklist .ost-staff-check').forEach(function(c) {
+                if (c.closest('.ost-staff-item').style.display !== 'none') c.checked = cb.checked;
+            });
+            updateOstChips();
+        }
+
+        function updateOstChips() {
+            var checked = Array.from(document.querySelectorAll('#ost_staffChecklist .ost-staff-check:checked')).map(function(c) { return c.value; });
+            var container = document.getElementById('ost_chipsContainer');
+            var wrap = document.getElementById('ost_selectedChips');
+            if (checked.length === 0) { wrap.classList.add('hidden'); container.innerHTML = ''; return; }
+            wrap.classList.remove('hidden');
+            container.innerHTML = checked.map(function(n) {
+                var short = n.split(' ').slice(0, 2).join(' ');
+                return '<span class="bg-blue-900/60 border border-blue-700 text-blue-200 text-[11px] font-semibold px-2 py-0.5 rounded-full">' + short + '</span>';
+            }).join('');
+        }
+
         function toggleAutoClockInTime() {
             var checked = document.getElementById('ost_autoClockIn').checked;
             var section = document.getElementById('autoClockInTimeSection');
@@ -2898,35 +3661,43 @@
         }
 
         function submitOutstationForm() {
-            var nama = document.getElementById('ost_nama').value;
-            var tarikh = document.getElementById('ost_tarikh').value;
-            if (!nama || !tarikh) { alert("Sila pilih nama staf dan tarikh outstation."); return; }
-
             var btn = document.getElementById('btnSaveOutstation');
             btn.innerText = "Menyimpan...";
             btn.disabled = true;
 
             var rowVal = document.getElementById('ost_rowIndex').value;
-            var payload = {
-                rowIndex: rowVal ? parseInt(rowVal) : null,
-                nama: nama,
+            var commonFields = {
                 tarikh: tarikh,
                 autoClockIn: document.getElementById('ost_autoClockIn').checked,
                 masaClockIn: document.getElementById('ost_masaClockIn').value,
                 sebab: document.getElementById('ost_sebab').value.trim()
             };
 
-            callGAS("saveOutstation", { payload: payload }, function (res) {
-                btn.innerText = "Simpan";
-                btn.disabled = false;
+            function onDone(res) {
+                btn.innerText = "Simpan"; btn.disabled = false;
                 if (res.status === 'SUCCESS') {
                     closeOutstationModal();
                     invalidateCache('outstationList');
                     loadOutstationList(true);
-                } else {
-                    alert(res.message || "Gagal simpan.");
-                }
-            });
+                } else { alert(res.message || "Gagal simpan."); }
+            }
+
+            if (rowVal) {
+                // Edit mode — single staff, single date
+                var nama = document.getElementById('ost_nama').value;
+                var tarikh = document.getElementById('ost_tarikh').value;
+                if (!nama || !tarikh) { btn.innerText = "Simpan"; btn.disabled = false; alert("Sila pilih nama staf dan tarikh."); return; }
+                callGAS("saveOutstation", { payload: Object.assign({}, commonFields, { rowIndex: parseInt(rowVal), nama: nama, tarikh: tarikh }) }, onDone);
+            } else {
+                // Add mode — multiple staff, date range
+                var dari = document.getElementById('ost_tarikhDari').value;
+                var hingga = document.getElementById('ost_tarikhHingga').value;
+                if (!dari || !hingga) { btn.innerText = "Simpan"; btn.disabled = false; alert("Sila pilih julat tarikh."); return; }
+                if (dari > hingga) { btn.innerText = "Simpan"; btn.disabled = false; alert("Tarikh Dari mesti sebelum Tarikh Hingga."); return; }
+                var checked = Array.from(document.querySelectorAll('#ost_staffChecklist .ost-staff-check:checked')).map(function(c) { return c.value; });
+                if (checked.length === 0) { btn.innerText = "Simpan"; btn.disabled = false; alert("Sila pilih sekurang-kurangnya seorang staf."); return; }
+                callGAS("saveOutstationBatch", { payload: Object.assign({}, commonFields, { staffNames: checked, tarikhDari: dari, tarikhHingga: hingga }) }, onDone);
+            }
         }
 
         function deleteOutstationRecord(rowIndex) {

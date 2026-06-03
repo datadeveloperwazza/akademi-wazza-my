@@ -1,5 +1,13 @@
 
 // ==========================================
+// Keep Warm — setup trigger: setiap 5 minit
+// Extensions → Apps Script → Triggers → keepWarm → Time-driven → Every 5 minutes
+// ==========================================
+function keepWarm() {
+  Logger.log("warm");
+}
+
+// ==========================================
 // Init.gs - (Inisialisasi & Penghalaan)
 // ==========================================
 
@@ -22,7 +30,17 @@ function doGet(e) {
 
       if      (action === "getStaffList")                  result = getStaffList();
       else if (action === "verifyLogin")                   result = verifyLogin(body.u, body.p);
+      else if (action === "loginAndGetDashboard")          result = loginAndGetDashboard(body.ic);
+      else if (action === "loginWithTodayStatus")          result = loginWithTodayStatus(body.ic);
+      else if (action === "getQuickDashboardData")         result = getQuickDashboardData(body.username);
       else if (action === "verifyAdminLogin")              result = verifyAdminLogin(body.username, body.password);
+      else if (action === "getLaporanKelewatan")           result = getLaporanKelewatan(body.staffName, body.month, body.year);
+      else if (action === "saveOutstationBatch")           result = saveOutstationBatch(body.payload);
+      else if (action === "getWarningSettings")            result = getWarningSettings();
+      else if (action === "saveWarningSettings")           result = saveWarningSettings(body.payload);
+      else if (action === "getWarningReport")              result = getWarningReport(body.month, body.year);
+      else if (action === "generateSuratAmaran")           result = generateSuratAmaran(body.staffName, body.month, body.year);
+      else if (action === "resetStaffWarning")             result = resetStaffWarning(body.staffName, body.month, body.year);
       else if (action === "processScan")                   result = processScan(body.payload);
       else if (action === "processClockOut")               result = processClockOut(body.payload);
       else if (action === "getDashboardStatus")            result = getDashboardStatus();
@@ -33,7 +51,7 @@ function doGet(e) {
       else if (action === "getLeaveTypes")                 result = getLeaveTypes();
       else if (action === "getLeaveValidationConfig")      result = getLeaveValidationConfig();
       else if (action === "getLeaveBalance")               result = getLeaveBalance(body.staffName);
-      else if (action === "processLeaveStatus")            result = processLeaveStatus(body.rowIndex, body.status);
+      else if (action === "processLeaveStatus")            result = processLeaveStatus(body.rowIndex, body.status, body.reason || "");
       else if (action === "setStaffLate")                  result = setStaffLate(body.nama);
       else if (action === "getSystemConfig")               result = getSystemConfig();
       else if (action === "saveSystemConfig")              result = saveSystemConfig(body.payload);
@@ -75,7 +93,17 @@ function doPost(e) {
 
     if      (action === "getStaffList")                  result = getStaffList();
     else if (action === "verifyLogin")                   result = verifyLogin(body.u, body.p);
+    else if (action === "loginAndGetDashboard")          result = loginAndGetDashboard(body.ic);
+    else if (action === "loginWithTodayStatus")          result = loginWithTodayStatus(body.ic);
+    else if (action === "getQuickDashboardData")         result = getQuickDashboardData(body.username);
     else if (action === "verifyAdminLogin")              result = verifyAdminLogin(body.username, body.password);
+    else if (action === "getLaporanKelewatan")           result = getLaporanKelewatan(body.staffName, body.month, body.year);
+    else if (action === "saveOutstationBatch")           result = saveOutstationBatch(body.payload);
+    else if (action === "getWarningSettings")            result = getWarningSettings();
+    else if (action === "saveWarningSettings")           result = saveWarningSettings(body.payload);
+    else if (action === "getWarningReport")              result = getWarningReport(body.month, body.year);
+    else if (action === "generateSuratAmaran")           result = generateSuratAmaran(body.staffName, body.month, body.year);
+    else if (action === "resetStaffWarning")             result = resetStaffWarning(body.staffName, body.month, body.year);
     else if (action === "processScan")                   result = processScan(body.payload);
     else if (action === "processClockOut")               result = processClockOut(body.payload);
     else if (action === "getDashboardStatus")            result = getDashboardStatus();
@@ -200,11 +228,88 @@ function setupMidnightTokenTrigger() {
 function verifyLogin(u, p) {
   const data = USER_SHEET.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
-    if ((String(data[i][0]) == u || String(data[i][2]) == u) && String(data[i][1]) == p) {
-      return { status: 'SUCCESS', nama: data[i][2] }; 
+    let ic   = String(data[i][1]).trim();
+    let nama = String(data[i][2]).trim();
+    let user = String(data[i][0]).trim();
+    // IC-only mode — u kosong, padankan IC sahaja
+    if (!u || u === "") {
+      if (ic === String(p).trim()) return { status: 'SUCCESS', nama: nama };
+    } else {
+      if ((user === u || nama === u) && ic === String(p).trim()) return { status: 'SUCCESS', nama: nama };
     }
   }
-  return { status: 'ERROR', message: 'Password Salah atau Nama Tiada' };
+  return { status: 'ERROR', message: 'IC tidak ditemui atau tidak sah.' };
+}
+
+// Gabung login + dashboard dalam 1 GAS call — potong 1 network round trip
+function loginAndGetDashboard(ic) {
+  const loginResult = verifyLogin("", ic);
+  if (loginResult.status !== 'SUCCESS') return loginResult;
+  const dashResult = getStaffDashboardData(loginResult.nama);
+  if (dashResult.status === 'SUCCESS') dashResult.nama = loginResult.nama;
+  return dashResult;
+}
+
+// Phase 1 data sahaja — verify IC + profile + today + stats (laju, last 90 rows)
+function loginWithTodayStatus(ic) {
+  const loginResult = verifyLogin("", ic);
+  if (loginResult.status !== 'SUCCESS') return loginResult;
+  return getQuickDashboardData(loginResult.nama);
+}
+
+// Sama macam atas tapi tanpa verify IC — untuk returning user
+function getQuickDashboardData(username) {
+  try {
+    const masterSheet = SS.getSheetByName("Master_Staff");
+    const masterData = masterSheet.getDataRange().getValues();
+    let profile = { name: username, role: "Staff", id: "0000", pic: "" };
+    for (let i = 1; i < masterData.length; i++) {
+      if (masterData[i][1] == username) {
+        profile.id = masterData[i][0]; profile.name = masterData[i][1];
+        profile.role = masterData[i][2]; profile.pic = masterData[i][3]; break;
+      }
+    }
+
+    const logSheet = SS.getSheetByName("Log_Kehadiran");
+    const lastRowLog = logSheet.getLastRow();
+    const startRow = Math.max(2, lastRowLog - 90 + 1);
+    let logData = [];
+    if (lastRowLog > 1) logData = logSheet.getRange(startRow, 1, lastRowLog - startRow + 1, 10).getValues();
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayStr = Utilities.formatDate(today, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    let todayLog = null;
+    let monthlyStats = { present: 0, late: 0, leave: 0 };
+
+    for (let i = logData.length - 1; i >= 0; i--) {
+      if (!logData[i][0] || logData[i][2] != username) continue;
+      let d = new Date(logData[i][0]);
+      if (isNaN(d.getTime())) continue;
+      let dateStr = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+      let inStr   = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "HH:mm");
+      let status  = logData[i][3];
+      let masaKeluar = logData[i][9]; let outStr = "--:--";
+      if (masaKeluar instanceof Date && !isNaN(masaKeluar.getTime())) {
+        outStr = Utilities.formatDate(masaKeluar, "Asia/Kuala_Lumpur", "HH:mm");
+      } else if (masaKeluar && String(masaKeluar).includes(":")) {
+        outStr = String(masaKeluar).replace("OUT:", "").trim();
+      }
+      if (dateStr === todayStr && !todayLog) {
+        todayLog = { date: dateStr, status: status, in: inStr, out: outStr };
+      }
+      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+        monthlyStats.present++;
+        if (String(status).toUpperCase().includes("LEWAT")) monthlyStats.late++;
+      }
+    }
+
+    return { status: 'SUCCESS', nama: username, profile: profile, todayLog: todayLog, monthlyStats: monthlyStats };
+  } catch(e) {
+    return { status: 'ERROR', message: e.toString() };
+  }
 }
 
 //  admin
@@ -646,9 +751,12 @@ function processCuti(form) {
   return { status: 'SUCCESS' };
 }
 
-function processLeaveStatus(rowIndex, status) {
+function processLeaveStatus(rowIndex, status, reason) {
   const sheet = SS.getSheetByName("Log_Cuti_Lewat");
   sheet.getRange(rowIndex, 7).setValue(status);
+  if (status === "DITOLAK" && reason) {
+    sheet.getRange(rowIndex, 11).setValue(reason);
+  }
   return "SUCCESS";
 }
 
@@ -758,50 +866,47 @@ function getStaffDashboardData(username) {
 
     const logSheet = SS.getSheetByName("Log_Kehadiran");
     const lastRowLog = logSheet.getLastRow();
-    const startRow = Math.max(2, lastRowLog - 200 + 1); 
     let logData = [];
-    if (lastRowLog > 1) logData = logSheet.getRange(startRow, 1, (lastRowLog - startRow + 1), 10).getValues();
+    if (lastRowLog > 1) logData = logSheet.getRange(2, 1, lastRowLog - 1, 10).getValues();
 
-    let myLogs = [];
+    let allAttendance = []; // semua rekod staff ni — untuk client-side filter
+    let myLogs = [];        // last 10 — untuk dashboard view
     let todayLog = null;
     let monthlyStats = { present: 0, late: 0, leave: 0 };
-    
-    const today = new Date();
+
+    const today = new Date(); today.setHours(0,0,0,0);
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     const todayDateString = Utilities.formatDate(today, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
 
     for (let i = logData.length - 1; i >= 0; i--) {
-      if (!logData[i][0] || logData[i][0] === "") continue; 
-      
-      if (logData[i][2] == username) {
-         let d = new Date(logData[i][0]); 
-         if (isNaN(d.getTime())) continue; 
+      if (!logData[i][0] || logData[i][0] === "") continue;
 
-         let dateStr = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
-         let inStr = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "HH:mm");
-         let statusReal = logData[i][3]; 
-         
+      if (logData[i][2] == username) {
+         let d = new Date(logData[i][0]);
+         if (isNaN(d.getTime())) continue;
+
+         let dateStr   = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+         let dateRaw   = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "yyyy-MM-dd"); // untuk filter
+         let inStr     = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "HH:mm");
+         let statusReal = logData[i][3];
+
          let masaKeluar = logData[i][9]; let outStr = "--:--";
          if (masaKeluar instanceof Date && !isNaN(masaKeluar.getTime())) {
              outStr = Utilities.formatDate(masaKeluar, "Asia/Kuala_Lumpur", "HH:mm");
          } else if (masaKeluar && String(masaKeluar).includes(":")) {
              outStr = String(masaKeluar).replace("OUT:", "").trim();
          }
-         
-         if (myLogs.length < 10) {
-             myLogs.push({ date: dateStr, status: statusReal, in: inStr, out: outStr });
-         }
 
-         if (dateStr === todayDateString && !todayLog) {
-             todayLog = { date: dateStr, status: statusReal, in: inStr, out: outStr };
-         }
+         let rec = { date: dateStr, dateRaw: dateRaw, status: statusReal, in: inStr, out: outStr };
+         allAttendance.push(rec);
+         if (myLogs.length < 10) myLogs.push(rec);
+
+         if (dateStr === todayDateString && !todayLog) todayLog = rec;
 
          if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
              monthlyStats.present++;
-             if (String(statusReal).toUpperCase().includes("LEWAT")) {
-                 monthlyStats.late++;
-             }
+             if (String(statusReal).toUpperCase().includes("LEWAT")) monthlyStats.late++;
          }
       }
     }
@@ -809,39 +914,45 @@ function getStaffDashboardData(username) {
     const cutiSheet = SS.getSheetByName("Log_Cuti_Lewat");
     const lastRowCuti = cutiSheet.getLastRow();
     let cutiData = [];
-    if (lastRowCuti > 1) cutiData = cutiSheet.getRange(2, 1, lastRowCuti - 1, 10).getValues();
+    if (lastRowCuti > 1) cutiData = cutiSheet.getRange(2, 1, lastRowCuti - 1, 11).getValues();
 
     let myLeave = [];
-    let latestLeave = null;
 
     for (let i = cutiData.length - 1; i >= 0; i--) {
       if (!cutiData[i][3] || cutiData[i][3] === "") continue;
 
       let isLambat = String(cutiData[i][2]).toLowerCase().includes("lambat");
-      if (cutiData[i][1] == username && !isLambat) { 
-         let d = new Date(cutiData[i][3]); 
+      if (cutiData[i][1] == username && !isLambat) {
+         let d = new Date(cutiData[i][3]);
          if (isNaN(d.getTime())) continue;
 
          let dateStr = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
          let statusRaw = cutiData[i][6];
-         let linkFail = cutiData[i][9]; 
-         if (!statusRaw || statusRaw === "") statusRaw = "DALAM PROSES"; 
-         
-         let leaveObj = { type: cutiData[i][2], date: dateStr, reason: cutiData[i][4], status: statusRaw, attachment: linkFail };
+         let linkFail = cutiData[i][9];
+         if (!statusRaw || statusRaw === "") statusRaw = "DALAM PROSES";
+
+         let leaveObj = { type: cutiData[i][2], date: dateStr, dateObj: d.getTime(), reason: cutiData[i][4], status: statusRaw, attachment: linkFail, rejectReason: cutiData[i][10] || "" };
          myLeave.push(leaveObj);
 
          if (statusRaw === "DILULUSKAN" && d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
              monthlyStats.leave++;
          }
-
-         if (!latestLeave) {
-             latestLeave = leaveObj;
-         }
       }
     }
+
+    // Upcoming: DILULUSKAN (tarikh >= hari ini) + semua PROSES, susun ascending
+    let upcomingLeaves = myLeave
+      .filter(function(l) {
+        if (l.status === "DILULUSKAN") return l.dateObj >= today.getTime();
+        if (l.status === "DALAM PROSES") return true;
+        return false;
+      })
+      .sort(function(a, b) { return a.dateObj - b.dateObj; })
+      .map(function(l) { return { type: l.type, date: l.date, reason: l.reason, status: l.status }; });
+
     var balResult = getLeaveBalance(username);
     var leaveBalance = balResult.status === "SUCCESS" ? balResult.data : null;
-    return { status: 'SUCCESS', profile: profile, attendance: myLogs, leave: myLeave, todayLog: todayLog, monthlyStats: monthlyStats, latestLeave: latestLeave, leaveBalance: leaveBalance };
+    return { status: 'SUCCESS', profile: profile, attendance: myLogs, allAttendance: allAttendance, leave: myLeave, todayLog: todayLog, monthlyStats: monthlyStats, upcomingLeaves: upcomingLeaves, leaveBalance: leaveBalance };
   
   } catch(error) {
     return { status: 'ERROR', message: "Ralat Pelayan: " + error.toString() };
@@ -1128,6 +1239,83 @@ function getStaffAttendanceByDateRange(username, dateStart, dateEnd) {
     return filteredLogs;
 }
 
+function getLaporanKelewatan(staffName, month, year) {
+  try {
+    // GAS CacheService — shared across all admins
+    var gasCache = CacheService.getScriptCache();
+    var gasCacheKey = 'laporan_v2_' + month + '_' + year + '_' + (staffName || 'all');
+    var cached = gasCache.get(gasCacheKey);
+    if (cached) return JSON.parse(cached);
+
+    // Ambil late-start dari Config
+    const configData = CONFIG_SHEET.getDataRange().getValues();
+    let lateStart = "08:00";
+    for (let i = 0; i < configData.length; i++) {
+      if (String(configData[i][0]).trim().toUpperCase() === "LATE-START") {
+        let lv = configData[i][1];
+        lateStart = lv instanceof Date ? Utilities.formatDate(lv, "GMT+8", "HH:mm") : String(lv).trim().substring(0, 5);
+        break;
+      }
+    }
+    let [lh, lm] = lateStart.split(':').map(Number);
+    let lateMinutes = lh * 60 + lm;
+
+    const logSheet = SS.getSheetByName("Log_Kehadiran");
+    const lastRow = logSheet.getLastRow();
+    if (lastRow <= 1) return { status: 'SUCCESS', records: [], summary: { totalLewat: 0, totalMinit: 0, avgMinit: 0, lateStart: lateStart } };
+
+    // Build set of visible staff (paparTracker != NO)
+    const masterDataLL = SS.getSheetByName("Master_Staff").getDataRange().getValues();
+    let visibleStaff = new Set();
+    for (let i = 1; i < masterDataLL.length; i++) {
+      let n = String(masterDataLL[i][1]).trim();
+      let pt = masterDataLL[i][13] ? String(masterDataLL[i][13]).trim().toUpperCase() : "YES";
+      if (n && pt !== "NO") visibleStaff.add(n);
+    }
+
+    const data = logSheet.getRange(2, 1, lastRow - 1, 10).getValues();
+    let records = [];
+
+    for (let i = 0; i < data.length; i++) {
+      if (!data[i][0]) continue;
+      let nama = String(data[i][2]).trim();
+      if (staffName && nama !== staffName) continue;
+      if (!visibleStaff.has(nama)) continue; // exclude paparTracker=NO
+
+      let d = new Date(data[i][0]);
+      if (isNaN(d.getTime())) continue;
+      if (d.getMonth() + 1 !== parseInt(month) || d.getFullYear() !== parseInt(year)) continue;
+
+      let status = String(data[i][3] || "").toUpperCase();
+      if (!status.includes("LEWAT")) continue;
+
+      let masuk = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "HH:mm");
+      let [mh, mm] = masuk.split(':').map(Number);
+      let masukMinutes = mh * 60 + mm;
+      let minitLewat = Math.max(0, masukMinutes - lateMinutes);
+      let dateStr = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+
+      records.push({ nama: nama, tarikh: dateStr, masuk: masuk, minitLewat: minitLewat });
+    }
+
+    records.sort(function(a, b) { return a.tarikh < b.tarikh ? -1 : 1; });
+
+    let totalMinit = records.reduce(function(s, r) { return s + r.minitLewat; }, 0);
+    let summary = {
+      totalLewat: records.length,
+      totalMinit: totalMinit,
+      avgMinit: records.length > 0 ? Math.round(totalMinit / records.length) : 0,
+      lateStart: lateStart
+    };
+
+    var result = { status: 'SUCCESS', records: records, summary: summary };
+    try { gasCache.put(gasCacheKey, JSON.stringify(result), 900); } catch(e) {}
+    return result;
+  } catch(e) {
+    return { status: 'ERROR', message: e.toString() };
+  }
+}
+
 function getAllLeaveLog() {
   const sheet = SS.getSheetByName("Log_Cuti_Lewat");
   if (!sheet) return [];
@@ -1156,6 +1344,7 @@ function getAllLeaveLog() {
       sebab: data[i][4],
       status: data[i][6] || "PROSES",
       lampiran: data[i][9] || "",
+      sebabTolak: data[i][10] || "",
       sortTime: sortValue
     });
   }
@@ -1376,6 +1565,10 @@ function getSystemConfig() {
           }).filter(h => h.date !== "");
         }
       }
+      if (key === "warning_trigger") { conf.warningTriggerLewat = String(val).toUpperCase().includes("LEWAT"); conf.warningTriggerTidakHadir = String(val).toUpperCase().includes("TIDAK_HADIR"); }
+      if (key === "warning_threshold") conf.warningThreshold = parseInt(String(val)) || 3;
+      if (key === "warning_auto_pdf") conf.warningAutoPdf = String(val).toUpperCase() === "TRUE";
+      if (key === "warning_template_url") conf.warningTemplateUrl = String(val).trim();
     }
 
     return { status: "SUCCESS", data: conf };
@@ -1629,6 +1822,33 @@ function saveOutstation(payload) {
   } catch (e) { return { status: 'ERROR', message: e.toString() }; }
 }
 
+function saveOutstationBatch(payload) {
+  try {
+    let sheet = SS.getSheetByName("Log_Outstation");
+    if (!sheet) {
+      sheet = SS.insertSheet("Log_Outstation");
+      sheet.appendRow(["Timestamp", "Nama_Staf", "Tarikh_Outstation", "Auto_ClockIn", "Masa_ClockIn", "Sebab", "Status"]);
+    }
+    // Jana semua tarikh dalam julat
+    let dates = [];
+    let cur = new Date(payload.tarikhDari + 'T00:00:00');
+    let end = new Date(payload.tarikhHingga + 'T00:00:00');
+    while (cur <= end) {
+      dates.push(new Date(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    let now = new Date();
+    let count = 0;
+    payload.staffNames.forEach(function(nama) {
+      dates.forEach(function(d) {
+        sheet.appendRow([now, nama, d, payload.autoClockIn ? "TRUE" : "FALSE", payload.masaClockIn || "08:00", payload.sebab || "", "PENDING"]);
+        count++;
+      });
+    });
+    return { status: 'SUCCESS', message: count + ' rekod outstation berjaya disimpan!' };
+  } catch(e) { return { status: 'ERROR', message: e.toString() }; }
+}
+
 function deleteOutstation(rowIndex) {
   try {
     const sheet = SS.getSheetByName("Log_Outstation");
@@ -1874,4 +2094,298 @@ function getDashboardStatus() {
 
   const isLate = isOpen && lateStart.length === 5 && nowStr > lateStart;
   return { token: token, isOpen: isOpen, statusMsg: message, isLate: isLate, lateStart: lateStart };
+}
+
+// ==========================================
+// SISTEM SURAT AMARAN
+// ==========================================
+
+function getWarningSettings() {
+  try {
+    const data = CONFIG_SHEET.getDataRange().getValues();
+    let s = { triggerLewat: true, triggerTidakHadir: false, threshold: 3, cooldown: "1", autoPdf: false, templateUrl: "" };
+    for (let i = 0; i < data.length; i++) {
+      let key = String(data[i][0]).trim().toLowerCase();
+      let val = String(data[i][1]).trim();
+      if (key === "warning_trigger") { s.triggerLewat = val.toUpperCase().includes("LEWAT"); s.triggerTidakHadir = val.toUpperCase().includes("TIDAK_HADIR"); }
+      if (key === "warning_threshold") s.threshold = parseInt(val) || 3;
+      if (key === "warning_cooldown") s.cooldown = val || "1";
+      if (key === "warning_auto_pdf") s.autoPdf = val.toUpperCase() === "TRUE";
+      if (key === "warning_template_url") s.templateUrl = val;
+    }
+    return { status: "SUCCESS", data: s };
+  } catch(e) { return { status: "ERROR", message: e.toString() }; }
+}
+
+function saveWarningSettings(payload) {
+  try {
+    let trigger = [];
+    if (payload.triggerLewat) trigger.push("LEWAT");
+    if (payload.triggerTidakHadir) trigger.push("TIDAK_HADIR");
+    _saveConfigByKey("warning_trigger", trigger.join(","));
+    _saveConfigByKey("warning_threshold", String(payload.threshold || 3));
+    _saveConfigByKey("warning_cooldown", String(payload.cooldown || "1"));
+    _saveConfigByKey("warning_auto_pdf", payload.autoPdf ? "TRUE" : "FALSE");
+    _saveConfigByKey("warning_template_url", payload.templateUrl || "");
+    return { status: "SUCCESS", message: "Tetapan surat amaran disimpan." };
+  } catch(e) { return { status: "ERROR", message: e.toString() }; }
+}
+
+function _extractDocId(url) {
+  let match = String(url).match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
+function getWarningReport(month, year) {
+  try {
+    // GAS CacheService — shared across all admins, TTL 15 minit
+    var gasCache = CacheService.getScriptCache();
+    var gasCacheKey = 'warning_v3_' + month + '_' + year;
+    var cached = gasCache.get(gasCacheKey);
+    if (cached) return JSON.parse(cached);
+
+    const configData = CONFIG_SHEET.getDataRange().getValues();
+    let triggerLewat = true, triggerTidakHadir = false, threshold = 3;
+    let workDays = [], publicHolidays = new Set();
+    for (let i = 0; i < configData.length; i++) {
+      let key = String(configData[i][0]).trim().toLowerCase();
+      let valStr = String(configData[i][1]).trim();
+      if (key === "warning_trigger") { triggerLewat = valStr.toUpperCase().includes("LEWAT"); triggerTidakHadir = valStr.toUpperCase().includes("TIDAK_HADIR"); }
+      if (key === "warning_threshold") threshold = parseInt(valStr) || 3;
+      if (key === "work_days") workDays = valStr.split(",").map(d => d.trim().toLowerCase()).filter(d => d);
+      if (key === "public_holidays" && valStr) valStr.split(",").forEach(function(e) { let d = e.split(":")[0].trim(); if (d) publicHolidays.add(d); });
+    }
+
+    // Fixed: calendar month, tapi cap pada hari ini kalau bulan semasa
+    let startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+    let monthEnd = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
+    let today = new Date(); today.setHours(23, 59, 59, 0);
+    let endDate = monthEnd < today ? monthEnd : today;
+
+    const masterData = SS.getSheetByName("Master_Staff").getDataRange().getValues();
+    let activeStaff = [];
+    for (let i = 1; i < masterData.length; i++) {
+      let nama = String(masterData[i][1]).trim();
+      let status = String(masterData[i][5] || "").trim().toUpperCase();
+      let paparTracker = masterData[i][13] ? String(masterData[i][13]).trim().toUpperCase() : "YES";
+      if (nama && status === "AKTIF" && paparTracker !== "NO") activeStaff.push({ nama: nama, jawatan: String(masterData[i][2] || "") });
+    }
+
+    const logSheet = SS.getSheetByName("Log_Kehadiran");
+    const lastRow = logSheet.getLastRow();
+    let logData = lastRow > 1 ? logSheet.getRange(2, 1, lastRow - 1, 10).getValues() : [];
+
+    let violations = {}, presentDates = {};
+    activeStaff.forEach(function(s) { violations[s.nama] = { lewat: [], tidakHadir: [] }; presentDates[s.nama] = new Set(); });
+
+    for (let i = 0; i < logData.length; i++) {
+      if (!logData[i][0]) continue;
+      let d = new Date(logData[i][0]);
+      if (d < startDate || d > endDate) continue; // filter dalam cooldown window
+      let nama = String(logData[i][2]).trim();
+      let st = String(logData[i][3] || "").toUpperCase();
+      if (!violations[nama]) continue;
+      let ds = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+      presentDates[nama].add(ds);
+      if (triggerLewat && st.includes("LEWAT")) violations[nama].lewat.push(ds);
+    }
+
+    if (triggerTidakHadir && workDays.length > 0) {
+      // Baca tarikh cuti yang DILULUSKAN dari Log_Cuti_Lewat — exclude dari Tidak Hadir
+      let approvedLeaveDates = {}; // { nama: Set of dd/MM/yyyy }
+      try {
+        const cutiSheet = SS.getSheetByName("Log_Cuti_Lewat");
+        if (cutiSheet && cutiSheet.getLastRow() > 1) {
+          const cutiData = cutiSheet.getRange(2, 1, cutiSheet.getLastRow() - 1, 7).getValues();
+          for (let i = 0; i < cutiData.length; i++) {
+            let nama = String(cutiData[i][1]).trim();
+            let status = String(cutiData[i][6] || "").trim().toUpperCase();
+            if (status !== "DILULUSKAN") continue;
+            let tarikhCuti = cutiData[i][3];
+            if (!tarikhCuti) continue;
+            let d = new Date(tarikhCuti);
+            if (isNaN(d.getTime())) continue;
+            if (d < startDate || d > endDate) continue;
+            let ds = Utilities.formatDate(d, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+            if (!approvedLeaveDates[nama]) approvedLeaveDates[nama] = new Set();
+            approvedLeaveDates[nama].add(ds);
+          }
+        }
+      } catch(e) {}
+
+      const DAY_NAMES = ["ahad","isnin","selasa","rabu","khamis","jumaat","sabtu"];
+      let cur = new Date(startDate);
+      let end = new Date(endDate); end.setHours(0,0,0,0);
+      while (cur <= end) {
+        let dayName = DAY_NAMES[cur.getDay()];
+        if (workDays.includes(dayName)) {
+          let ds = Utilities.formatDate(cur, "Asia/Kuala_Lumpur", "dd/MM/yyyy");
+          let dr = Utilities.formatDate(cur, "Asia/Kuala_Lumpur", "yyyy-MM-dd");
+          if (!publicHolidays.has(dr)) {
+            activeStaff.forEach(function(s) {
+              let hadir = presentDates[s.nama].has(ds);
+              let onLeave = approvedLeaveDates[s.nama] && approvedLeaveDates[s.nama].has(ds);
+              if (!hadir && !onLeave) violations[s.nama].tidakHadir.push(ds);
+            });
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+
+    let suratLog = {};
+    try {
+      let ls = SS.getSheetByName("Log_Surat_Amaran");
+      if (ls && ls.getLastRow() > 1) {
+        let ld = ls.getRange(2, 1, ls.getLastRow() - 1, 6).getValues();
+        ld.forEach(function(r) {
+          if (parseInt(r[2]) === parseInt(month) && parseInt(r[3]) === parseInt(year)) {
+            if (!suratLog[r[1]]) suratLog[r[1]] = { hasSurat: false, isReset: false, suratUrl: "" };
+            if (r[4] === "SURAT") { suratLog[r[1]].hasSurat = true; suratLog[r[1]].suratUrl = r[5] || ""; }
+            if (r[4] === "RESET") suratLog[r[1]].isReset = true;
+          }
+        });
+      }
+    } catch(e) {}
+
+    let report = activeStaff.map(function(s) {
+      let v = violations[s.nama];
+      let sl = suratLog[s.nama] || { hasSurat: false, isReset: false, suratUrl: "" };
+      let total = v.lewat.length + v.tidakHadir.length;
+      return { nama: s.nama, jawatan: s.jawatan, lewat: v.lewat.length, lewatDates: v.lewat.join(", "), tidakHadir: v.tidakHadir.length, tidakHadirDates: v.tidakHadir.join(", "), total: total, isLayak: !sl.isReset && total >= threshold, hasSurat: sl.hasSurat, suratUrl: sl.suratUrl, isReset: sl.isReset };
+    }).filter(function(s) { return s.total > 0; });
+
+    var result = { status: "SUCCESS", data: report, threshold: threshold };
+    try { gasCache.put(gasCacheKey, JSON.stringify(result), 900); } catch(e) {}
+    return result;
+  } catch(e) { return { status: "ERROR", message: e.toString() }; }
+}
+
+function generateSuratAmaran(staffName, month, year) {
+  try {
+    const MONTHS_MY = ["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"];
+    const monthName = MONTHS_MY[parseInt(month) - 1];
+    const masterData = SS.getSheetByName("Master_Staff").getDataRange().getValues();
+    let jawatan = "Staff", staffId = "-";
+    for (let i = 1; i < masterData.length; i++) {
+      if (String(masterData[i][1]).trim() === staffName) { jawatan = masterData[i][2] || "Staff"; staffId = masterData[i][0] || "-"; break; }
+    }
+    const rpt = getWarningReport(month, year);
+    let staffData = rpt.data ? rpt.data.find(function(s) { return s.nama === staffName; }) : null;
+    let violationLines = [];
+    let violationText = "";
+    if (staffData) {
+      if (staffData.lewat > 0) violationLines.push("• Kelewatan: " + staffData.lewat + " kali (" + staffData.lewatDates + ")");
+      if (staffData.tidakHadir > 0) violationLines.push("• Tidak Hadir: " + staffData.tidakHadir + " kali (" + staffData.tidakHadirDates + ")");
+    }
+    violationText = violationLines.join("\n");
+    const today = new Date();
+    const todayStr = Utilities.formatDate(today, "Asia/Kuala_Lumpur", "dd MMMM yyyy");
+    const suratNo = "SA/" + year + "/" + String(month).padStart(2,"0") + "/" + String(staffId).replace(/\s/g,"");
+    const pdfName = "Surat Amaran - " + staffName + " - " + monthName + " " + year + ".pdf";
+
+    // Cuba guna template Google Doc jika ada
+    let templateUrl = "";
+    try {
+      const cd = CONFIG_SHEET.getDataRange().getValues();
+      for (let i = 0; i < cd.length; i++) {
+        if (String(cd[i][0]).trim().toLowerCase() === "warning_template_url") { templateUrl = String(cd[i][1]).trim(); break; }
+      }
+    } catch(e) {}
+
+    let docToExport;
+    const templateId = _extractDocId(templateUrl);
+
+    // ── Buat / copy dokumen ──
+    let docFile;
+    if (templateId) {
+      // Guna Google Doc template — copy & replace placeholders
+      docFile = DriveApp.getFileById(templateId).makeCopy(pdfName.replace(".pdf",""));
+      const copyDoc = DocumentApp.openById(docFile.getId());
+      const body = copyDoc.getBody();
+      body.replaceText("\\{\\{SURAT_NO\\}\\}", suratNo);
+      body.replaceText("\\{\\{TARIKH\\}\\}", todayStr);
+      body.replaceText("\\{\\{NAMA_STAFF\\}\\}", staffName);
+      body.replaceText("\\{\\{JAWATAN\\}\\}", jawatan);
+      body.replaceText("\\{\\{BULAN_TAHUN\\}\\}", monthName + " " + year);
+      body.replaceText("\\{\\{VIOLATIONS\\}\\}", violationText || "-");
+      copyDoc.saveAndClose();
+    } else {
+      // Fallback — generate hardcoded
+      const doc = DocumentApp.create(pdfName.replace(".pdf",""));
+      const body = doc.getBody();
+      body.setMarginTop(50).setMarginBottom(50).setMarginLeft(70).setMarginRight(70);
+      const BOLD = DocumentApp.Attribute.BOLD;
+      const FS = DocumentApp.Attribute.FONT_SIZE;
+      body.appendParagraph("SURAT AMARAN KEHADIRAN").setAlignment(DocumentApp.HorizontalAlignment.CENTER).setAttributes({[BOLD]:true,[FS]:14});
+      body.appendParagraph("No. Rujukan: " + suratNo).setAlignment(DocumentApp.HorizontalAlignment.CENTER).setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Tarikh: " + todayStr).setAlignment(DocumentApp.HorizontalAlignment.RIGHT).setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Kepada:").setAttributes({[FS]:11});
+      body.appendParagraph(staffName).setAttributes({[BOLD]:true,[FS]:11});
+      body.appendParagraph(jawatan).setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("PERKARA: SURAT AMARAN KEHADIRAN BAGI BULAN " + monthName.toUpperCase() + " " + year).setAttributes({[BOLD]:true,[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Merujuk perkara di atas, pihak pengurusan ingin memaklumkan bahawa rekod kehadiran anda bagi bulan " + monthName + " " + year + " menunjukkan perkara berikut:").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      violationLines.forEach(function(line) { body.appendParagraph(line).setAttributes({[FS]:11}); });
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Anda diingatkan bahawa ketidakhadiran atau kelewatan yang berulang boleh menjejaskan prestasi kerja dan mengakibatkan tindakan tatatertib lanjut diambil.").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Sila berjumpa dengan pihak pengurusan dalam masa 3 hari bekerja dari tarikh surat ini untuk penjelasan lanjut.").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Sekian, terima kasih.").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Yang benar,").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("____________________________").setAttributes({[FS]:11});
+      body.appendParagraph("Tandatangan Pengurusan").setAttributes({[FS]:11});
+      body.appendParagraph("Tarikh: _________________").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("―".repeat(40)).setAttributes({[FS]:10});
+      body.appendParagraph("Pengesahan Penerimaan Surat").setAttributes({[BOLD]:true,[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Saya mengakui telah menerima dan memahami kandungan surat ini.").setAttributes({[FS]:11});
+      body.appendParagraph("").setAttributes({[FS]:11});
+      body.appendParagraph("Nama: " + staffName).setAttributes({[FS]:11});
+      body.appendParagraph("Tandatangan: ____________________________").setAttributes({[FS]:11});
+      body.appendParagraph("Tarikh: _________________").setAttributes({[FS]:11});
+      doc.saveAndClose();
+      docFile = DriveApp.getFileById(doc.getId());
+    }
+
+    // ── Export PDF (sama untuk kedua-dua path) ──
+    const pdfBlob = docFile.getAs(MimeType.PDF);
+    pdfBlob.setName(pdfName);
+    let folder = DriveApp.getRootFolder();
+    try {
+      const cd = CONFIG_SHEET.getDataRange().getValues();
+      for (let i = 0; i < cd.length; i++) {
+        if (String(cd[i][0]).trim().toLowerCase() === "link-folder") {
+          let match = String(cd[i][1]).trim().match(/[-\w]{25,}/);
+          if (match) { folder = DriveApp.getFolderById(match[0]); break; }
+        }
+      }
+    } catch(e) {}
+    const pdfFile = folder.createFile(pdfBlob);
+    docFile.setTrashed(true);
+    pdfFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    let ls = SS.getSheetByName("Log_Surat_Amaran");
+    if (!ls) { ls = SS.insertSheet("Log_Surat_Amaran"); ls.appendRow(["Timestamp","Nama_Staff","Bulan","Tahun","Jenis","URL"]); }
+    ls.appendRow([new Date(), staffName, parseInt(month), parseInt(year), "SURAT", pdfFile.getUrl()]);
+    return { status: "SUCCESS", url: pdfFile.getUrl(), message: "Surat amaran berjaya dijana." };
+  } catch(e) { return { status: "ERROR", message: e.toString() }; }
+}
+
+function resetStaffWarning(staffName, month, year) {
+  try {
+    let ls = SS.getSheetByName("Log_Surat_Amaran");
+    if (!ls) { ls = SS.insertSheet("Log_Surat_Amaran"); ls.appendRow(["Timestamp","Nama_Staff","Bulan","Tahun","Jenis","URL"]); }
+    ls.appendRow([new Date(), staffName, parseInt(month), parseInt(year), "RESET", ""]);
+    return { status: "SUCCESS", message: "Rekod amaran " + staffName + " telah direset." };
+  } catch(e) { return { status: "ERROR", message: e.toString() }; }
 }

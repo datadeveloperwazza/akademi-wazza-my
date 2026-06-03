@@ -577,14 +577,8 @@
 
         <form onsubmit="handlePortalLogin(this); return false;" style="display:flex; flex-direction:column; gap:16px;">
             <div>
-                <label class="form-label">Nama Staf</label>
-                <select name="username" id="loginUserSelect" required class="form-input">
-                    <option value="" disabled selected>-- Sila Pilih Nama Anda --</option>
-                </select>
-            </div>
-            <div>
-                <label class="form-label">Kata Laluan</label>
-                <input type="password" name="password" required placeholder="••••••••" class="form-input">
+                <label class="form-label">No. Kad Pengenalan (IC)</label>
+                <input type="text" name="ic" id="loginIcInput" required placeholder="Contoh: 901231012345" class="form-input" inputmode="numeric" autocomplete="off">
             </div>
             <button type="submit" id="btnLogin" class="btn-primary" style="margin-top:4px;">
                 <span id="loginBtnText">MASUK</span>
@@ -594,7 +588,7 @@
                 </svg>
             </button>
             <p id="loginError" style="text-align:center; font-size:12px; color:#f87171; min-height:16px;"></p>
-            <p style="text-align:center; font-size:11px; color:#6b7280;">Terlupa password? Hubungi <span style="color:#eab308; font-weight:600;">Admin</span>.</p>
+            <p style="text-align:center; font-size:11px; color:#6b7280;">Masalah log masuk? Hubungi <span style="color:#eab308; font-weight:600;">Admin</span>.</p>
         </form>
         <div style="margin-top:14px; padding-top:12px; border-top:1px solid #374151; text-align:center;">
             <a href="admin" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#6b7280; text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='#eab308'" onmouseout="this.style.color='#6b7280'">
@@ -781,14 +775,24 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Warning count -->
+                        <div id="warningCard" style="display:none;">
+                            <div style="background:#450a0a; border:1px solid #7f1d1d; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:22px;">⚠️</span>
+                                <div>
+                                    <p style="font-size:12px; font-weight:700; color:#fca5a5;" id="warningText">0 amaran bulan ini</p>
+                                    <p style="font-size:10px; color:#9ca3af; margin-top:2px;">Sila berjumpa pengurusan jika ada pertanyaan.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="home-right">
-                        <!-- Latest leave -->
+                        <!-- Upcoming leave -->
                         <div>
-                            <p class="section-title">Permohonan Cuti Terkini</p>
-                            <div id="homeLatestLeave" class="card">
-                                <div style="display:flex; align-items:center; justify-content:center; min-height:60px;">
+                            <p class="section-title">Cuti Akan Datang</p>
+                            <div id="homeLatestLeave">
+                                <div class="card" style="display:flex; align-items:center; justify-content:center; min-height:60px;">
                                     <div class="loader-ring" style="width:24px;height:24px;border-width:2px;"></div>
                                 </div>
                             </div>
@@ -860,19 +864,25 @@
                             </select>
                             <!-- Legend -->
                             <div style="margin-top:8px; background:#111827; border:1px solid #374151; border-radius:8px; padding:10px 12px;">
-                                <p style="font-size:9px; font-weight:700; color:#4b5563; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px;">Panduan Jenis Cuti</p>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 12px;">
+                                <p style="font-size:9px; font-weight:700; color:#4b5563; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px;">Panduan Jenis Cuti</p>
+                                <!-- Penuh hari (kiri) & Half day (kanan) -->
+                                <p style="font-size:9px; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Penuh Hari &amp; ½ Hari</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 8px; margin-bottom:8px;">
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">AL</strong> — Cuti Tahunan</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HAL</strong> — ½ Hari AL</span>
-                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">MC</strong> — Cuti Sakit</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">EL</strong> — Cuti Kecemasan</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HEL</strong> — ½ Hari EL</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">UL</strong> — Tanpa Gaji</span>
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HUL</strong> — ½ Hari UL</span>
+                                </div>
+                                <!-- Jenis lain -->
+                                <p style="font-size:9px; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Jenis Lain</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 8px;">
+                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">MC</strong> — Cuti Sakit</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HL</strong> — Hospitalisasi</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">ML</strong> — Cuti Bersalin</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">PL</strong> — Cuti Isteri Bersalin</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">BL</strong> — Cuti Ihsan</span>
-                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">UL</strong> — Tanpa Gaji</span>
-                                    <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">HUL</strong> — ½ Hari UL</span>
                                     <span style="font-size:11px; color:#6b7280;"><strong style="color:#eab308;">RL</strong> — Cuti Ganti</span>
                                 </div>
                             </div>
@@ -1004,38 +1014,65 @@
         if (current) select.value = current;
     }
 
+    // ── Speculative prefetch state ──
+    var _prefetch = { ic: null, result: null, pending: false };
+
+    function setupIcPrefetch() {
+        document.getElementById('loginIcInput').addEventListener('input', function() {
+            var ic = this.value.trim();
+            if (ic.length >= 12) {
+                if (_prefetch.ic === ic) return;
+                _prefetch = { ic: ic, result: null, pending: true };
+                // Quick data je — laju, verify + profile + today + stats
+                callGAS("loginWithTodayStatus", { ic: ic }, function(res) {
+                    if (_prefetch.ic !== ic) return;
+                    if (res.status === 'SUCCESS') _prefetch.result = { nama: res.nama, data: res };
+                    _prefetch.pending = false;
+                });
+            } else {
+                _prefetch = { ic: null, result: null, pending: false };
+            }
+        });
+    }
+
     window.onload = function () {
+        document.getElementById('pageLoader').style.display = 'none';
+
         if (currentUser) {
-            // Already logged in — pageLoader already visible, load dashboard
-            loadDashboard(currentUser);
+            var cached = getDashboardCache(currentUser);
+            if (cached) {
+                // Ada cache — render terus, tiada loading langsung
+                renderPhase1(cached);
+                renderPhase2(cached);
+                // Background 1: refresh today status (phase 1) — laju
+                callGAS("getQuickDashboardData", { username: currentUser }, function(quick) {
+                    if (quick.status === 'SUCCESS') renderPhase1(quick);
+                });
+            } else {
+                document.getElementById('pageLoader').style.display = 'flex';
+            }
+            // Background 2 (selalu): full refresh — update semua + simpan cache baru
+            callGAS("getStaffDashboardData", { username: currentUser }, function(full) {
+                if (full.status === 'SUCCESS') {
+                    setDashboardCache(currentUser, full);
+                    if (!cached) {
+                        document.getElementById('pageLoader').style.display = 'none';
+                        renderPhase1(full);
+                    }
+                    renderPhase2(full);
+                }
+            }, function() {
+                if (!cached) {
+                    document.getElementById('pageLoader').style.display = 'none';
+                    alert("Gagal memuatkan data. Sila refresh.");
+                }
+            });
             setupFormInit();
         } else {
-            // Not logged in — load staff names, then fade out loader & fade in login
-            callGAS("getStaffList", {}, function (names) {
-                const select = document.getElementById('loginUserSelect');
-                select.innerHTML = '<option value="" disabled selected>-- Sila Pilih Nama Anda --</option>';
-                names.forEach(function(name) {
-                    let option = document.createElement("option");
-                    option.text = name; option.value = name;
-                    select.add(option);
-                });
-                // Fade out loader, fade in login form
-                var loader = document.getElementById('pageLoader');
-                loader.classList.add('fade-out');
-                setTimeout(function() {
-                    loader.style.display = 'none';
-                    document.getElementById('loginOverlay').classList.add('visible');
-                }, 400);
-            }, function(err) {
-                // On error — still show login with error message
-                var loader = document.getElementById('pageLoader');
-                loader.classList.add('fade-out');
-                setTimeout(function() {
-                    loader.style.display = 'none';
-                    document.getElementById('loginOverlay').classList.add('visible');
-                    document.getElementById('loginError').innerText = '⚠️ Gagal muat senarai staf. Sila refresh halaman.';
-                }, 400);
-            });
+            // Terus tunjuk login — zero delay
+            document.getElementById('loginOverlay').classList.add('visible');
+            document.getElementById('loginIcInput').focus();
+            setupIcPrefetch();
         }
     };
 
@@ -1048,31 +1085,75 @@
         spinner.style.display = isLoading ? "block" : "none";
     }
 
+    function _doLoginProgressive(nama, quickData) {
+        currentUser = nama;
+        localStorage.setItem("wazza_nama", nama);
+        // Phase 1: tunjuk dashboard segera
+        renderPhase1(quickData);
+        // Phase 2: guna cache kalau ada, else skeleton
+        var cached = getDashboardCache(nama);
+        if (cached) { renderPhase2(cached); } else { showPhase2Skeleton(); }
+        setupFormInit();
+        // Background: full data
+        callGAS("getStaffDashboardData", { username: nama }, function(full) {
+            if (full.status === 'SUCCESS') { setDashboardCache(nama, full); renderPhase2(full); }
+        });
+    }
+
+    // Compat wrapper untuk kes prefetch yang dah ada full data
+    function _doLogin(nama, data) {
+        currentUser = nama;
+        localStorage.setItem("wazza_nama", nama);
+        setDashboardCache(nama, data);
+        document.getElementById('loginOverlay').classList.remove('visible');
+        renderDashboard(data);
+        setupFormInit();
+    }
+
     function handlePortalLogin(form) {
+        var ic = form.ic.value.trim();
         document.getElementById('loginError').innerText = "";
+
+        // Prefetch dah siap — tunjuk phase 1 terus, phase 2 background
+        if (_prefetch.result && _prefetch.ic === ic) {
+            _doLoginProgressive(_prefetch.result.nama, _prefetch.result.data);
+            return;
+        }
+
+        // Prefetch masih running — tunggu, tak perlu GAS call baru
+        if (_prefetch.pending && _prefetch.ic === ic) {
+            setPortalLoginLoading(true);
+            var poll = setInterval(function() {
+                if (_prefetch.result) {
+                    clearInterval(poll); setPortalLoginLoading(false);
+                    _doLoginProgressive(_prefetch.result.nama, _prefetch.result.data);
+                } else if (!_prefetch.pending) {
+                    clearInterval(poll); setPortalLoginLoading(false);
+                    document.getElementById('loginError').innerText = 'IC tidak ditemui atau tidak sah.';
+                }
+            }, 100);
+            return;
+        }
+
+        // Fallback: quick login call (verify + phase 1 data)
         setPortalLoginLoading(true);
-        callGAS("verifyLogin", { u: form.username.value, p: form.password.value }, function (res) {
-            if (res.status === 'SUCCESS') {
-                currentUser = res.nama;
-                localStorage.setItem("wazza_nama", res.nama);
-                document.getElementById('loginOverlay').classList.remove('visible');
-                var loader = document.getElementById('pageLoader');
-                loader.style.display = 'flex';
-                loader.classList.remove('fade-out');
-                loadDashboard(currentUser);
-                setupFormInit();
-            } else {
-                document.getElementById('loginError').innerText = res.message;
-                setPortalLoginLoading(false);
-            }
-        }, function (err) {
-            document.getElementById('loginError').innerText = "Ralat rangkaian: " + err.message;
+        callGAS("loginWithTodayStatus", { ic: ic }, function(res) {
             setPortalLoginLoading(false);
+            if (res.status === 'SUCCESS') {
+                _doLoginProgressive(res.nama, res);
+            } else {
+                document.getElementById('loginError').innerText = res.message || 'IC tidak sah.';
+            }
+        }, function() {
+            setPortalLoginLoading(false);
+            document.getElementById('loginError').innerText = "Ralat rangkaian. Cuba semula.";
         });
     }
 
     function logoutPortal() {
         if (confirm("Anda pasti untuk log keluar?")) {
+            var u = localStorage.getItem("wazza_nama");
+            if (u) localStorage.removeItem('wazza_dash_' + u);
             localStorage.removeItem("wazza_nama");
             location.reload();
         }
@@ -1275,15 +1356,31 @@
     function searchMyAttendance() {
         let ds = document.getElementById('searchDateStart').value;
         let de = document.getElementById('searchDateEnd').value;
-        let btn = document.getElementById('btnSearchAtt');
         if (!ds || !de) { alert("Sila pilih Tarikh Mula dan Akhir."); return; }
         if (ds > de) { alert("Tarikh Mula tak boleh lebih dari Tarikh Akhir."); return; }
-        btn.innerText = "Mencari..."; btn.disabled = true;
-        document.getElementById('attList').innerHTML = `<div class="empty-state"><div class="loader-ring" style="margin:0 auto 8px;"></div><p>Menarik rekod...</p></div>`;
-        callGAS("getStaffAttendanceByDateRange", { username: currentUser, dateStart: ds, dateEnd: de }, function (logs) {
-            renderAttendanceLogs(logs, "Tiada rekod dijumpai pada julat tarikh ini.");
-            btn.innerText = "Cari Rekod"; btn.disabled = false;
+
+        // Kalau data belum loaded — fetch fresh dan filter lepas dapat
+        if (_allAttendance.length === 0) {
+            var btn = document.getElementById('btnSearchAtt');
+            btn.innerText = "Menarik data..."; btn.disabled = true;
+            document.getElementById('attList').innerHTML = `<div class="empty-state"><div class="loader-ring" style="margin:0 auto 8px;"></div><p>Menarik rekod...</p></div>`;
+            callGAS("getStaffDashboardData", { username: currentUser }, function(fresh) {
+                if (fresh.allAttendance) {
+                    _allAttendance = fresh.allAttendance;
+                    setDashboardCache(currentUser, fresh);
+                }
+                btn.innerText = "Cari Rekod"; btn.disabled = false;
+                var filtered = _allAttendance.filter(function(rec) { return rec.dateRaw >= ds && rec.dateRaw <= de; });
+                renderAttendanceLogs(filtered, "Tiada rekod dijumpai pada julat tarikh ini.");
+            });
+            return;
+        }
+
+        // Filter local — no GAS call, instant
+        var filtered = _allAttendance.filter(function(rec) {
+            return rec.dateRaw >= ds && rec.dateRaw <= de;
         });
+        renderAttendanceLogs(filtered, "Tiada rekod dijumpai pada julat tarikh ini.");
     }
 
     function renderAttendanceLogs(logs, emptyMsg) {
@@ -1319,49 +1416,83 @@
         });
     }
 
-    function loadDashboard(u) {
-        document.getElementById('pageLoader').style.display = 'flex';
-        callGAS("getStaffDashboardData", { username: u }, renderDashboard, function (err) {
-            alert("Gagal menghubungi pelayan. Sila refresh semula.\nSebab: " + err.message);
-            document.getElementById('staffName').innerText = "Ralat!";
-            document.getElementById('pageLoader').style.display = 'none';
-        });
+    var CACHE_TTL = 15 * 60 * 1000; // 15 minit — sama macam Looker Studio
+    var CACHE_VERSION = 'v2'; // naikkan version bila struktur data berubah
+    var _allAttendance = []; // semua rekod staff — untuk filter local
+
+    function getDashboardCache(u) {
+        try {
+            var raw = localStorage.getItem('wazza_dash_' + u);
+            if (!raw) return null;
+            var obj = JSON.parse(raw);
+            // Invalidate kalau expired ATAU version lama (struktur data berubah)
+            if (Date.now() - obj.ts > CACHE_TTL || obj.ver !== CACHE_VERSION) {
+                localStorage.removeItem('wazza_dash_' + u);
+                return null;
+            }
+            return obj.data;
+        } catch(e) { return null; }
     }
 
-    function renderDashboard(data) {
+    function setDashboardCache(u, data) {
+        try { localStorage.setItem('wazza_dash_' + u, JSON.stringify({ ts: Date.now(), ver: CACHE_VERSION, data: data })); } catch(e) {}
+    }
+
+    function loadDashboard(u) {
+        var cached = getDashboardCache(u);
+        if (cached) {
+            // Tunjuk cache serta-merta, refresh background
+            renderDashboard(cached);
+            callGAS("getStaffDashboardData", { username: u }, function(fresh) {
+                setDashboardCache(u, fresh);
+                renderDashboard(fresh);
+            });
+        } else {
+            document.getElementById('pageLoader').style.display = 'flex';
+            callGAS("getStaffDashboardData", { username: u }, function(data) {
+                setDashboardCache(u, data);
+                renderDashboard(data);
+            }, function(err) {
+                alert("Gagal menghubungi pelayan. Sila refresh semula.\nSebab: " + err.message);
+                document.getElementById('staffName').innerText = "Ralat!";
+                document.getElementById('pageLoader').style.display = 'none';
+            });
+        }
+    }
+
+    // ── Skeleton untuk phase 2 sections ──
+    function showPhase2Skeleton() {
+        var sk = '<div style="display:flex;align-items:center;justify-content:center;padding:20px;gap:8px;"><div class="loader-ring" style="width:18px;height:18px;border-width:2px;flex-shrink:0;"></div><span style="font-size:12px;color:#4b5563;">Memuatkan...</span></div>';
+        document.getElementById('homeLatestLeave').innerHTML = sk;
+        document.getElementById('attList').innerHTML = sk;
+        document.getElementById('leaveList').innerHTML = sk;
+        document.getElementById('leaveBalanceWidget').innerHTML = sk;
+    }
+
+    // ── Phase 1: profile + today + stats (data kecik, laju) ──
+    function renderPhase1(data) {
         document.getElementById('appShell').style.display = 'flex';
         document.getElementById('pageLoader').style.display = 'none';
         document.getElementById('loginOverlay').classList.remove('visible');
-        if (data.status === 'ERROR') { alert(data.message); return; }
 
-        // Set status kehadiran hari ini untuk clock in/out logic
         userClockedInToday = !!data.todayLog;
         if (data.todayLog) {
             todayClockInTime = data.todayLog.in || '--:--';
             userClockedOutToday = !!(data.todayLog.out && data.todayLog.out !== '--:--');
             todayClockOutTime = data.todayLog.out || '--:--';
         } else {
-            userClockedOutToday = false;
-            todayClockInTime = '--:--';
-            todayClockOutTime = '--:--';
+            userClockedOutToday = false; todayClockInTime = '--:--'; todayClockOutTime = '--:--';
         }
-
         if (!ciIntervalId) initKehadiran();
 
-        // Profile — desktop sidebar
         document.getElementById('staffName').innerText = data.profile.name;
         document.getElementById('staffRole').innerText = data.profile.role;
         document.getElementById('staffID').innerText = "ID: " + data.profile.id;
-
-        // Profile — mobile header
         document.getElementById('staffNameMob').innerText = data.profile.name;
         document.getElementById('staffRoleMob').innerText = data.profile.role;
-
-        // Topbar
         document.getElementById('topbarTitle').innerText = "Dashboard";
         document.getElementById('topbarSub').innerText = "Selamat datang, " + data.profile.name;
 
-        // Profile pic
         function setPic(el, url) {
             let picUrl = url;
             if (picUrl && typeof picUrl === 'string' && picUrl.trim() !== "") {
@@ -1371,107 +1502,111 @@
                     if (match && match[1]) picUrl = "https://lh3.googleusercontent.com/d/" + match[1];
                 }
                 el.src = picUrl;
-            } else {
-                el.src = "https://via.placeholder.com/150?text=No+Pic";
-            }
+            } else { el.src = "https://via.placeholder.com/150?text=No+Pic"; }
         }
         setPic(document.getElementById('profilePic'), data.profile.pic);
         setPic(document.getElementById('profilePicMob'), data.profile.pic);
 
-        // ── Today card ──
         const todayCard = document.getElementById('homeTodayCard');
         if (data.todayLog) {
             let isLate = String(data.todayLog.status).toUpperCase().includes("LEWAT");
-            let cardClass = isLate ? 'today-card lewat' : 'today-card hadir';
-            let statusText = isLate ? 'HADIR (LEWAT)' : 'HADIR';
+            todayCard.className = isLate ? 'today-card lewat' : 'today-card hadir';
             let statusColor = isLate ? 'var(--danger)' : 'var(--success)';
-            todayCard.className = cardClass;
             todayCard.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                     <span style="font-size:12px; color:#9ca3af; font-family:'Inter',monospace;">${data.todayLog.date}</span>
-                    <span style="font-size:11px; font-weight:800; letter-spacing:0.08em; color:${statusColor};">${statusText}</span>
+                    <span style="font-size:11px; font-weight:800; letter-spacing:0.08em; color:${statusColor};">${isLate ? 'HADIR (LEWAT)' : 'HADIR'}</span>
                 </div>
                 <div style="display:flex; gap:40px;">
-                    <div>
-                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Masuk</div>
-                        <div class="time-big" style="color:#f9fafb;">${data.todayLog.in}</div>
-                    </div>
-                    <div>
-                        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Keluar</div>
-                        <div class="time-big" style="color:${data.todayLog.out === '--:--' ? 'var(--text-3)' : 'var(--accent)'};">${data.todayLog.out}</div>
-                    </div>
+                    <div><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Masuk</div>
+                    <div class="time-big" style="color:#f9fafb;">${data.todayLog.in}</div></div>
+                    <div><div style="font-size:9px; text-transform:uppercase; letter-spacing:0.07em; color:#6b7280; margin-bottom:4px;">Keluar</div>
+                    <div class="time-big" style="color:${data.todayLog.out === '--:--' ? 'var(--text-3)' : 'var(--accent)'};">${data.todayLog.out}</div></div>
                 </div>`;
         } else {
             todayCard.className = 'today-card absent';
-            todayCard.innerHTML = `
-                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px; gap:6px;">
-                    <div style="font-size:28px;">👋</div>
-                    <p style="font-size:13px; font-weight:600; color:#9ca3af;">Belum Rekod Kehadiran</p>
-                    <p style="font-size:11px; color:#6b7280;">Sila scan QR di pintu masuk.</p>
-                </div>`;
+            todayCard.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px; gap:6px;">
+                <div style="font-size:28px;">👋</div>
+                <p style="font-size:13px; font-weight:600; color:#9ca3af;">Belum Rekod Kehadiran</p>
+                <p style="font-size:11px; color:#6b7280;">Sila scan QR di pintu masuk.</p></div>`;
         }
 
-        // Stats
-        document.getElementById('statHadir').innerText = data.monthlyStats.present;
-        document.getElementById('statLewat').innerText = data.monthlyStats.late;
-        document.getElementById('statCuti').innerText  = data.monthlyStats.leave;
+        var stats = data.monthlyStats || { present: 0, late: 0, leave: 0 };
+        document.getElementById('statHadir').innerText = stats.present;
+        document.getElementById('statLewat').innerText = stats.late;
+        document.getElementById('statCuti').innerText  = stats.leave;
+    }
 
-        // Latest leave
-        const latestLeaveCard = document.getElementById('homeLatestLeave');
-        if (data.latestLeave) {
-            let l = data.latestLeave;
-            let badge = "";
-            if (l.status === "DILULUSKAN") badge = `<span class="badge badge-success">LULUS</span>`;
-            else if (l.status === "DITOLAK") badge = `<span class="badge badge-danger">DITOLAK</span>`;
-            else badge = `<span class="badge badge-warning">PROSES</span>`;
-            latestLeaveCard.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <p style="font-size:13px; font-weight:700; text-transform:uppercase;">${l.type}</p>
-                    ${badge}
-                </div>
-                <p style="font-size:11px; color:#6b7280; font-family:'Inter',monospace; margin-bottom:8px;">${l.date}</p>
-                <div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:10px 12px; font-size:12px; color:#9ca3af; font-style:italic;">"${l.reason}"</div>`;
+    // ── Phase 2: upcoming + attendance + leave history + balance ──
+    function renderPhase2(data) {
+        if (data.allAttendance) {
+            _allAttendance = data.allAttendance;
+            // Kira amaran bulan ini dari allAttendance
+            var now = new Date();
+            var thisMonth = now.getMonth(), thisYear = now.getFullYear();
+            var lewatCount = _allAttendance.filter(function(r) {
+                if (!r.dateRaw) return false;
+                var d = new Date(r.dateRaw + 'T00:00:00');
+                return d.getMonth() === thisMonth && d.getFullYear() === thisYear && String(r.status).toUpperCase().includes('LEWAT');
+            }).length;
+            var warnCard = document.getElementById('warningCard');
+            var warnText = document.getElementById('warningText');
+            if (lewatCount > 0 && warnCard && warnText) {
+                warnText.innerText = lewatCount + ' kelewatan bulan ini';
+                warnCard.style.display = 'block';
+            } else if (warnCard) { warnCard.style.display = 'none'; }
+        }
+
+        const upcomingContainer = document.getElementById('homeLatestLeave');
+        const upcoming = data.upcomingLeaves || [];
+        if (upcoming.length === 0) {
+            upcomingContainer.innerHTML = `<div class="card"><div class="empty-state" style="padding:20px;"><p>Tiada cuti akan datang.</p></div></div>`;
         } else {
-            latestLeaveCard.innerHTML = `<div class="empty-state" style="padding:20px;"><p>Tiada permohonan terkini.</p></div>`;
+            upcomingContainer.innerHTML = upcoming.map(function(l) {
+                var isProses = l.status === "DALAM PROSES";
+                var badge = isProses ? `<span class="badge badge-warning">PROSES</span>` : `<span class="badge badge-success">LULUS</span>`;
+                var cls = isProses ? "proses" : "lulus";
+                return `<div class="card leave-card ${cls}" style="margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <p style="font-size:13px; font-weight:700; text-transform:uppercase;">${l.type}</p>${badge}</div>
+                    <p style="font-size:12px; color:#6b7280; font-family:'Inter',monospace;">${l.date}</p></div>`;
+            }).join('');
         }
 
-        // Attendance logs
-        renderAttendanceLogs(data.attendance, "Tiada rekod 10 hari terakhir.");
+        renderAttendanceLogs(data.attendance || [], "Tiada rekod 10 hari terakhir.");
 
-        // Leave history
         const leaveList = document.getElementById('leaveList');
         leaveList.innerHTML = "";
-        if (data.leave.length === 0) {
+        var leaves = data.leave || [];
+        if (leaves.length === 0) {
             leaveList.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Tiada sejarah permohonan.</p></div>`;
         }
-        data.leave.forEach(cuti => {
+        leaves.forEach(function(cuti) {
             let badge = ""; let cls = "proses";
             if (cuti.status === "DILULUSKAN") { badge = `<span class="badge badge-success">LULUS</span>`; cls = "lulus"; }
             else if (cuti.status === "DITOLAK") { badge = `<span class="badge badge-danger">DITOLAK</span>`; cls = "ditolak"; }
-            else { badge = `<span class="badge badge-warning">PROSES</span>`; cls = "proses"; }
-
-            let attachHtml = "";
-            if (cuti.attachment && cuti.attachment !== "Tiada" && cuti.attachment !== "") {
-                attachHtml = `<a href="${cuti.attachment}" target="_blank" style="display:inline-flex; align-items:center; gap:4px; margin-top:8px; font-size:11px; color:#60a5fa; text-decoration:none;">🔗 Lihat Lampiran</a>`;
-            }
-
-            leaveList.innerHTML += `
-            <div class="leave-card ${cls}">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-                    <div>
-                        <p style="font-size:13px; font-weight:700; text-transform:uppercase;">${cuti.type}</p>
-                        <p style="font-size:11px; color:#6b7280; font-family:'Inter',monospace; margin-top:2px;">${cuti.date}</p>
-                    </div>
-                    ${badge}
-                </div>
-                <div style="background:#111827; border:1px solid #374151; border-radius:6px; padding:10px 12px; font-size:12px; color:#9ca3af; font-style:italic;">"${cuti.reason}"${attachHtml}</div>
-            </div>`;
+            else { badge = `<span class="badge badge-warning">PROSES</span>`; }
+            let attachHtml = (cuti.attachment && cuti.attachment !== "Tiada" && cuti.attachment !== "")
+                ? `<a href="${cuti.attachment}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:#60a5fa;text-decoration:none;">🔗 Lihat Lampiran</a>` : "";
+            let rejectHtml = (cuti.status === "DITOLAK" && cuti.rejectReason)
+                ? `<div style="margin-top:8px;background:#450a0a;border:1px solid #7f1d1d;border-radius:6px;padding:8px 12px;font-size:11px;color:#fca5a5;"><span style="font-weight:700;display:block;margin-bottom:2px;">⚠️ Sebab Ditolak:</span>${cuti.rejectReason}</div>` : "";
+            leaveList.innerHTML += `<div class="leave-card ${cls}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                    <div><p style="font-size:13px;font-weight:700;text-transform:uppercase;">${cuti.type}</p>
+                    <p style="font-size:11px;color:#6b7280;font-family:'Inter',monospace;margin-top:2px;">${cuti.date}</p></div>${badge}</div>
+                <div style="background:#111827;border:1px solid #374151;border-radius:6px;padding:10px 12px;font-size:12px;color:#9ca3af;font-style:italic;">"${cuti.reason}"${attachHtml}</div>${rejectHtml}</div>`;
         });
 
-        // Leave balance widget
         leaveBalance = data.leaveBalance;
         renderLeaveBalanceWidget(leaveBalance);
         populateLeaveDropdown();
+    }
+
+    // ── Wrapper — render both phases (untuk backward compat) ──
+    function renderDashboard(data) {
+        if (data.status === 'ERROR') { alert(data.message); return; }
+        renderPhase1(data);
+        renderPhase2(data);
     }
 
     function renderLeaveBalanceWidget(bal) {
