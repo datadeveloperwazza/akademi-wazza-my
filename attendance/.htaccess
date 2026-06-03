@@ -1,0 +1,7 @@
+# Guna file 'index' (tanpa extension) sebagai default page untuk /attendance/
+DirectoryIndex index index.html
+
+# Paksa file extensionless ni di-serve sebagai HTML (bukan plain-text/download)
+<FilesMatch "^(index|portal|admin|scan|clockout)$">
+    ForceType text/html
+</FilesMatch>
