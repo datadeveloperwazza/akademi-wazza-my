@@ -1755,9 +1755,7 @@
 
         // Fetch semua data baru (background atau first load)
         function fetchAllData(onComplete) {
-            var now = new Date();
-            var curMonth = now.getMonth() + 1, curYear = now.getFullYear();
-            var done = 0; var total = 8; // 6 existing + 2 current month
+            var done = 0; var total = 6;
             function tick() { done++; if (done >= total && onComplete) onComplete(); }
             callGAS("getAdminDashboardData", {}, function(data) {
                 setCache('dashboard', data);
@@ -1789,13 +1787,6 @@
                 if (res.status === 'SUCCESS') setCache('outstationList', res.data);
                 tick();
             }, tick);
-            // Stage 1: bulan semasa (parallel dengan calls lain)
-            callGAS("getLaporanKelewatan", { staffName: '', month: curMonth, year: curYear }, function(res) {
-                _qcSet('ll:__all__|' + curMonth + '|' + curYear, res); tick();
-            }, tick);
-            callGAS("getWarningReport", { month: curMonth, year: curYear }, function(res) {
-                _qcSet('sa:' + curMonth + '|' + curYear, res); tick();
-            }, tick);
         }
 
         // Init — check localStorage dulu, kalau ada render terus, fetch background
@@ -1807,8 +1798,6 @@
                 document.getElementById('loaderLive').classList.add('hidden');
                 fetchAllData(function() {
                     startAutoRefresh();
-                    // Stage 2: 3 bulan sebelumnya senyap
-                    setTimeout(_backgroundPrefetch3Months, 2000);
                 });
             } else {
                 // Takda cache — show loader, fetch, render
@@ -1817,8 +1806,6 @@
                     renderFromCache();
                     document.getElementById('loaderLive').classList.add('hidden');
                     startAutoRefresh();
-                    // Stage 2: 3 bulan sebelumnya senyap (delay 3s bagi admin settle dulu)
-                    setTimeout(_backgroundPrefetch3Months, 3000);
                 });
             }
         }
@@ -2863,8 +2850,11 @@
                 if (res.status === 'SUCCESS') {
                     alert("Surat berjaya dijana! Klik OK untuk download.");
                     window.open(res.url, '_blank');
-                    _qcDel('sa:' + month + '|' + year); // clear cache for this month
-                    loadSuratAmaranReport();
+                    // Clear GAS server cache dulu, pastu reload
+                    _qcDel('sa:' + month + '|' + year);
+                    callGAS("clearWarningCache", { month: month, year: year }, function() {
+                        loadSuratAmaranReport();
+                    });
                 } else { alert("Gagal: " + res.message); }
             });
         }
@@ -2873,8 +2863,10 @@
             if (!confirm("Reset rekod amaran " + staffName + " untuk bulan ini?")) return;
             callGAS("resetStaffWarning", { staffName: staffName, month: month, year: year }, function(res) {
                 if (res.status === 'SUCCESS') {
-                    _qcDel('sa:' + month + '|' + year); // clear cache
-                    loadSuratAmaranReport();
+                    _qcDel('sa:' + month + '|' + year);
+                    callGAS("clearWarningCache", { month: month, year: year }, function() {
+                        loadSuratAmaranReport();
+                    });
                 } else { alert("Gagal: " + res.message); }
             });
         }
