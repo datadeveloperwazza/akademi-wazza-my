@@ -1023,10 +1023,10 @@
             if (ic.length >= 12) {
                 if (_prefetch.ic === ic) return;
                 _prefetch = { ic: ic, result: null, pending: true };
-                // Quick data je — laju, verify + profile + today + stats
-                callGAS("loginWithTodayStatus", { ic: ic }, function(res) {
+                // Verify IC sahaja — paling ringan, GAS cached 30 minit
+                callGAS("verifyLogin", { u: "", p: ic }, function(res) {
                     if (_prefetch.ic !== ic) return;
-                    if (res.status === 'SUCCESS') _prefetch.result = { nama: res.nama, data: res };
+                    if (res.status === 'SUCCESS') _prefetch.result = { nama: res.nama };
                     _prefetch.pending = false;
                 });
             } else {
@@ -1114,19 +1114,54 @@
         var ic = form.ic.value.trim();
         document.getElementById('loginError').innerText = "";
 
-        // Prefetch dah siap — tunjuk phase 1 terus, phase 2 background
+        // Prefetch dah siap — IC verified, terus show dashboard
         if (_prefetch.result && _prefetch.ic === ic) {
-            _doLoginProgressive(_prefetch.result.nama, _prefetch.result.data);
+            var nama = _prefetch.result.nama;
+            currentUser = nama;
+            localStorage.setItem("wazza_nama", nama);
+            var cached = getDashboardCache(nama);
+            if (cached) {
+                renderPhase1(cached); renderPhase2(cached); setupFormInit();
+                callGAS("getStaffDashboardData", { username: nama }, function(fresh) {
+                    if (fresh.status === 'SUCCESS') { setDashboardCache(nama, fresh); renderPhase1(fresh); renderPhase2(fresh); }
+                });
+            } else {
+                callGAS("loginWithTodayStatus", { ic: ic }, function(quick) {
+                    if (quick.status === 'SUCCESS') {
+                        renderPhase1(quick); showPhase2Skeleton(); setupFormInit();
+                        callGAS("getStaffDashboardData", { username: nama }, function(full) {
+                            if (full.status === 'SUCCESS') { setDashboardCache(nama, full); renderPhase2(full); }
+                        });
+                    }
+                });
+            }
             return;
         }
 
-        // Prefetch masih running — tunggu, tak perlu GAS call baru
+        // Prefetch masih running — tunggu
         if (_prefetch.pending && _prefetch.ic === ic) {
             setPortalLoginLoading(true);
             var poll = setInterval(function() {
                 if (_prefetch.result) {
-                    clearInterval(poll); setPortalLoginLoading(false);
-                    _doLoginProgressive(_prefetch.result.nama, _prefetch.result.data);
+                    clearInterval(poll);
+                    var nama = _prefetch.result.nama;
+                    currentUser = nama; localStorage.setItem("wazza_nama", nama);
+                    var cached = getDashboardCache(nama);
+                    if (cached) {
+                        renderPhase1(cached); renderPhase2(cached); setupFormInit();
+                        callGAS("getStaffDashboardData", { username: nama }, function(fresh) {
+                            if (fresh.status === 'SUCCESS') { setDashboardCache(nama, fresh); renderPhase1(fresh); renderPhase2(fresh); }
+                        });
+                    } else {
+                        callGAS("loginWithTodayStatus", { ic: ic }, function(quick) {
+                            if (quick.status === 'SUCCESS') {
+                                renderPhase1(quick); showPhase2Skeleton(); setupFormInit();
+                                callGAS("getStaffDashboardData", { username: nama }, function(full) {
+                                    if (full.status === 'SUCCESS') { setDashboardCache(nama, full); renderPhase2(full); }
+                                });
+                            } else { setPortalLoginLoading(false); }
+                        }, function() { setPortalLoginLoading(false); });
+                    }
                 } else if (!_prefetch.pending) {
                     clearInterval(poll); setPortalLoginLoading(false);
                     document.getElementById('loginError').innerText = 'IC tidak ditemui atau tidak sah.';
@@ -1135,14 +1170,42 @@
             return;
         }
 
-        // Fallback: quick login call (verify + phase 1 data)
+        // Fallback: verify IC dulu (ringan, cached), terus show dashboard
         setPortalLoginLoading(true);
-        callGAS("loginWithTodayStatus", { ic: ic }, function(res) {
-            setPortalLoginLoading(false);
-            if (res.status === 'SUCCESS') {
-                _doLoginProgressive(res.nama, res);
-            } else {
+        callGAS("verifyLogin", { u: "", p: ic }, function(res) {
+            if (res.status !== 'SUCCESS') {
+                setPortalLoginLoading(false);
                 document.getElementById('loginError').innerText = res.message || 'IC tidak sah.';
+                return;
+            }
+            var nama = res.nama;
+            currentUser = nama;
+            localStorage.setItem("wazza_nama", nama);
+            var cached = getDashboardCache(nama);
+            if (cached) {
+                // Ada cache — renderPhase1 will hide login, no need to reset button
+                renderPhase1(cached);
+                renderPhase2(cached);
+                setupFormInit();
+                callGAS("getStaffDashboardData", { username: nama }, function(fresh) {
+                    if (fresh.status === 'SUCCESS') { setDashboardCache(nama, fresh); renderPhase1(fresh); renderPhase2(fresh); }
+                });
+            } else {
+                // No cache — kekal MEMUAT, renderPhase1 akan hide login terus
+                callGAS("loginWithTodayStatus", { ic: ic }, function(quick) {
+                    if (quick.status === 'SUCCESS') {
+                        renderPhase1(quick);
+                        showPhase2Skeleton();
+                        setupFormInit();
+                        callGAS("getStaffDashboardData", { username: nama }, function(full) {
+                            if (full.status === 'SUCCESS') { setDashboardCache(nama, full); renderPhase2(full); }
+                        });
+                    } else {
+                        setPortalLoginLoading(false);
+                    }
+                }, function() {
+                    setPortalLoginLoading(false);
+                });
             }
         }, function() {
             setPortalLoginLoading(false);

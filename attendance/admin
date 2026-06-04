@@ -266,6 +266,29 @@
         .flatpickr-day.today:hover { background:#374151; color:#fbbf24; }
         .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color:#374151; background:transparent; cursor:not-allowed; }
         .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color:#4b5563; }
+        /* Skeleton loader */
+        @keyframes shimmer {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .skeleton-bar {
+            background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+
+        /* Toast notification */
+        #historyToast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: #1f2937; border: 1px solid #374151; color: #d1d5db;
+            padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 9999;
+        }
+        #historyToast.hidden { opacity: 0; transform: translateX(-50%) translateY(12px); pointer-events: none; }
     </style>
 </head>
 
@@ -775,8 +798,14 @@
                     </div>
                 </div>
 
+                <!-- Banner mode cooldown (jump dari Surat Amaran) -->
+                <div id="llRangeBanner" class="hidden bg-orange-900/30 border border-orange-700/50 rounded-xl px-4 py-3 flex items-center justify-between">
+                    <p class="text-sm text-orange-200" id="llRangeBannerText"></p>
+                    <button onclick="clearLaporanRange()" class="text-orange-300 hover:text-white text-xs font-bold border border-orange-700 rounded px-3 py-1 transition">✕ Kembali ke mod bulan</button>
+                </div>
+
                 <!-- Filter bar -->
-                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                <div id="llFilterBar" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
                     <div class="px-4 py-3 flex flex-wrap items-end gap-3">
                         <div class="flex-1 min-w-[160px]">
                             <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Nama Staf</label>
@@ -835,18 +864,9 @@
                 <div class="flex justify-between items-end border-b border-gray-700 pb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-white">📄 Surat Amaran</h2>
-                        <p class="text-gray-400 text-sm">Jana surat amaran untuk staff yang melebihi had violations.</p>
+                        <p class="text-gray-400 text-sm">Status amaran semasa setiap staff (akumulasi + cooldown).</p>
                     </div>
-                </div>
-                <!-- Filter -->
-                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-                    <div class="px-4 py-3 flex flex-wrap items-end gap-3">
-                        <div>
-                            <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Bulan</label>
-                            <input type="month" id="saMonth" class="bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-yellow-500">
-                        </div>
-                        <button onclick="loadSuratAmaranReport()" class="bg-yellow-500 hover:bg-yellow-400 text-black px-5 py-2 rounded-lg text-sm font-bold shadow transition">Semak</button>
-                    </div>
+                    <button onclick="loadSuratAmaranReport(true)" class="bg-yellow-500 hover:bg-yellow-400 text-black px-4 py-2 rounded-lg text-sm font-bold shadow transition">🔄 Semak Semula</button>
                 </div>
                 <!-- Summary -->
                 <div id="saSummary" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4"></div>
@@ -857,15 +877,13 @@
                             <thead class="bg-gray-900 text-gray-400 text-xs uppercase">
                                 <tr>
                                     <th class="p-4">Nama Staff</th>
-                                    <th class="p-4 text-center">Lewat</th>
-                                    <th class="p-4 text-center">T.Hadir</th>
-                                    <th class="p-4 text-center">Jumlah</th>
-                                    <th class="p-4 text-center">Status</th>
+                                    <th class="p-4 text-center">Violations</th>
+                                    <th class="p-4">Status</th>
                                     <th class="p-4 text-center">Tindakan</th>
                                 </tr>
                             </thead>
                             <tbody id="saTable" class="divide-y divide-gray-700">
-                                <tr><td colspan="6" class="p-8 text-center text-gray-500">Pilih bulan dan tekan Semak.</td></tr>
+                                <tr><td colspan="4" class="p-8 text-center text-gray-500">Memuatkan...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1160,6 +1178,16 @@
                                             <option value="5">5 violations</option>
                                         </select>
                                     </div>
+                                    <div>
+                                        <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Tempoh Cooldown (Hari)</label>
+                                        <input type="number" id="warn_cooldown" min="1" max="365" value="14" class="w-full p-2 bg-gray-900 border border-gray-700 text-white rounded-lg text-sm focus:outline-none focus:border-yellow-500">
+                                        <p class="text-[10px] text-gray-600 mt-1">*Selepas surat dijana, kelewatan dalam tempoh ini = untuk potong gaji</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-400 text-xs font-bold uppercase mb-1">Tarikh Mula Kira Amaran</label>
+                                        <input type="date" id="warn_startDate" class="w-full p-2 bg-gray-900 border border-gray-700 text-white rounded-lg text-sm focus:outline-none focus:border-yellow-500 cursor-pointer">
+                                        <p class="text-[10px] text-amber-500/80 mt-1">⚠️ Lewat/tidak hadir SEBELUM tarikh ini tidak dikira. Set ke tarikh sistem mula guna.</p>
+                                    </div>
                                     <label class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 transition">
                                         <input type="checkbox" id="warn_autoPdf" class="w-4 h-4 accent-yellow-500">
                                         <div>
@@ -1170,10 +1198,14 @@
                                 </div>
                             </div>
                             <div class="space-y-2">
-                                <label class="block text-gray-400 text-xs font-bold uppercase">Template Surat (Google Doc URL)</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-gray-400 text-xs font-bold uppercase">Template Surat (Google Doc URL)</label>
+                                    <!-- Contoh template — tukar URL ni dalam HTML kalau nak ganti -->
+                                    <a href="https://docs.google.com/document/d/1WjP3BgfTG7s6fKbDIljEjY9sETOw5lWx9U6mKYAUsvE/edit?usp=sharing" target="_blank" class="text-[11px] bg-blue-900/60 hover:bg-blue-800 text-blue-200 border border-blue-700 px-3 py-1 rounded-lg font-bold transition">📄 Lihat Contoh Template</a>
+                                </div>
                                 <input type="text" id="warn_templateUrl" placeholder="https://docs.google.com/document/d/..."
                                     class="w-full p-2 bg-gray-900 border border-gray-700 text-white rounded-lg text-sm focus:outline-none focus:border-yellow-500">
-                                <p class="text-[10px] text-gray-600">*Buat Google Doc dengan placeholder {{SURAT_NO}}, {{TARIKH}}, {{NAMA_STAFF}}, {{JAWATAN}}, {{BULAN_TAHUN}}, {{VIOLATIONS}}. Paste URL di sini.</p>
+                                <p class="text-[10px] text-gray-600">*Tekan <strong class="text-blue-300">Lihat Contoh Template</strong> untuk rujukan. Buat copy, edit ikut syarikat, pastu paste URL anda di sini. Placeholder: {{SURAT_NO}}, {{TARIKH}}, {{NAMA_STAFF}}, {{JAWATAN}}, {{BULAN_TAHUN}}, {{VIOLATIONS}}.</p>
                             </div>
                             <div class="pt-2 border-t border-gray-700">
                                 <button onclick="saveWarningSettings()" id="btnSaveWarning" class="bg-yellow-600 hover:bg-yellow-500 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
@@ -1846,18 +1878,39 @@
                 setCache('dashboard', data);
                 globalLeaveEvents = data.calendarEvents || [];
                 renderDashboard(data);
-                if (!btnDone) { btnDone = true; btn.innerText = "🔄 Refresh Sekarang"; btn.disabled = false; }
                 nextRefreshTs = Date.now() + CACHE_TTL;
                 autoRefreshIntervalId = setInterval(refreshAllCache, CACHE_TTL);
                 updateCacheStatusBar();
+                if (!btnDone) { btnDone = true; startRefreshCooldown(); }
             }, function() {
-                if (!btnDone) { btnDone = true; btn.innerText = "🔄 Refresh Sekarang"; btn.disabled = false; }
+                if (!btnDone) { btnDone = true; startRefreshCooldown(); }
             });
             callGAS("getAllLeaveLog", {}, function(data) {
                 setCache('allLeaveLog', data);
                 var logPage = document.getElementById('page-allLeaveLog');
                 if (logPage && !logPage.classList.contains('hidden')) { globalAllLeaveLog = data; filterLeaveLog(); }
             });
+        }
+
+        function startRefreshCooldown() {
+            var btn = document.getElementById('btnManualRefresh');
+            var sisa = 30;
+            btn.disabled = true;
+            btn.style.background = '#374151';
+            btn.style.color = '#6b7280';
+            btn.style.cursor = 'not-allowed';
+            var cd = setInterval(function() {
+                sisa--;
+                btn.innerText = "🔄 Refresh (" + sisa + "s)";
+                if (sisa <= 0) {
+                    clearInterval(cd);
+                    btn.innerText = "🔄 Refresh Sekarang";
+                    btn.disabled = false;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.cursor = '';
+                }
+            }, 1000);
         }
 
         // Update UI: masa terakhir dikemaskini + countdown timer
@@ -1901,6 +1954,7 @@
                 else { loadStaffManagement(); }
             }
             if (page === 'outstation') loadOutstationPage();
+            if (page === 'history') preloadHistoryBackground();
             if (page === 'laporanLewat') initLaporanLewat();
             if (page === 'suratAmaran') initSuratAmaran();
             if (page === 'config') loadWarningSettingsUI();
@@ -2011,6 +2065,93 @@
             return { type: 'KERJA', holidayName: null };
         }
 
+        var _historyPreloaded = false;
+
+        function showHistorySkeleton(days) {
+            var container = document.getElementById('historyResult');
+            var n = Math.min(days || 3, 5);
+            var html = '';
+            for (var i = 0; i < n; i++) {
+                html += '<div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">' +
+                    '<div class="p-4 border-b border-gray-700 flex items-center justify-between">' +
+                    '<div class="skeleton-bar h-4 w-40"></div>' +
+                    '<div class="skeleton-bar h-4 w-16"></div>' +
+                    '</div>' +
+                    '<div class="p-4 space-y-3">' +
+                    '<div class="skeleton-bar h-3 w-full"></div>' +
+                    '<div class="skeleton-bar h-3 w-5/6"></div>' +
+                    '<div class="skeleton-bar h-3 w-4/6"></div>' +
+                    '</div>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+            container.classList.remove('hidden');
+            document.getElementById('historyEmptyState').classList.add('hidden');
+        }
+
+        function _setHistorySearchDisabled(disabled) {
+            var btnSingle = document.getElementById('btnSearchSingle');
+            var btnRange = document.getElementById('btnSearchRange');
+            if (btnSingle) {
+                btnSingle.disabled = disabled;
+                btnSingle.classList.toggle('opacity-40', disabled);
+                btnSingle.classList.toggle('cursor-not-allowed', disabled);
+            }
+            if (btnRange) {
+                btnRange.disabled = disabled;
+                btnRange.classList.toggle('opacity-40', disabled);
+                btnRange.classList.toggle('cursor-not-allowed', disabled);
+            }
+        }
+
+        function showHistoryToast(msg, icon) {
+            var toast = document.getElementById('historyToast');
+            document.getElementById('historyToastIcon').innerText = icon || '⏳';
+            document.getElementById('historyToastText').innerText = msg;
+            toast.classList.remove('hidden');
+        }
+        function hideHistoryToast(delay) {
+            setTimeout(function() {
+                document.getElementById('historyToast').classList.add('hidden');
+            }, delay || 0);
+        }
+
+        function preloadHistoryBackground() {
+            if (_historyPreloaded) return;
+            _historyPreloaded = true;
+
+            var toFetch = [];
+            var now = new Date();
+            for (var i = 1; i <= 30; i++) {
+                var d = new Date(now);
+                d.setDate(d.getDate() - i);
+                var dateRaw = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                if (historyCache[dateRaw] && (Date.now() - historyCache[dateRaw].ts) < HISTORY_CACHE_TTL) continue;
+                var dayType = getDateType(dateRaw);
+                if (dayType.type !== 'KERJA') continue;
+                toFetch.push(dateRaw);
+            }
+
+            if (toFetch.length === 0) return; // semua dah cached, tak perlu toast
+
+            showHistoryToast('Menyediakan data 30 hari...', '⏳');
+            _setHistorySearchDisabled(true);
+
+            callGAS("getHistoryRange", { dates: toFetch }, function(res) {
+                if (res.status === 'SUCCESS') {
+                    res.results.forEach(function(r) {
+                        historyCache[r.dateRaw] = { data: r, ts: Date.now() };
+                    });
+                }
+                _setHistorySearchDisabled(false);
+                showHistoryToast('Data sedia — carian akan jadi laju!', '✅');
+                hideHistoryToast(2500);
+            }, function() {
+                _setHistorySearchDisabled(false);
+                hideHistoryToast(0);
+            });
+        }
+
         function loadHistoryData() {
             var dateVal = document.getElementById('historyDateInput').value;
             if (!dateVal) { alert("Sila pilih tarikh dulu!"); return; }
@@ -2033,7 +2174,7 @@
                 return;
             }
 
-            // Guna cache kalau ada
+            // Guna cache kalau ada — instant
             if (historyCache[dateVal] && (Date.now() - historyCache[dateVal].ts) < HISTORY_CACHE_TTL) {
                 globalHistoryData = [historyCache[dateVal].data];
                 renderHistoryPage();
@@ -2042,6 +2183,8 @@
                 return;
             }
 
+            // Takda cache — show skeleton, then GAS call
+            showHistorySkeleton(1);
             callGAS("getHistoryRange", { dates: [dateVal] }, function(res) {
                 if (res.status === 'SUCCESS' && res.results.length > 0) {
                     var result = res.results[0];
@@ -2103,8 +2246,11 @@
                 btn.disabled = false;
             }
 
-            // Kalau tiada yang perlu di-fetch — terus render
+            // Kalau tiada yang perlu di-fetch — terus render (instant dari cache)
             if (toFetch.length === 0) { finalize(); return; }
+
+            // Ada yang perlu fetch — show skeleton
+            showHistorySkeleton(toFetch.length);
 
             // SATU GAS call untuk semua tarikh kerja yang belum dicache
             callGAS("getHistoryRange", { dates: toFetch }, function(res) {
@@ -2628,7 +2774,14 @@
         // ==========================================
         // LAPORAN KELEWATAN
         // ==========================================
+        var _laporanJump = null; // { staffName, dateFrom, dateTo } bila jump dari Surat Amaran
+
         function initLaporanLewat() {
+            // Reset paparan — filter bar nampak, banner sorok (kecuali kalau jump range di bawah)
+            if (!_laporanJump) {
+                document.getElementById('llFilterBar').classList.remove('hidden');
+                document.getElementById('llRangeBanner').classList.add('hidden');
+            }
             // Set default bulan = bulan semasa
             var now = new Date();
             var m = String(now.getMonth() + 1).padStart(2, '0');
@@ -2645,16 +2798,49 @@
                         select.add(opt);
                     });
             }
+            function afterFill() {
+                if (_laporanJump) { var j = _laporanJump; _laporanJump = null; loadLaporanRange(j.staffName, j.dateFrom, j.dateTo); }
+            }
             if (globalStaffList.length > 0) {
                 fillLLStaff(globalStaffList);
+                afterFill();
             } else {
                 callGAS("getStaffManagementData", {}, function(res) {
-                    if (res.status === 'SUCCESS') {
-                        globalStaffList = res.data;
-                        fillLLStaff(res.data);
-                    }
+                    if (res.status === 'SUCCESS') { globalStaffList = res.data; fillLLStaff(res.data); }
+                    afterFill();
                 });
             }
+        }
+
+        function _fmtDmy(ymdStr) {
+            var p = ymdStr.split('-');
+            return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : ymdStr;
+        }
+
+        // Mode date-range (tempoh cooldown) — dipanggil bila jump dari Surat Amaran
+        function loadLaporanRange(staffName, dateFrom, dateTo) {
+            document.getElementById('llStaffSelect').value = staffName;
+            document.getElementById('llFilterBar').classList.add('hidden'); // sorok month picker
+            document.getElementById('llRangeBanner').classList.remove('hidden');
+            document.getElementById('llRangeBannerText').innerHTML = '📊 Kelewatan <strong>' + staffName + '</strong> sepanjang tempoh cooldown: <strong>' + _fmtDmy(dateFrom) + ' – ' + _fmtDmy(dateTo) + '</strong>';
+
+            var cacheKey = 'llrng:' + staffName + '|' + dateFrom + '|' + dateTo;
+            var _c = _qcGet(cacheKey);
+            if (_c) { renderLaporanResult(_c); return; }
+
+            var tbody = document.getElementById('llTable');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-yellow-500 animate-pulse">Menarik data...</td></tr>';
+            document.getElementById('llSummary').classList.add('hidden');
+            callGAS("getLaporanKelewatan", { staffName: staffName, dateFrom: dateFrom, dateTo: dateTo }, function(res) {
+                _qcSet(cacheKey, res);
+                renderLaporanResult(res);
+            });
+        }
+
+        function clearLaporanRange() {
+            document.getElementById('llRangeBanner').classList.add('hidden');
+            document.getElementById('llFilterBar').classList.remove('hidden'); // tunjuk balik month picker
+            loadLaporanLewat();
         }
 
         // _laporanCache — now uses _qStore via _qcGet/_qcSet
@@ -2667,7 +2853,7 @@
             document.getElementById('llAvgMinit').innerText = res.summary.avgMinit + ' min';
             document.getElementById('llSummary').classList.remove('hidden');
             tbody.innerHTML = "";
-            if (res.records.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Tiada rekod kelewatan pada bulan ini.</td></tr>'; return; }
+            if (res.records.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Tiada rekod kelewatan dalam tempoh dipilih.</td></tr>'; return; }
             res.records.forEach(function(r) {
                 var minitColor = r.minitLewat >= 30 ? 'text-red-400' : r.minitLewat >= 15 ? 'text-yellow-400' : 'text-orange-400';
                 tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
@@ -2679,6 +2865,7 @@
         }
 
         function loadLaporanLewat() {
+            document.getElementById('llRangeBanner').classList.add('hidden'); // keluar mod range
             var monthVal = document.getElementById('llMonth').value;
             if (!monthVal) { alert("Sila pilih bulan."); return; }
             var parts = monthVal.split('-');
@@ -2718,25 +2905,22 @@
         // SURAT AMARAN
         // ==========================================
         function loadWarningSettingsUI() {
-            // Baca dari cache config dulu — instant
-            if (isCacheValid('config') && appCache.config.data) {
-                var d = appCache.config.data;
-                document.getElementById('warn_triggerLewat').checked = d.warningTriggerLewat || false;
-                document.getElementById('warn_triggerTidakHadir').checked = d.warningTriggerTidakHadir || false;
-                document.getElementById('warn_threshold').value = String(d.warningThreshold || 3);
-                document.getElementById('warn_autoPdf').checked = d.warningAutoPdf || false;
-                document.getElementById('warn_templateUrl').value = d.warningTemplateUrl || '';
-                return;
-            }
-            // Fallback: GAS call
             callGAS("getWarningSettings", {}, function(res) {
                 if (res.status !== 'SUCCESS') return;
                 var d = res.data;
                 document.getElementById('warn_triggerLewat').checked = d.triggerLewat;
                 document.getElementById('warn_triggerTidakHadir').checked = d.triggerTidakHadir;
                 document.getElementById('warn_threshold').value = String(d.threshold);
+                document.getElementById('warn_cooldown').value = String(d.cooldown || '14');
                 document.getElementById('warn_autoPdf').checked = d.autoPdf;
                 document.getElementById('warn_templateUrl').value = d.templateUrl || '';
+                // Tarikh mula — kalau kosong, default hari ni (admin boleh ubah)
+                if (d.startDate) {
+                    document.getElementById('warn_startDate').value = d.startDate;
+                } else {
+                    var now = new Date();
+                    document.getElementById('warn_startDate').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+                }
             });
         }
 
@@ -2747,11 +2931,14 @@
                 triggerLewat: document.getElementById('warn_triggerLewat').checked,
                 triggerTidakHadir: document.getElementById('warn_triggerTidakHadir').checked,
                 threshold: parseInt(document.getElementById('warn_threshold').value),
+                cooldown: String(parseInt(document.getElementById('warn_cooldown').value) || 14),
                 autoPdf: document.getElementById('warn_autoPdf').checked,
-                templateUrl: document.getElementById('warn_templateUrl').value.trim()
+                templateUrl: document.getElementById('warn_templateUrl').value.trim(),
+                startDate: document.getElementById('warn_startDate').value
             };
             callGAS("saveWarningSettings", { payload: payload }, function(res) {
                 btn.innerText = "💾 Simpan Tetapan Amaran"; btn.disabled = false;
+                _qcDel('sa:state'); // setting berubah → clear cache report
                 var msg = document.getElementById('warnSaveMsg');
                 msg.classList.remove('hidden');
                 setTimeout(function() { msg.classList.add('hidden'); }, 3000);
@@ -2759,116 +2946,105 @@
         }
 
         function initSuratAmaran() {
-            var now = new Date();
-            document.getElementById('saMonth').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            loadSuratAmaranReport(false);
         }
 
-        // _suratAmaranCache — now uses _qStore via _qcGet/_qcSet
-
-        function renderSuratAmaranResult(res, month, year) {
+        function renderSuratAmaranResult(res) {
             var tbody = document.getElementById('saTable');
-            if (res.status !== 'SUCCESS') { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500">' + res.message + '</td></tr>'; return; }
-            var data = res.data; var threshold = res.threshold;
-            var layak = data.filter(function(s) { return s.isLayak; }).length;
-            var hasSurat = data.filter(function(s) { return s.hasSurat; }).length;
+            if (res.status !== 'SUCCESS') { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500">' + (res.message || 'Ralat') + '</td></tr>'; return; }
+            var data = (res.data || []).slice(); var threshold = res.threshold;
+            var layak = data.filter(function(s){ return s.state === 'LAYAK'; }).length;
+            var cooldown = data.filter(function(s){ return s.state === 'COOLDOWN'; }).length;
+
             var sum = document.getElementById('saSummary');
             sum.innerHTML =
                 '<div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Staff Terlibat</p><p class="text-2xl font-bold text-white">' + data.length + '</p></div>' +
                 '<div class="bg-gray-800 rounded-xl border border-red-900/50 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Layak Surat</p><p class="text-2xl font-bold text-red-400">' + layak + '</p></div>' +
-                '<div class="bg-gray-800 rounded-xl border border-green-900/50 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Surat Dijana</p><p class="text-2xl font-bold text-green-400">' + hasSurat + '</p></div>' +
+                '<div class="bg-gray-800 rounded-xl border border-orange-900/50 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Dalam Cooldown</p><p class="text-2xl font-bold text-orange-400">' + cooldown + '</p></div>' +
                 '<div class="bg-gray-800 rounded-xl border border-gray-700 p-4 text-center"><p class="text-gray-400 text-xs font-bold uppercase mb-1">Threshold</p><p class="text-2xl font-bold text-yellow-400">' + threshold + 'x</p></div>';
             sum.classList.remove('hidden');
+
             tbody.innerHTML = '';
-            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500">Tiada violations pada bulan ini.</td></tr>'; return; }
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">Tiada violations — semua staff bersih ✅</td></tr>'; return; }
+
+            // Susun: cooldown → layak → counting (count desc)
+            var rank = { 'COOLDOWN': 0, 'LAYAK': 1, 'COUNTING': 2 };
+            data.sort(function(a, b){ return rank[a.state] !== rank[b.state] ? rank[a.state] - rank[b.state] : (b.count || 0) - (a.count || 0); });
+
+            var btn = 'inline-flex items-center justify-center px-3 py-1.5 rounded text-xs font-bold transition';
             data.forEach(function(s) {
-                var statusHtml = s.isReset ? '<span class="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-xs font-bold">RESET</span>'
-                    : s.hasSurat ? '<a href="' + s.suratUrl + '" target="_blank" class="bg-green-900 text-green-300 px-2 py-0.5 rounded text-xs font-bold border border-green-700">SURAT ✓</a>'
-                    : s.isLayak ? '<span class="bg-red-900 text-red-300 px-2 py-0.5 rounded text-xs font-bold border border-red-700">⚠️ LAYAK</span>'
-                    : '<span class="bg-yellow-900/40 text-yellow-400 px-2 py-0.5 rounded text-xs font-bold">' + s.total + '/' + threshold + '</span>';
-                var safeNama = s.nama.replace(/'/g,"\\'");
-                var btnBase = 'inline-flex items-center justify-center px-3 py-1.5 rounded text-xs font-bold transition w-28';
-                var btnSm   = 'inline-flex items-center justify-center px-3 py-1.5 rounded text-xs font-bold transition w-20';
-                var col1 = s.hasSurat
-                    ? '<a href="' + s.suratUrl + '" target="_blank" class="' + btnBase + ' bg-green-800 hover:bg-green-700 text-white">⬇️ Download</a>'
-                    : s.isLayak
-                    ? '<button onclick="doGenerateSurat(\'' + safeNama + '\',' + month + ',' + year + ')" class="' + btnBase + ' bg-blue-700 hover:bg-blue-600 text-white">📄 Jana PDF</button>'
-                    : '<span class="' + btnBase + ' cursor-default text-gray-600">—</span>';
-                var iconSemula = s.hasSurat
-                    ? '<button onclick="doGenerateSurat(\'' + safeNama + '\',' + month + ',' + year + ')" title="Jana Semula" class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm transition flex-shrink-0">🔄</button>'
-                    : '';
-                var col2 = s.isReset
-                    ? '<span class="' + btnSm + ' cursor-default text-gray-600">—</span>'
-                    : '<button onclick="doResetWarning(\'' + safeNama + '\',' + month + ',' + year + ')" class="' + btnSm + ' bg-gray-700 hover:bg-gray-600 text-gray-300">Reset</button>';
-                var aksiHtml = '<div class="flex gap-2 items-center justify-end">' + col1 + iconSemula + col2 + '</div>';
+                var safeNama = s.nama.replace(/'/g, "\\'");
+                var subLabel = '';
+                if (s.state !== 'COOLDOWN') {
+                    subLabel = (s.lewat > 0 ? (s.lewat + ' lewat') : '') + (s.lewat > 0 && s.tidakHadir > 0 ? ' · ' : '') + (s.tidakHadir > 0 ? (s.tidakHadir + ' t.hadir') : '');
+                }
+                var violCell, statusHtml, aksiHtml;
+
+                if (s.state === 'COOLDOWN') {
+                    violCell = '<span class="text-gray-500 text-xs">—</span>';
+                    statusHtml = '<span class="bg-orange-900/40 text-orange-300 px-2 py-1 rounded text-xs font-bold border border-orange-700/60">🔴 COOLDOWN sampai ' + s.cooldownTamat + '</span>' +
+                        '<div class="text-[11px] text-gray-400 mt-1">' + (s.lateDays || 0) + ' hari lewat · <span class="text-yellow-400 font-bold">' + (s.lateMin || 0) + ' min</span></div>';
+                    var dl = s.suratUrl
+                        ? '<a href="' + s.suratUrl + '" target="_blank" class="' + btn + ' bg-green-800 hover:bg-green-700 text-white w-28">⬇️ Surat</a>'
+                        : '<span class="' + btn + ' w-28 text-gray-600 cursor-default">—</span>';
+                    aksiHtml = '<div class="flex gap-2 items-center justify-end">' + dl +
+                        '<button onclick="jumpToLaporanLewat(\'' + safeNama + '\',\'' + s.cooldownStart + '\',\'' + s.cooldownEnd + '\')" class="' + btn + ' bg-blue-700 hover:bg-blue-600 text-white w-32">📊 Lihat Lewat</button></div>';
+                } else if (s.state === 'LAYAK') {
+                    violCell = '<span class="font-bold text-red-400 text-lg">' + s.count + '</span><span class="text-gray-500">/' + threshold + '</span>';
+                    statusHtml = '<span class="bg-red-900 text-red-300 px-2 py-1 rounded text-xs font-bold border border-red-700">⚠️ LAYAK SURAT</span>' +
+                        (subLabel ? '<div class="text-[11px] text-gray-500 mt-1">' + subLabel + '</div>' : '');
+                    aksiHtml = '<div class="flex justify-end"><button onclick="doGenerateSurat(\'' + safeNama + '\')" class="' + btn + ' bg-blue-700 hover:bg-blue-600 text-white w-32">📄 Jana Surat</button></div>';
+                } else {
+                    violCell = '<span class="font-bold text-yellow-400 text-lg">' + s.count + '</span><span class="text-gray-500">/' + threshold + '</span>';
+                    statusHtml = '<span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs font-bold">Belum cukup</span>' +
+                        (subLabel ? '<div class="text-[11px] text-gray-500 mt-1">' + subLabel + '</div>' : '');
+                    aksiHtml = '<div class="flex justify-end"><span class="text-gray-600 text-xs">—</span></div>';
+                }
+
                 tbody.innerHTML += '<tr class="hover:bg-gray-700/30 border-b border-gray-700/50 transition">' +
                     '<td class="p-4"><div class="font-bold text-white text-sm">' + s.nama + '</div><div class="text-xs text-gray-500">' + s.jawatan + '</div></td>' +
-                    '<td class="p-4 text-center"><span class="font-bold ' + (s.lewat > 0 ? 'text-orange-400' : 'text-gray-600') + '">' + s.lewat + 'x</span></td>' +
-                    '<td class="p-4 text-center"><span class="font-bold ' + (s.tidakHadir > 0 ? 'text-red-400' : 'text-gray-600') + '">' + s.tidakHadir + 'x</span></td>' +
-                    '<td class="p-4 text-center"><span class="font-bold text-white text-lg">' + s.total + '</span></td>' +
-                    '<td class="p-4 text-center">' + statusHtml + '</td>' +
-                    '<td class="p-4 text-center">' + aksiHtml + '</td></tr>';
+                    '<td class="p-4 text-center">' + violCell + '</td>' +
+                    '<td class="p-4">' + statusHtml + '</td>' +
+                    '<td class="p-4">' + aksiHtml + '</td></tr>';
             });
         }
 
-        function loadSuratAmaranReport() {
-            var monthVal = document.getElementById('saMonth').value;
-            if (!monthVal) { alert("Sila pilih bulan."); return; }
-            var parts = monthVal.split('-');
-            var year = parseInt(parts[0]), month = parseInt(parts[1]);
-            var cacheKey = month + '|' + year;
-
-            // Check cache — instant
-            var _sc = _qcGet('sa:' + cacheKey); if (_sc) { renderSuratAmaranResult(_sc, month, year); return; }
-
+        function loadSuratAmaranReport(force) {
+            if (!force) {
+                var c = _qcGet('sa:state');
+                if (c) { renderSuratAmaranResult(c); return; }
+            }
             var tbody = document.getElementById('saTable');
-            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-yellow-500 animate-pulse">Menganalisis data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-yellow-500 animate-pulse">Menganalisis data...</td></tr>';
             document.getElementById('saSummary').classList.add('hidden');
-
-            callGAS("getWarningReport", { month: month, year: year }, function(res) {
-                _qcSet('sa:' + cacheKey, res);
-                renderSuratAmaranResult(res, month, year);
-            });
+            _qcDel('sa:state');
+            function doFetch() {
+                callGAS("getWarningReport", {}, function(res) {
+                    _qcSet('sa:state', res);
+                    renderSuratAmaranResult(res);
+                });
+            }
+            // Force = clear GAS server cache dulu (untuk reflect perubahan manual dalam sheet)
+            if (force) { callGAS("clearWarningCache", {}, doFetch); }
+            else { doFetch(); }
         }
 
-        function toggleSaMenu(btn) {
-            // Close all other menus first
-            document.querySelectorAll('.sa-menu').forEach(function(m) { if (m !== btn.nextElementSibling) m.classList.add('hidden'); });
-            btn.nextElementSibling.classList.toggle('hidden');
-        }
-        function closeSaMenu(el) {
-            var menu = el.closest('.sa-menu');
-            if (menu) menu.classList.add('hidden');
-        }
-        // Close menu bila click luar
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.relative')) document.querySelectorAll('.sa-menu').forEach(function(m) { m.classList.add('hidden'); });
-        });
-
-        function doGenerateSurat(staffName, month, year) {
-            if (!confirm("Jana surat amaran untuk " + staffName + "?")) return;
-            callGAS("generateSuratAmaran", { staffName: staffName, month: month, year: year }, function(res) {
+        function doGenerateSurat(staffName) {
+            if (!confirm("Jana surat amaran untuk " + staffName + "?\n\nCooldown akan bermula selepas surat dijana.")) return;
+            callGAS("generateSuratAmaran", { staffName: staffName }, function(res) {
                 if (res.status === 'SUCCESS') {
-                    alert("Surat berjaya dijana! Klik OK untuk download.");
+                    alert("✅ " + (res.message || "Surat berjaya dijana") + "\n\nKlik OK untuk download.");
                     window.open(res.url, '_blank');
-                    // Clear GAS server cache dulu, pastu reload
-                    _qcDel('sa:' + month + '|' + year);
-                    callGAS("clearWarningCache", { month: month, year: year }, function() {
-                        loadSuratAmaranReport();
-                    });
+                    _qcDel('sa:state');
+                    callGAS("clearWarningCache", {}, function() { loadSuratAmaranReport(true); });
                 } else { alert("Gagal: " + res.message); }
             });
         }
 
-        function doResetWarning(staffName, month, year) {
-            if (!confirm("Reset rekod amaran " + staffName + " untuk bulan ini?")) return;
-            callGAS("resetStaffWarning", { staffName: staffName, month: month, year: year }, function(res) {
-                if (res.status === 'SUCCESS') {
-                    _qcDel('sa:' + month + '|' + year);
-                    callGAS("clearWarningCache", { month: month, year: year }, function() {
-                        loadSuratAmaranReport();
-                    });
-                } else { alert("Gagal: " + res.message); }
-            });
+        // Jump ke Laporan Kelewatan dengan pre-filter staff + tempoh cooldown
+        function jumpToLaporanLewat(staffName, dateFrom, dateTo) {
+            _laporanJump = { staffName: staffName, dateFrom: dateFrom, dateTo: dateTo };
+            switchPage('laporanLewat');
         }
 
         function loadAllLeaveLog(forceRefresh) {
@@ -3937,6 +4113,10 @@
     </div>
 </div>
 
+    <div id="historyToast" class="hidden">
+        <span id="historyToastIcon">⏳</span>
+        <span id="historyToastText">Menyediakan data 30 hari...</span>
+    </div>
 </body>
 
 </html>
