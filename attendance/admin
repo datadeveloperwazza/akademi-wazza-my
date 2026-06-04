@@ -277,18 +277,6 @@
             animation: shimmer 1.5s infinite;
             border-radius: 6px;
         }
-
-        /* Toast notification */
-        #historyToast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            background: #1f2937; border: 1px solid #374151; color: #d1d5db;
-            padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            transition: opacity 0.4s, transform 0.4s;
-            z-index: 9999;
-        }
-        #historyToast.hidden { opacity: 0; transform: translateX(-50%) translateY(12px); pointer-events: none; }
     </style>
 </head>
 
@@ -1954,7 +1942,6 @@
                 else { loadStaffManagement(); }
             }
             if (page === 'outstation') loadOutstationPage();
-            if (page === 'history') preloadHistoryBackground();
             if (page === 'laporanLewat') initLaporanLewat();
             if (page === 'suratAmaran') initSuratAmaran();
             if (page === 'config') loadWarningSettingsUI();
@@ -2065,8 +2052,6 @@
             return { type: 'KERJA', holidayName: null };
         }
 
-        var _historyPreloaded = false;
-
         function showHistorySkeleton(days) {
             var container = document.getElementById('historyResult');
             var n = Math.min(days || 3, 5);
@@ -2087,69 +2072,6 @@
             container.innerHTML = html;
             container.classList.remove('hidden');
             document.getElementById('historyEmptyState').classList.add('hidden');
-        }
-
-        function _setHistorySearchDisabled(disabled) {
-            var btnSingle = document.getElementById('btnSearchSingle');
-            var btnRange = document.getElementById('btnSearchRange');
-            if (btnSingle) {
-                btnSingle.disabled = disabled;
-                btnSingle.classList.toggle('opacity-40', disabled);
-                btnSingle.classList.toggle('cursor-not-allowed', disabled);
-            }
-            if (btnRange) {
-                btnRange.disabled = disabled;
-                btnRange.classList.toggle('opacity-40', disabled);
-                btnRange.classList.toggle('cursor-not-allowed', disabled);
-            }
-        }
-
-        function showHistoryToast(msg, icon) {
-            var toast = document.getElementById('historyToast');
-            document.getElementById('historyToastIcon').innerText = icon || '⏳';
-            document.getElementById('historyToastText').innerText = msg;
-            toast.classList.remove('hidden');
-        }
-        function hideHistoryToast(delay) {
-            setTimeout(function() {
-                document.getElementById('historyToast').classList.add('hidden');
-            }, delay || 0);
-        }
-
-        function preloadHistoryBackground() {
-            if (_historyPreloaded) return;
-            _historyPreloaded = true;
-
-            var toFetch = [];
-            var now = new Date();
-            for (var i = 1; i <= 30; i++) {
-                var d = new Date(now);
-                d.setDate(d.getDate() - i);
-                var dateRaw = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-                if (historyCache[dateRaw] && (Date.now() - historyCache[dateRaw].ts) < HISTORY_CACHE_TTL) continue;
-                var dayType = getDateType(dateRaw);
-                if (dayType.type !== 'KERJA') continue;
-                toFetch.push(dateRaw);
-            }
-
-            if (toFetch.length === 0) return; // semua dah cached, tak perlu toast
-
-            showHistoryToast('Menyediakan data 30 hari...', '⏳');
-            _setHistorySearchDisabled(true);
-
-            callGAS("getHistoryRange", { dates: toFetch }, function(res) {
-                if (res.status === 'SUCCESS') {
-                    res.results.forEach(function(r) {
-                        historyCache[r.dateRaw] = { data: r, ts: Date.now() };
-                    });
-                }
-                _setHistorySearchDisabled(false);
-                showHistoryToast('Data sedia — carian akan jadi laju!', '✅');
-                hideHistoryToast(2500);
-            }, function() {
-                _setHistorySearchDisabled(false);
-                hideHistoryToast(0);
-            });
         }
 
         function loadHistoryData() {
@@ -4113,10 +4035,6 @@
     </div>
 </div>
 
-    <div id="historyToast" class="hidden">
-        <span id="historyToastIcon">⏳</span>
-        <span id="historyToastText">Menyediakan data 30 hari...</span>
-    </div>
 </body>
 
 </html>
