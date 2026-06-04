@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Masuk – Wazza Academy</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f; --bg2: #12121a; --surface: #1a1a26;
+      --border: rgba(255,255,255,0.08); --text: #e8e8ef; --text2: rgba(255,255,255,0.55);
+      --green: #34A853;
+      --gradient: linear-gradient(135deg, #34A853, #4285F4, #FBBC04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.6; }
+    h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; line-height: 1.15; }
+    a { color: inherit; text-decoration: none; }
+    .gradient-text { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      position: relative; overflow: hidden;
+    }
+    .bg-grid {
+      position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 36px 36px; pointer-events: none;
+    }
+    .bg-glow {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(52,168,83,0.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 440px;
+      padding: 2.8rem 2.4rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      text-align: center; margin: 1.5rem;
+    }
+    .login-logo {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 2.2rem; text-decoration: none;
+    }
+    .login-logo .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 1.25rem; color: var(--text);
+    }
+    .course-visual { margin-bottom: 2rem; }
+    .course-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(52,168,83,0.08);
+      border: 1px solid rgba(52,168,83,0.2);
+      color: var(--green); padding: 0.35rem 0.9rem;
+      border-radius: 50px; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .course-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.85rem; font-weight: 800;
+      letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 0.5rem;
+    }
+    .course-sub { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+    .login-divider { height: 1px; background: var(--border); margin: 1.8rem 0; }
+    .login-label {
+      display: block; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--text2); text-align: left; margin-bottom: 0.45rem;
+    }
+    .login-input-wrap { position: relative; margin-bottom: 1.2rem; }
+    .login-input {
+      width: 100%; padding: 0.85rem 3rem 0.85rem 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 1rem;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 3px;
+    }
+    .login-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(52,168,83,0.12);
+    }
+    .login-input::placeholder { color: rgba(255,255,255,0.2); letter-spacing: 0; }
+    .toggle-pw {
+      position: absolute; right: 0.9rem; top: 50%;
+      transform: translateY(-50%); background: none; border: none;
+      cursor: pointer; color: var(--text2); font-size: 1.1rem;
+      padding: 0; line-height: 1; transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+    .btn-login {
+      width: 100%; padding: 0.9rem;
+      background: var(--green); color: #fff; border: none;
+      border-radius: 10px; font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-login:hover:not(:disabled) {
+      background: #2d9247; transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(52,168,83,0.3);
+    }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-back {
+      display: block; margin-top: 1.4rem;
+      font-size: 0.8rem; color: var(--text2); transition: color 0.2s;
+    }
+    .login-back:hover { color: var(--green); }
+    #auth-toast {
+      display: none; position: fixed;
+      bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: #ea4335; color: #fff;
+      padding: 0.75rem 1.5rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 600; z-index: 999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4); white-space: nowrap;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-6px); }
+      40%       { transform: translateX(6px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.4s ease; }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="login-card" id="login-card">
+
+    <a href="/" class="login-logo">
+      <span>
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+          <rect x="2" y="2" width="24" height="24" rx="6" fill="url(#lg1)" />
+          <path d="M8 10h12M8 14h8M8 18h10" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+          <defs>
+            <linearGradient id="lg1" x1="2" y1="2" x2="26" y2="26">
+              <stop stop-color="#34A853" />
+              <stop offset="1" stop-color="#0D652D" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <span class="logo-text">Wazza<span style="color:#34A853">.</span>Academy</span>
+    </a>
+
+    <div class="course-visual">
+      <div class="course-badge">
+        <span>●</span> <span id="badge-text">Memuat...</span>
+      </div>
+      <div class="course-title" id="course-headline"></div>
+      <div class="course-sub" id="course-sub">Memuat...</div>
+    </div>
+
+    <div class="login-divider"></div>
+
+    <label class="login-label" for="login-password">Kata Laluan</label>
+    <div class="login-input-wrap">
+      <input
+        type="password" id="login-password" class="login-input"
+        placeholder="Masukkan kata laluan" autocomplete="current-password" />
+      <button class="toggle-pw" type="button" onclick="togglePassword()">👁</button>
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="handleLogin()">
+      Masuk ke Kelas →
+    </button>
+
+    <a href="/" class="login-back">← Kembali ke Laman Utama</a>
+  </div>
+
+  <div id="auth-toast"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('course') || '';
+
+    if (!courseId) window.location.replace('/');
+
+    const _initSess = JSON.parse(localStorage.getItem('wazza_session') || '{}');
+    if (_initSess.unlocked && _initSess.unlocked.includes(courseId)) {
+      window.location.replace('/course.html?course=' + courseId);
+    }
+
+    let _cfg = null;
+
+    async function loadConfig() {
+      if (_cfg) return _cfg;
+      const res = await fetch(courseId + '/config.json');
+      _cfg = await res.json();
+      applyBranding(_cfg);
+      return _cfg;
+    }
+
+    function applyBranding(cfg) {
+      document.title = 'Log Masuk – ' + (cfg.badge || 'Wazza Academy');
+      document.getElementById('badge-text').textContent = cfg.badge || '';
+      const headlineEl = document.getElementById('course-headline');
+      if (cfg.headlineHighlight) {
+        headlineEl.innerHTML =
+          (cfg.headlinePre || '') +
+          '<br><span class="gradient-text">' + cfg.headlineHighlight + '</span> ' +
+          (cfg.headlinePost || '');
+      } else {
+        headlineEl.textContent = cfg.headlinePre || '';
+      }
+      document.getElementById('course-sub').textContent = cfg.sub || '';
+    }
+
+    loadConfig().catch(() => {
+      document.getElementById('badge-text').textContent = 'Kursus';
+      document.getElementById('course-headline').textContent = 'Log masuk untuk teruskan.';
+      document.getElementById('course-sub').textContent = 'Masukkan kata laluan untuk akses kandungan kelas.';
+    });
+
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function showToast(msg, isSuccess) {
+      const t = document.getElementById('auth-toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      t.style.background = isSuccess ? '#34A853' : '#ea4335';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function togglePassword() {
+      const input = document.getElementById('login-password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    async function handleLogin() {
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('login-btn');
+      const card = document.getElementById('login-card');
+
+      if (!password) {
+        showToast('Sila masukkan kata laluan.');
+        document.getElementById('login-password').focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sila tunggu...';
+
+      try {
+        const cfg = await loadConfig();
+        const inputHash = await hashPassword(password);
+
+        if (inputHash !== cfg.passwordHash) {
+          card.classList.add('shake');
+          setTimeout(() => card.classList.remove('shake'), 450);
+          showToast('Kata laluan salah. Cuba semula.');
+          document.getElementById('login-password').value = '';
+          document.getElementById('login-password').focus();
+          btn.disabled = false;
+          btn.textContent = 'Masuk ke Kelas →';
+          return;
+        }
+
+        const sess = JSON.parse(localStorage.getItem('wazza_session') || '{}');
+        if (!sess.unlocked) sess.unlocked = [];
+        if (!sess.unlocked.includes(courseId)) sess.unlocked.push(courseId);
+        localStorage.setItem('wazza_session', JSON.stringify(sess));
+
+        showToast('Berjaya! Mengalihkan...', true);
+        setTimeout(() => window.location.href = '/course.html?course=' + courseId, 800);
+      } catch (e) {
+        showToast('Ralat sambungan. Cuba semula.');
+        btn.disabled = false;
+        btn.textContent = 'Masuk ke Kelas →';
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+</body>
+
+</html>

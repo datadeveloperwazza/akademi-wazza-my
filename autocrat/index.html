@@ -38,10 +38,11 @@
 
 <body>
     <script>
-        if (localStorage.getItem('wazza_session')) {
-            window.location.replace('course.html?id=senarai-video-autocrat');
+        const sess = JSON.parse(localStorage.getItem('wazza_session') || '{}');
+        if (sess.unlocked && sess.unlocked.includes('autocrat')) {
+            window.location.replace('/course.html?course=autocrat');
         } else {
-            window.location.replace('login.html');
+            window.location.replace('/login.html?course=autocrat');
         }
     </script>
 </body>

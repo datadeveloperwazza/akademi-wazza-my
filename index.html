@@ -45,6 +45,20 @@
       transition: background 0.15s;
     }
     .btn:hover { background: #2f4ee0; }
+    .btn-outline {
+      display: block;
+      background: transparent;
+      color: #3d5cf5;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1.5px solid #3d5cf5;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-outline:hover { background: #3d5cf5; color: #fff; }
 
     .skeleton {
       background: linear-gradient(90deg, #e4e9f8 25%, #d6dcf2 50%, #e4e9f8 75%);
@@ -110,7 +124,8 @@
             <div style="padding: 18px; display:flex; flex-direction:column; flex:1; gap:10px;">
               <h2 style="font-size:0.95rem; font-weight:700; color:#1a2562; line-height:1.4;">${p.title}</h2>
               <p style="font-size:0.8rem; color:#7a87b8; line-height:1.6; flex:1;">${p.description}</p>
-              <a href="${p.link_url}" target="_blank" rel="noopener" class="btn">${p.button_text}</a>
+              ${p.lms_url ? `<a href="${p.lms_url}" class="btn">Masuk Kelas →</a>` : ''}
+              <a href="${p.link_url}" target="_blank" rel="noopener" class="btn-outline">${p.button_text}</a>
             </div>
           `;
           grid.appendChild(card);

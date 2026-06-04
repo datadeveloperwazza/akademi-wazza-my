@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wazza Digital Camp</title>
+  <style>
+    body { background: #08080d; }
+  </style>
+</head>
+<body>
+  <script>
+    const sess = JSON.parse(localStorage.getItem('wazza_session') || '{}');
+    if (sess.unlocked && sess.unlocked.includes('wdc')) {
+      window.location.replace('/course.html?course=wdc');
+    } else {
+      window.location.replace('/login.html?course=wdc');
+    }
+  </script>
+</body>
+</html>

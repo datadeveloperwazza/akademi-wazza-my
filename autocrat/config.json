@@ -1,3 +1,11 @@
 {
-  "passwordHash": "ada924c03e47f56e8c35472941157ea0cecf6f3dcee2006bdd7064aea87be8fa"
+  "passwordHash": "ada924c03e47f56e8c35472941157ea0cecf6f3dcee2006bdd7064aea87be8fa",
+  "courseId": "autocrat",
+  "badge": "AutoCrat Masterclass",
+  "headlinePre": "Jimatkan masa.",
+  "headlineHighlight": "AutoCrat",
+  "headlinePost": "buat kerja.",
+  "sub": "Masukkan kata laluan untuk akses kandungan kelas.",
+  "logo": "autocrat/wazza.autocrat.png",
+  "topbarTitle": "Modul Autocrat"
 }

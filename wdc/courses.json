@@ -1,0 +1,90 @@
+{
+  "courses": [
+    {
+      "id": "senarai-video-wdc",
+      "title": "Wazza Digital Camp: Google Sheets Series",
+      "category": "Google Sheets",
+      "description": "Modul lengkap Google Sheets berbahasa Melayu untuk bantu anda kuasai dari asas hingga automasi.",
+      "materials": [
+        {
+          "name": "Senarai Video Modul (PDF)",
+          "url": "https://drive.google.com/file/d/1Mnr-eTaVQb_fwJ-7a35iAUSr_O1UtIey/view",
+          "icon": "📄",
+          "label": "Muat Turun ↗"
+        },
+        {
+          "name": "Fail Nota - Index Function (PDF)",
+          "url": "https://drive.google.com/file/d/1hv_Sfz7YIvTYRjA1r-pQSauqDKmlWAyA/view",
+          "icon": "📄",
+          "label": "Muat Turun ↗"
+        }
+      ],
+      "sections": [
+        {
+          "title": "Modul 1 - Pengenalan",
+          "lessons": [
+            {
+              "id": "wdc-m1-01",
+              "title": "1.1 Kenali Google Sheets",
+              "duration": 9,
+              "videoUrl": "https://www.youtube.com/watch?v=QMZBxdYJZc0",
+              "description": "Video ini memperkenalkan Wazza Google Sheet Camp, sebuah program yang direka khas untuk meningkatkan kemahiran Google Sheet peserta daripada 'Zero to Hero'. Pengajar, Coach Waasil dan Coach Adli dari Wazza Digital, menekankan aplikasi praktikal Google Sheets, berdasarkan pengalaman mereka mengurus sejumlah besar data pelanggan dan jualan. Mereka menyerlahkan empat kelebihan utama Google Sheets. Video ini berfungsi sebagai modul pengenalan, menjanjikan pelajaran yang lebih mendalam untuk memperkasakan pengguna dengan keyakinan dan kemahiran dalam Google Sheets.",
+              "tip": "Google Sheets adalah percuma dan boleh diakses di mana-mana sahaja menggunakan akaun Google anda.",
+              "resources": []
+            }
+          ]
+        },
+        {
+          "title": "Modul 2 - Jom Mula!",
+          "lessons": [
+            {
+              "id": "wdc-m2-01",
+              "title": "2.1 Bina Fail Google Sheets",
+              "duration": 6,
+              "videoUrl": "https://www.youtube.com/watch?v=ywhEcmks5ys",
+              "description": "Tutorial komprehensif tentang cara membuka dan create fail dalam Google Sheets. Ia menekankan keperluan mempunyai akaun Gmail untuk mengakses Google Sheets dan memperkenalkan tiga kaedah utama untuk membuka atau create fail Google Sheets: melalui menu Google Apps, dengan menaip URL pintasan dan melalui Google Drive. Tutorial ini menyerlahkan petua praktikal seperti menyusun semula ikon Google Apps untuk kemudahan dan menggunakan ciri 'yang digunakan baru-baru ini' untuk mengakses fail dengan cepat.",
+              "tip": "Gunakan Google Chrome sebagai browser utama untuk pengalaman Google Sheets yang terbaik.",
+              "resources": []
+            },
+            {
+              "id": "wdc-m2-02",
+              "title": "2.2 Rename dan Organize File",
+              "duration": 5,
+              "videoUrl": "https://www.youtube.com/watch?v=wvp9E6WsTYY",
+              "description": "Tutorial ini menyediakan panduan yang jelas dan praktikal tentang cara mencari, menyusun, mengalih dan rename fail dalam Google Sheets dan Google Drive. Menekankan ciri penyimpanan automatik Google Sheets, DUA kaedah utama untuk mengalihkan fail sama ada secara direct dalam Google Drive atau melalui Google Sheets interface, dan menerangkan cara rename fail menggunakan Google Drive dan Google Sheets.",
+              "tip": "Google Sheets menyimpan fail anda secara automatik — anda tidak perlu tekan Ctrl+S seperti Microsoft Excel.",
+              "resources": []
+            },
+            {
+              "id": "wdc-m2-03",
+              "title": "2.3 Interface - Toolbar Menu, Shortcut Toolbar, Collaboration Tools, Formula Bar",
+              "duration": 10,
+              "videoUrl": "https://www.youtube.com/watch?v=ZnKDOesNyL4",
+              "description": "Pengenalan menyeluruh kepada Google Sheets, memfokuskan pada tools dan ciri asas untuk pengguna baharu. Ia menerangkan secara sistematik Sheets Home interface, menu toolbar, shortcut toolbar dan collaboration tools, menekankan kegunaan dan faedah praktikalnya. Tutorial ini menunjukkan cara Google Sheets memudahkan kerja berpasukan melalui perkongsian, ulasan dan real-time editing. Kandungan video ini disusun untuk membimbing beginner step-by-step daripada asas kepada fungsi yang lebih advance.",
+              "tip": "Shortcut toolbar di Google Sheets lebih ringkas berbanding Excel — mudah untuk pengguna baru bermula.",
+              "resources": []
+            },
+            {
+              "id": "wdc-m2-04",
+              "title": "2.4 Istilah Penting - Column, Row, Cell, Range",
+              "duration": 7,
+              "videoUrl": "https://www.youtube.com/watch?v=AY-RJJXaKrU",
+              "description": "Tutorial ini tentang komponen asas spreadsheet interface, khususnya memfokuskan pada konsep cell, column, row dan range. Empat elemen ini penting untuk mengatur, memasukkan dan memanipulasi data dalam perisian hamparan seperti Google Sheets atau Excel. Memahami istilah ini dan kaedah pengenalannya adalah penting untuk cekap bekerja. Video ini menekankan kepentingan mengenali kedudukan data dalam spreadsheet dengan menggabungkan huruf column dan nombor row dan menjelaskan perbezaan antara range cell dan berbilang cell terpilih yang tidak bersebelahan.",
+              "tip": "Gunakan Name Box (kiri atas) untuk navigate terus ke cell tertentu dengan menaip contohnya B9 dan tekan Enter.",
+              "resources": []
+            },
+            {
+              "id": "wdc-m2-05",
+              "title": "2.5 Ketahui Beza Spreadsheet vs. Sheet, Sheet Options",
+              "duration": 13,
+              "videoUrl": "https://www.youtube.com/watch?v=EXn336_ZbX0",
+              "description": "Tutorial komprehensif tentang user interface Google Sheets, memfokuskan terutamanya pada Sheets Toolbar dan fungsinya. Ia menerangkan konsep spreadsheets dan sheets (atau tab), membimbing pengguna melalui ADD, RENAME, REARRANGE, DUPLICATE, DELETE dan pewarnaan sheets untuk menyusun data dengan berkesan. Tutorial ini juga merangkumi ciri lanjutan seperti melindungi sheets untuk mengelakkan pengeditan yang tidak diingini, menyembunyikan sheets untuk pengurusan data yang lebih baik dan melihat ulasan untuk kerjasama.",
+              "tip": "Warnakan sheet tabs anda untuk membezakan antara data yang berbeza — lebih mudah untuk navigate.",
+              "resources": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
