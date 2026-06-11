@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekod Jualan — Kedai Olin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="olin.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="portal.html">&larr;</a>
+    <span class="title">🧾 Rekod <span class="dot">Jualan</span></span>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="grid2">
+        <div><label>Tarikh</label><input id="tarikh" type="date"></div>
+        <div><label>Bayar Melalui</label><select id="melalui"></select></div>
+      </div>
+      <label>Staf (pilihan)</label>
+      <input id="staf" placeholder="cth: AIN" autocomplete="off">
+    </div>
+
+    <h3 style="margin:4px 2px 10px;font-size:14px;color:var(--text-2)">ITEM JUALAN</h3>
+    <div id="lines"></div>
+    <button class="btn btn-ghost" onclick="addLine()">+ Tambah Item</button>
+  </div>
+
+  <div class="footbar">
+    <div class="inner">
+      <div class="total">Jumlah Jualan<b id="grandTotal">RM 0.00</b></div>
+      <button class="btn" id="btnSave" style="flex:1" onclick="simpan()">Simpan Jualan</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="olin-app.js"></script>
+  <script>
+    var PRODUCTS = [];   // {kod,nama,jenis,kos_seunit,harga_jualan}
+    var pmap = {};
+    var lineId = 0;
+
+    window.addEventListener('DOMContentLoaded', function(){
+      if(!requireLogin()) return;
+      document.getElementById('tarikh').value = todayISO();
+      loadMaster();
+    });
+
+    function loadMaster(){
+      callGAS('getMasterData', {}, function(res){
+        if(res.status!=='SUCCESS'){ toast(res.message||'Gagal muat produk','err'); return; }
+        PRODUCTS = res.products || [];
+        PRODUCTS.forEach(function(p){ pmap[p.kod]=p; });
+        var sel = document.getElementById('melalui');
+        sel.innerHTML = (res.banks||[]).map(function(b){ return '<option>'+b+'</option>'; }).join('');
+        addLine();
+      }, function(){ toast('Ralat sambungan','err'); });
+    }
+
+    function prodOptions(){
+      return '<option value="">— Pilih Produk —</option>' +
+        PRODUCTS.map(function(p){ return '<option value="'+p.kod+'">'+p.kod+' — '+p.nama+'</option>'; }).join('');
+    }
+
+    function addLine(){
+      var id = ++lineId;
+      var div = document.createElement('div');
+      div.className = 'row-line';
+      div.id = 'line'+id;
+      div.innerHTML =
+        '<button class="del" onclick="delLine('+id+')" title="Buang">&times;</button>' +
+        '<label style="margin-top:0">Produk (KOD)</label>' +
+        '<select onchange="recalc('+id+')" id="kod'+id+'">'+prodOptions()+'</select>' +
+        '<div class="grid3" style="margin-top:8px">' +
+          '<div><label style="margin-top:0">Kuantiti</label><input type="number" min="1" step="1" id="qty'+id+'" oninput="recalc('+id+')" placeholder="0"></div>' +
+          '<div><label style="margin-top:0">Diskaun (RM)</label><input type="number" min="0" step="0.01" id="disk'+id+'" oninput="recalc('+id+')" placeholder="0"></div>' +
+          '<div><label style="margin-top:0">Harga Akhir</label><input id="akhir'+id+'" disabled placeholder="RM 0"></div>' +
+        '</div>' +
+        '<div class="line-meta"><span id="meta'+id+'">Harga seunit: —</span><span>Untung: <b id="unt'+id+'">—</b></span></div>';
+      document.getElementById('lines').appendChild(div);
+    }
+
+    function delLine(id){
+      var el = document.getElementById('line'+id);
+      if(el) el.remove();
+      if(!document.querySelectorAll('.row-line').length) addLine();
+      grand();
+    }
+
+    function recalc(id){
+      var kod = document.getElementById('kod'+id).value;
+      var qty = parseFloat(document.getElementById('qty'+id).value)||0;
+      var disk = Math.abs(parseFloat(document.getElementById('disk'+id).value)||0);
+      var meta = document.getElementById('meta'+id);
+      var akhirEl = document.getElementById('akhir'+id);
+      var untEl = document.getElementById('unt'+id);
+      if(!kod || !pmap[kod]){ meta.textContent='Harga seunit: —'; akhirEl.value=''; untEl.textContent='—'; grand(); return; }
+      var p = pmap[kod];
+      var tetap = p.harga_jualan*qty;
+      var akhir = tetap - disk;
+      var untung = akhir - (p.kos_seunit*qty);
+      meta.innerHTML = 'Harga seunit: <b>'+rm(p.harga_jualan)+'</b> &nbsp;·&nbsp; Tetap: <b>'+rm(tetap)+'</b>';
+      akhirEl.value = rm(akhir);
+      untEl.textContent = rm(untung);
+      grand();
+    }
+
+    function grand(){
+      var total = 0;
+      document.querySelectorAll('.row-line').forEach(function(el){
+        var id = el.id.replace('line','');
+        var kod = document.getElementById('kod'+id).value;
+        var qty = parseFloat(document.getElementById('qty'+id).value)||0;
+        var disk = Math.abs(parseFloat(document.getElementById('disk'+id).value)||0);
+        if(kod && pmap[kod] && qty>0) total += (pmap[kod].harga_jualan*qty - disk);
+      });
+      document.getElementById('grandTotal').textContent = rm(total);
+    }
+
+    function simpan(){
+      var lines = [];
+      var bad = false;
+      document.querySelectorAll('.row-line').forEach(function(el){
+        var id = el.id.replace('line','');
+        var kod = document.getElementById('kod'+id).value;
+        var qty = parseFloat(document.getElementById('qty'+id).value)||0;
+        var disk = Math.abs(parseFloat(document.getElementById('disk'+id).value)||0);
+        if(!kod && qty===0) return; // baris kosong — abai
+        if(!kod || qty<=0){ bad = true; return; }
+        lines.push({ kod: kod, kuantiti: qty, diskaun: disk });
+      });
+      if(bad){ toast('Ada baris tak lengkap (KOD / kuantiti)','err'); return; }
+      if(!lines.length){ toast('Tiada item untuk disimpan','err'); return; }
+
+      var b = document.getElementById('btnSave'); b.disabled=true; b.textContent='Menyimpan...';
+      callGAS('addSale', {
+        payload: {
+          tarikh: document.getElementById('tarikh').value,
+          melalui: document.getElementById('melalui').value,
+          staf: document.getElementById('staf').value,
+          lines: lines
+        }
+      }, function(res){
+        b.disabled=false; b.textContent='Simpan Jualan';
+        if(res.status==='SUCCESS'){
+          toast('✅ '+res.message+' ('+rm(res.total)+')','ok');
+          document.getElementById('lines').innerHTML=''; lineId=0; addLine(); grand();
+        } else toast(res.message||'Gagal simpan','err');
+      }, function(){ b.disabled=false; b.textContent='Simpan Jualan'; toast('Ralat sambungan','err'); });
+    }
+  </script>
+</body>
+</html>

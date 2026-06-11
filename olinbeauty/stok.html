@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stok Semasa — Kedai Olin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="olin.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="portal.html">&larr;</a>
+    <span class="title">📋 Stok <span class="dot">Semasa</span></span>
+    <button class="btn-ghost btn-sm" style="margin-left:auto;border:none;cursor:pointer" onclick="load()">↻ Muat Semula</button>
+  </div>
+
+  <div class="wrap">
+    <div class="kpi" style="margin-bottom:14px">
+      <div class="box"><div class="lbl">Jumlah Nilai Stok</div><div class="val accent" id="kNilai">—</div></div>
+      <div class="box"><div class="lbl">Produk Stok Rendah</div><div class="val bad" id="kLow">—</div></div>
+    </div>
+
+    <div class="card" style="padding:8px">
+      <input id="cari" placeholder="🔎 Cari kod / nama produk..." oninput="render()" style="margin:8px 6px;width:calc(100% - 12px)">
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Kod</th><th>Produk</th>
+            <th class="num">Masuk</th><th class="num">Jualan</th><th class="num">Baki</th><th class="num">Nilai (RM)</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="6" class="skel" style="text-align:center;padding:24px">Memuatkan...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="muted" style="text-align:center">Baki = Stok Masuk − Jualan · produk jenis SERVIS sentiasa baki 0</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="olin-app.js"></script>
+  <script>
+    var ROWS = [];
+    var LOW_THRESHOLD = 20; // ambang stok rendah (boleh ubah)
+
+    window.addEventListener('DOMContentLoaded', function(){
+      if(!requireLogin()) return;
+      load();
+    });
+
+    function load(){
+      document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="skel" style="text-align:center;padding:24px">Memuatkan...</td></tr>';
+      callGAS('getStock', {}, function(res){
+        if(res.status!=='SUCCESS'){ toast(res.message||'Gagal muat stok','err'); return; }
+        ROWS = res.rows||[];
+        document.getElementById('kNilai').textContent = rm(res.totalNilai);
+        var low = ROWS.filter(function(r){ return !r.is_servis && r.baki <= LOW_THRESHOLD; }).length;
+        document.getElementById('kLow').textContent = low;
+        render();
+      }, function(){ toast('Ralat sambungan','err'); });
+    }
+
+    function render(){
+      var q = (document.getElementById('cari').value||'').toLowerCase();
+      var rows = ROWS.filter(function(r){ return !q || r.kod.toLowerCase().indexOf(q)>-1 || (r.nama||'').toLowerCase().indexOf(q)>-1; });
+      if(!rows.length){ document.getElementById('tbody').innerHTML = '<tr><td colspan="6" class="skel" style="text-align:center;padding:24px">Tiada produk.</td></tr>'; return; }
+      document.getElementById('tbody').innerHTML = rows.map(function(r){
+        var pill = r.is_servis ? '<span class="pill servis">SERVIS</span>'
+                 : (r.baki <= LOW_THRESHOLD ? '<span class="pill low">RENDAH</span>' : '<span class="pill ok">OK</span>');
+        return '<tr>' +
+          '<td><b>'+r.kod+'</b></td>' +
+          '<td>'+(r.nama||'')+'<br>'+pill+'</td>' +
+          '<td class="num">'+r.stok_masuk+'</td>' +
+          '<td class="num">'+r.jualan+'</td>' +
+          '<td class="num"><b>'+r.baki+'</b></td>' +
+          '<td class="num">'+rm(r.nilai_stok)+'</td>' +
+        '</tr>';
+      }).join('');
+    }
+  </script>
+</body>
+</html>

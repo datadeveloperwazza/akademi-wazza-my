@@ -1,0 +1,187 @@
+module 3
+Fail Praktis - Modul 3 : Modul Asas : https://docs.google.com/spreadsheets/d/1LHxJMhYbXhxRojQuFogkwivcq3Qx04NyppdoCJ-OOMM/copy
+
+3.1 Asas Mengisi Data (Data Entry) 
+link video: https://youtu.be/OZQTop5xjCM?si=4MMutPBphUwvWhgZ
+Memperkenalkan asas mengisi data (Data Entry) dalam Google Sheets, memfokuskan pada kemahiran asas seperti memilih cell, memasukkan dan mengedit data serta mengurus entri berbilang baris dalam satu cell. Ia menekankan petua praktikal untuk input data yang cekap, termasuk penggunaan pintasan (shortcuts) papan kekunci seperti Enter dan Tab, dan menerangkan amalan terbaik untuk mengatur data alamat untuk mengekalkan kejelasan dan struktur. 
+
+3.2 Copy & Paste dan Autofill
+link video: https://youtu.be/FbTG7jaNe9o?si=C9-I4XvpL1senqVE
+Video ini tentang cara COPY & PASTE data dengan cekap dalam Google Sheets, menekankan tiga kaedah utama: shortcut keys, pilihan menu klik kanan dan ciri autofill. Menunjukkan kepentingan memahami corak data agar autofill berfungsi dengan berkesan, menunjukkan cara membuat jujukan dengan nombor, hari dan bulan untuk menjimatkan masa dan mengurangkan kemasukan manual.
+
+3.3 Pilihan & Cara Format Cell
+link video: https://youtu.be/_MHnsFHD3bw?si=NtkIlbRCfOGLda_9
+Memformat dan mereka bentuk jadual data dalam Google Sheets. Merangkumi alat pemformatan penting seperti pemilihan font, pelarasan saiz, huruf tebal, condong, warna teks, warna isian, sempadan, penggabungan cell, putaran teks, penjajaran dan saiz semula lajur dan baris. Tutorial ini menekankan petua praktikal untuk membuat jadual secara visual menarik, teratur dan mudah dibaca. 
+
+
+3.4 Jenis-jenis Data 
+link video: https://youtu.be/lg-daaYzYHg?si=0FpH8z6ca_R4XGDJ
+Pengenalan menyeluruh kepada enam jenis data asas yang biasa digunakan dalam aplikasi Google Sheets: TEXT, NUMBER, LOGIC, BOOLEAN, DATA ARRAY dan ERROR. Menerangkan definisi, ciri dan aplikasi praktikal bagi setiap jenis, dengan tumpuan khusus pada teks dan nombor sebagai elemen asas. Tutorial ini juga merangkumi cara menggunakan toolbar dan pintasan Google Sheets untuk memformat data dengan berkesan, menekankan kepentingan membezakan antara teks dan nombor untuk pemprosesan dan pengiraan data yang tepat. Selain itu, ia menyelidiki format tarikh dan masa, pengendalian peratusan dan format mata wang/perakaunan, menawarkan petua praktikal untuk mengekalkan keseragaman data dan mengelakkan ralat biasa.
+
+3.5 Pengenalan Formula : Formula Asas 
+link video: https://youtu.be/DtHsFBiELcU?si=sb6ZVfICLh4F1GjB
+Memperkenalkan konsep asas formula dalam Google  Sheets, menekankan kepentingannya untuk pengiraan yang cekap dan bebas ralat. Ia menerangkan cara formula mengautomasikan operasi matematik seperti penambahan, penolakan, pendaraban dan pembahagian, menghapuskan keperluan untuk pengiraan manual dengan kalkulator. Tutorial ini merangkumi cara membuat, mengedit dan menggunakan rujukan cell dalam formula untuk memaut data secara dinamik merentas cell, membolehkan pengurusan data berskala. 
+
+
+3.6 Pengenalan Formula : Copy & Paste Formula 
+link video: https://youtu.be/-xmtNJem6zw?si=mA63g6FqnY-vDAYn
+Panduan komprehensif tentang penggunaan formula secara cekap dalam perisian hamparan, memfokuskan pada COPY, PASTE dan mengisi formula secara automatik. Ia menyerlahkan kelebihan menggunakan formula seperti kelajuan dan kemudahan pengiraan, terutamanya apabila berurusan dengan berbilang entri data. Selain itu, video itu meliputi fungsi tampal lanjutan seperti "nilai tampal sahaja", "tampal pemformatan sahaja" dan "tampal transpos", yang membolehkan pengguna mengawal cara data dan format dipindahkan. 
+
+
+3.7 Pengenalan Formula : Relative Reference vs. Absolute Reverence 
+link video: https://youtu.be/sU9rZ_W93hM?si=iiYQdYOlUfEI-IB4
+Konsep Relative Reference dan Absolute Reference dalam formula spreadsheet. menerangkan cara relative reference berubah apabila formula disalin merentas cell, manakala absolute reference kekal tetap, membolehkan pengiraan yang lebih tepat seperti aplikasi diskaun yang konsisten atau pengiraan keuntungan. 
+
+
+3.8 Function - SUM(), COUNT(), AVERAGE(), MAX(), MIN() 
+link video: https://youtu.be/3q5DDWniTUY?si=ITftxmD1H8O7TlXF
+Memfokuskan pada cara menggunakan formula yang dipratentukan untuk memudahkan pengiraan. Ia menunjukkan kelebihan fungsi seperti SUM, COUNT, COUNTUNIQUE, AVERAGE, MAX dan MIN, menunjukkan sintaks, hujah dan aplikasi praktikalnya dalam mengurus data jualan. Tutorial ini menekankan kecekapan yang diperoleh dengan menggunakan fungsi ini dan bukannya formula manual yang panjang dan menggambarkan cara mengendalikan data angka dan teks dengan sewajarnya. 
+
+3.9 Data Boolean dan Logical Operator 
+link video: https://youtu.be/fcPqJ8sfAbI?si=GunJiKOqkZnmo-ji
+Penjelasan asas data Boolean dan Operator Logikal, konsep penting dalam pengaturcaraan dan fungsi hamparan seperti Excel dan Google Sheets. Ia menghuraikan nilai Boolean TRUE dan FALSE, kepentingannya dalam mengesahkan pernyataan, dan memperkenalkan enam jenis operator logik yang digunakan untuk membandingkan nilai, termasuk =, <>, >, >=, <, dan <=. Tutorial menunjukkan cara pengendali ini berfungsi dengan nombor, teks, rujukan cell dan hasil fungsi, menekankan aplikasi praktikal dalam ungkapan dan fungsi logik seperti IF. 
+
+3.10 Function - IF(), IFS() 
+link video: https://youtu.be/X027vchwyh4?si=WfOCEwEbl_IjrV0Z
+Tutorial tentang penggunaan fungsi IF dan varian lanjutan IFS dalam Google Sheets untuk perbandingan logik dan pelabelan data. Ia menerangkan sintaks dan aplikasi praktikal IF untuk keadaan binari (TRUE/FALSE) dan menunjukkan cara melabelkan gred pelajar berdasarkan skor. Video ini memperkenalkan lagi fungsi IFS untuk mengendalikan berbilang keadaan dengan cekap, membolehkan penggredan merentas berbilang kategori.  
+
+3.11 Function - ArrayFormula() 
+link video: https://youtu.be/GTdmKBu05aY?si=_3_aCiJzjUdH6XAp
+Fungsi ArrayFormula() dalam Helaian Google membolehkan anda memproses pelbagai nilai dalam satu formula, menjadikan pengiraan lebih efisien tanpa perlu memasukkan formula ke setiap baris secara manual. Ia sangat berguna apabila anda ingin mengira hasil daripada julat sel seperti menambahkan, mendarab, atau menggabungkan data dalam satu kolum secara automatik. Dengan ArrayFormula, anda boleh menjimatkan masa, mengurangkan kesilapan, dan menjadikan kerja lebih baik dan dinamik. 
+
+module 4
+Fail Praktis - Modul 4 : Pengurusan Data: https://docs.google.com/spreadsheets/d/1IarKVqWwusfQ5iM8eqqB6Cts5NW-4s2vRSdseyL9w14/copy
+Fail Tambahan - Modul 4 : Data Excel (xlxs) : https://docs.google.com/spreadsheets/d/12fUH-cYgwUU-Tg2D-udYNjSh7yuT4C1Z/edit?gid=340170820#gid=340170820
+Fail Tambahan - Modul 4 : Sumber Data ImportRange : https://docs.google.com/spreadsheets/d/1UX9UpN39EBlx89kn1s2-H_lLNr0XSj6SxPIPfloyqGw/copy
+
+4.1 Import Data dari Excel dan CSV 
+Topik ini menerangkan cara membawa masuk data dari fail Excel (.xlsx) atau CSV (.csv) ke dalam Helaian Google. Proses ini membolehkan pengguna mengakses dan menyimpan data secara atas talian. Fail boleh dimuat naik terus ke Google Drive atau diseret ke tetingkap Google Sheets. Setelah diimport, data akan dipaparkan dalam format lembaran kerja yang boleh digunakan untuk analisis, pengiraan, atau perkongsian dengan mudah. Kaedah ini memudahkan integrasi data daripada pelbagai sumber ke dalam satu platform. 
+link video: https://youtu.be/xNlI8beGkx4?si=xPwZ9l6-kqQnU8fg
+
+4.2 Import Data dari Google Sheets - IMPORTRANGE() 
+Menerangkan penggunaan fungsi IMPORTRANGE() untuk mengimport data daripada satu fail Google Sheets kepada fail yang lain. Fungsi ini membolehkan anda mengakses dan memaparkan data secara langsung dari spreadsheet lain dengan hanya menggunakan pautan URL dan julat sel yang ingin diambil. Ia sangat berguna untuk mengumpulkan data daripada pelbagai sumber dalam satu dokumen tanpa perlu salin dan tampal secara manual. Ciri ini juga memastikan data sentiasa dikemas kini secara automatik apabila gagal asal berubah. 
+link video: https://youtu.be/GVonke4iiCw?si=yxoDcQ_kN2l1EhFm
+
+4.3 Pengenalan Data Clearing, Function UPPER(), LOWER(), PROPER() 
+Membincangkan asas pembersihan data dalam Helaian Google serta penggunaan tiga fungsi penting untuk menukar format teks. Fungsi UPPER() menukar semua huruf kepada huruf besar, LOWER() menukar kepada huruf kecil, manakala PROPER() menukar huruf pertama setiap perkataan kepada huruf besar. Fungsi-fungsi ini menyeragamkan teks data, terutamanya apabila menerima input daripada pelbagai sumber yang tidak konsisten, sekali gus memudahkan analisis dan pembentangan data.
+link video: https://youtu.be/p-08Nms2Eo0?si=fJfoJCoE6Hxc3rI8
+
+4.4 Split, Trim Whitespace, Remove Duplicate, Find and Replace 
+Menerangkan beberapa alat penting dalam Google Sheets untuk membersihkan dan menyusun data. Fungsi Split digunakan untuk memisahkan teks dalam satu sel kepada beberapa sel berdasarkan pemisah seperti koma atau ruang. Trim Whitespace membuang ruang kosong berlebihan di hadapan, tengah, atau hujung teks. Remove Duplicate membantu menghapuskan entri berulang dalam data agar lebih bersih dan unik. Sementara itu, Find and Replace digunakan untuk mencari teks tertentu dan menggantikannya secara automatik, mempercepatkan kerja 
+link video: https://youtu.be/BXwjtF1gt6w?si=NRHCFWxoM1IhftHA
+
+
+4.5 Functions - LEFT(), RIGHT(), MID(), LEN(), SEARCH() 
+Membincangkan fungsi teks dalam Google Sheets yang digunakan untuk mengekstrak atau menganalisis bahagian tertentu daripada teks. Fungsi LEFT() mengambil beberapa aksara dari sebelah kiri teks, manakala RIGHT() mengambil dari sebelah kanan. MID() pula mengambil aksara dari kedudukan tertentu dalam teks. LEN() digunakan untuk mengira panjang (bilangan aksara) dalam sesuatu teks. Akhir sekali, SEARCH() membantu mencari kedudukan sesuatu perkataan atau aksara dalam satu teks. Gabungan fungsi-fungsi ini amat berguna untuk manipulasi dan analisis data teks. 
+link video: https://youtu.be/rRUc3NyO1FY?si=ljs9ii1FUiNjcnmb
+
+4.6 Susun Data Menggunakan Feature Sort() 
+Mengajar cara menyusun data dalam Google Sheets menggunakan ciri Sort(). Fungsi ini membolehkan pengguna menyusun data secara menaik (A-Z) atau menurun (Z-A) berdasarkan satu atau lebih lajur. Ia boleh digunakan melalui menu Data > Sort range atau dengan formula SORT() secara manual. Ciri ini memudahkan analisis data, seperti mengenal pasti nilai tertinggi atau terendah, dan menyusun maklumat dengan lebih teratur untuk pembentangan atau rujukan.
+link video: https://youtu.be/4VbIBhKwZKw?si=MouljL-tgDViGbpa
+
+
+4.7 Tapis Data Menggunakan Feature Create Filter 
+Topik ini menerangkan penggunaan ciri Create Filter dalam Google Sheets untuk menapis dan melihat data tertentu tanpa mengubah keseluruhan set data. Dengan mengaktifkan Filter, pengguna boleh memilih nilai, teks, nombor, atau kriteria tertentu untuk dipaparkan, seperti hanya menunjukkan data yang mengandungi perkataan tertentu atau berada dalam julat nombor tertentu. 
+link video: https://youtu.be/RzVtbWU1b0g?si=coNbfuJbPNF2Scmi
+
+4.8 Function - SUBTOTAL() 
+Mengajar cara penggunaan fungsi SUBTOTAL() dalam Google Sheets untuk membuat pengiraan seperti jumlah, purata, kiraan, dan lain-lain secara fleksibel. Tidak seperti fungsi biasa seperti SUM() atau AVERAGE(), SUBTOTAL() boleh mengabaikan baris yang ditapis atau disembunyikan, menjadikannya sangat sesuai digunakan bersama ciri penapisan data. Ia juga menyokong pelbagai jenis pengiraan melalui kod fungsi 
+link video: https://youtu.be/ZR5X08lkpxU?si=jPN46Nn27-iUsVd7
+
+4.9 Data Validation dan Drop-Down List 
+Topik ini mengajar cara memastikan ketepatan input dalam Google Sheets menggunakan ciri Data Validation. Dengan menetapkan peraturan tertentu, pengguna boleh mengehadkan jenis data yang boleh dimasukkan ke dalam sel, seperti nombor sahaja, tarikh, atau nilai daripada senarai pilihan. Ciri Drop-Down List pula membolehkan pengguna memilih nilai dari senarai yang telah ditetapkan, menjadikan pengisian data lebih mudah, cepat, dan konsisten. 
+link video: https://youtu.be/SCiOoJ9o07s?si=Y07vgxTna3BUU6c9
+
+4.10 Conditional Formatting 
+Topik 4.10 Conditional Formatting menerangkan cara menyerlahkan sel dalam Google Sheets secara automatik berdasarkan kriteria tertentu. Dengan menggunakan Conditional Formatting, pengguna boleh menukar warna latar, teks, atau gaya cell apabila nilai memenuhi syarat yang ditetapkan. 
+link video: https://youtu.be/j6gQzg9whc0?si=y3C0kolMgkrirSso
+
+4.11 Gabung Teks, Function CONCAT(), CONCATENATE(), Ampersand '&' 
+Topik ini memfokuskan cara menggabungkan dua atau lebih teks dalam Google Sheets. Fungsi CONCAT() digunakan untuk menggabungkan dua sel sahaja, manakala CONCATENATE() membolehkan gabungan lebih banyak sel atau teks. Selain itu, simbol ampersand (&) juga boleh digunakan sebagai cara ringkas untuk menyambung teks. Contohnya: =A1 & " " & B1. Teknik ini berguna untuk membentuk ayat, nama penuh, atau maklumat gabungan lain secara automatik dan konsisten dalam satu cell.
+link video: https://youtu.be/S9ROPxr9uMU?si=a2eAS1soLFMwLvn-
+
+4.12 Gabung Nombor Dalam Teks, Function - TEXT() 
+Video ini menerangkan cara menggunakan fungsi TEXT() dalam Google Sheets untuk memformat nombor apabila digabungkan dengan teks. Fungsi ini membolehkan anda menukar nombor, tarikh, atau masa ke dalam format yang mudah dibaca. 
+link video: https://youtu.be/3cKnb7sBBGw?si=QZRBgdUyRQDxanL4
+
+module 5
+Fail Praktis - Modul 5 : Analisa : https://docs.google.com/spreadsheets/d/1O9hQcb1-odBOIl7qsdCM3dN7taPvPXxJKThLipo8nU8/copy
+
+5.1 Jenis-Jenis Error dan Function IFERROR() 
+Video ini tentang jenis-jenis ralat (error) yang biasa berlaku dalam Google Sheets seperti #DIV/0! (pembahagian dengan sifar), #VALUE! (jenis data tidak sesuai), #REF! (rujukan sel tidak sah), dan lain-lain. Untuk menguruskan ralat ini, fungsi IFERROR() digunakan bagi menggantikan mesej ralat dengan nilai atau mesej tersuai. 
+link video: https://youtu.be/-fXRZXG7Fe4?si=FkVjrn3juE18P0JN
+
+5.2 Function - AND(), OR(), *,+ 
+Mengajar skill penggunaan fungsi logik dan operator matematik dalam Google Sheets. Fungsi AND() digunakan untuk menyemak sama ada semua syarat adalah benar, manakala OR() menyemak jika sekurang-kurangnya satu syarat benar. Kedua-dua fungsi ini sering digunakan bersama IF() untuk membuat keputusan berdasarkan syarat berganda. Operator * digunakan untuk darab, dan + untuk tambah nilai antara sel atau nombor. 
+link video: https://youtu.be/d6FHjNxVO2g?si=5BTUv9DCpZCWVeFR
+
+5.3 Function - SUMIF(), SUMIFS(), COUNTIF(), COUNTIFS() 
+Menerangkan fungsi bersyarat dalam Google Sheets yang digunakan untuk menjumlahkan atau mengira data berdasarkan kriteria tertentu. 
+link video: https://youtu.be/pk8WzpdRFQs?si=nu1-FXA_-LsVxQiL
+
+
+5.4 Function - SORT(), FILTER() 
+Topik 5.4 Function - SORT(), FILTER() menerangkan dua fungsi penting dalam Google Sheets untuk mengurus dan menapis data secara dinamik.
+link video: https://youtu.be/Dsx2Q8DTGxw?si=dPsT5YvJxVscC4c3
+
+
+5.5 Function - QUERY() 
+Fungsi QUERY() dalam Google Sheets yang sangat powerfull untuk menapis, menyusun, dan menganalisis data menggunakan sintaks seperti bahasa SQL. Fungsi ini membolehkan anda memilih baris atau lajur tertentu, menetapkan syarat (seperti WHERE), mengira jumlah (SUM), dan menyusun data (ORDER BY) dengan lebih fleksibel. 
+link video: https://youtu.be/xpC6jJcuW-Y?si=8iiCjv7KdWt5u1gL
+
+module 6
+Fail Praktis - Modul 6 : Carta & Graf : https://docs.google.com/spreadsheets/d/173e_XayGKNhUrfrU88SxsUiZQ55Gcd3gPSy6IHZoJ4c/copy
+
+6.1 Asas Menbina Carta dan Graf, Jenis - Line, Area, Column, Bar, Pie 
+Topik ini menerangkan langkah asas untuk mencipta carta dalam Google Sheets bagi memvisualkan data dengan lebih jelas dan menarik. Pengguna boleh memilih pelbagai jenis carta bergantung pada jenis data dan tujuan analisis 
+video link: https://youtu.be/GSM3IXbltXI?si=GAj6GjF3W1Ab95Ny
+
+
+6.2 Carta Organisasi 
+Menunjukkan cara membina Carta Organisasi (Organizational Chart) dalam Google Sheets untuk memaparkan struktur hierarki seperti syarikat, jabatan, atau pasukan. 
+video link: https://youtu.be/SfU2j_DdI3k?si=IRLWPB-no8pI71Ti
+
+6.3 Function - SPARKLINE() 
+Mengajar cara penggunaan fungsi SPARKLINE() dalam Google Sheets untuk memaparkan carta mini (graf kecil) di dalam sel. Fungsi ini membolehkan anda menvisualkan trend data seperti kenaikan, penurunan, atau variasi secara ringkas dan padat, tanpa memerlukan carta besar. 
+video link: https://youtu.be/pewWYSRPuDI?si=sz_RVGA5_ay0FZDK
+
+module 7
+
+7.1 Share and Protect 
+Cara mudah untuk berkongsi dan melindungi fail Google Sheets bagi memastikan kerjasama yang selamat dan terkawal. Fungsi Share membolehkan pengguna menjemput orang lain untuk melihat, mengulas, atau menyunting dokumen dengan tetapan akses seperti Viewer, Commenter, atau Editor. 
+video link: https://youtu.be/RymQJDRC21o?si=-45HPiDX3MTzostu
+
+
+7.2 Version History
+
+Ciri Version History dalam Google Sheets yang membolehkan pengguna melihat, menjejak, dan memulihkan perubahan yang telah dibuat pada dokumen. Setiap kali fail disunting, Google Sheets akan menyimpan versi secara automatik.
+video link: https://youtu.be/5zFDv-htaYI?si=OYRt10s8xM1wT1dO
+
+7.3 Insert Comment & Add Notes 
+
+Insert Comment & Add Notes dua ciri penting dalam Google Sheets untuk memberi maklum balas atau penerangan tambahan tanpa mengganggu data asal. 
+video link : https://youtu.be/DtC2EX2e0fM?si=7svcPa7khwwq7QgA
+
+7.4 Smart Chip & Link 
+
+Topik 7.4 Smart Chip & Link menerangkan penggunaan ciri Smart Chip dan Link dalam Google Sheets untuk memperkaya maklumat dalam sel secara interaktif dan mudah diakses. 
+video link: https://youtu.be/FExVWYLJNdk?si=flTUwZQyvn2XlUXx
+
+
+7.5 Live Display 
+
+Penerangan cara penggunaan Google Sheets untuk memaparkan data secara langsung (real-time) dalam bentuk paparan visual yang interaktif dan sentiasa dikemas kini. Ciri ini sangat berguna untuk dashboard, laporan prestasi, atau pemantauan data semasa seperti jualan, kehadiran, atau status projek. 
+video link: https://youtu.be/fPvyCznb7ho?si=lY9qvRvmFY8l8iW-
+
+
+
+
+
+
+
+
+
+
+
+
+

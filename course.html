@@ -54,7 +54,8 @@
         }
 
         /* LEFT */
-        .vid-area { display: flex; flex-direction: column; overflow-y: auto; min-width: 0; }
+        .vid-area { display: flex; flex-direction: column; overflow-y: auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
+        .vid-area::-webkit-scrollbar { display: none; }
 
         /* ── WELCOME SCREEN ── */
         .welcome-screen {
@@ -172,13 +173,15 @@
         /* ── SIDEBAR ── */
         .pl-sidebar {
             background: #0e0e16; border-left: 1px solid var(--border);
-            overflow-y: auto; overflow-x: hidden;
-            display: flex; flex-direction: column; min-width: 0;
+            overflow-y: auto; overflow-x: hidden; min-width: 0;
+            scrollbar-width: none; -ms-overflow-style: none;
+            overflow-anchor: none;
         }
+        .pl-sidebar::-webkit-scrollbar { display: none; }
+        .pl-sidebar * { overflow-anchor: none; }
         .pl-head {
             padding: 1.1rem 1.1rem 0.85rem; border-bottom: 1px solid var(--border);
-            border-top: 4px solid rgba(255,255,255,0.04); margin-top: 0.5rem;
-            position: sticky; top: 0; background: #0e0e16; z-index: 2;
+            border-top: 4px solid rgba(255,255,255,0.04); background: #0e0e16;
             display: flex; align-items: center; gap: 0.5rem;
         }
         .pl-head h3 { font-family: 'Space Grotesk'; font-size: 0.74rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; }
@@ -251,6 +254,20 @@
         .sec-accordion.open .sec-chevron { transform: rotate(180deg); }
         .sec-accordion-body { display: none; }
         .sec-accordion.open .sec-accordion-body { display: block; }
+
+        /* ── SIDEBAR FILE ITEM ── */
+        .sidebar-file-item {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 1rem 0.55rem 1.65rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            text-decoration: none; color: inherit;
+            background: rgba(66,133,244,0.05);
+            transition: background 0.15s;
+        }
+        .sidebar-file-item:hover { background: rgba(66,133,244,0.12); }
+        .sidebar-file-icon { font-size: 0.85rem; width: 20px; text-align: center; opacity: 0.6; flex-shrink: 0; }
+        .sidebar-file-name { font-size: 0.74rem; color: rgba(255,255,255,0.55); flex: 1; line-height: 1.3; }
+        .sidebar-file-link { font-size: 0.64rem; font-weight: 600; color: #4285F4; white-space: nowrap; flex-shrink: 0; }
 
         /* ── MOBILE ── */
         @media (max-width: 767px) {
@@ -353,20 +370,6 @@
 
         <!-- SIDEBAR -->
         <div class="pl-sidebar" id="pl-sidebar">
-            <div class="bahan-section" id="bahan-section">
-                <div class="bahan-head" onclick="toggleBahan()">
-                    <div class="bahan-head-left">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-                        <h3>Senarai Bahan</h3>
-                    </div>
-                    <svg class="bahan-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-                <div class="bahan-body" id="bahan-body"></div>
-            </div>
-            <div class="pl-head">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                <h3>Senarai Modul</h3>
-            </div>
             <div id="playlist-container"></div>
         </div>
     </div>
@@ -447,8 +450,6 @@
             document.getElementById('welcome-course-name').textContent = currentCourse.title;
             document.title = currentCourse.title + ' – Wazza Academy';
             renderPlaylist();
-            renderMaterials();
-            document.getElementById('bahan-section').classList.add('open');
         }
 
         function loadLesson(lessonId) {
@@ -522,14 +523,46 @@
 
         const sectionStates = {};
         function toggleSection(secId) {
+            const sidebar = document.getElementById('pl-sidebar');
+            const prevScroll = sidebar ? sidebar.scrollTop : 0;
             sectionStates[secId] = !sectionStates[secId];
             const el = document.getElementById(secId);
             if (el) el.classList.toggle('open', sectionStates[secId]);
+            if (sidebar) {
+                sidebar.scrollTop = prevScroll;
+                requestAnimationFrame(() => { sidebar.scrollTop = prevScroll; });
+            }
         }
 
         function renderPlaylist() {
             const container = document.getElementById('playlist-container');
             let html = '';
+
+            // ── SENARAI BAHAN (dirender dalam aliran sama, sebelum modul) ──
+            const materials = currentCourse.materials || [];
+            const materialsHtml = materials.length
+                ? materials.map(m => {
+                    const url = m.url ? (/^https?:\/\//.test(m.url) ? m.url : 'https://' + m.url) : '#';
+                    return `<a href="${url}" target="_blank" class="bahan-item"><span class="bahan-icon">${m.icon || '📄'}</span><span class="bahan-name">${m.name}</span><span class="bahan-link">${m.label || 'Buka ↗'}</span></a>`;
+                }).join('')
+                : '<div class="bahan-empty">Tiada bahan untuk kursus ini.</div>';
+            html += `<div class="bahan-section${bahanOpen ? ' open' : ''}" id="bahan-section">
+                <div class="bahan-head" onclick="toggleBahan()">
+                    <div class="bahan-head-left">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                        <h3>Senarai Bahan</h3>
+                    </div>
+                    <svg class="bahan-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="bahan-body" id="bahan-body">${materialsHtml}</div>
+            </div>`;
+
+            // ── SENARAI MODUL (header) ──
+            html += `<div class="pl-head">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <h3>Senarai Modul</h3>
+            </div>`;
+
             currentCourse.sections.forEach((sec, secIdx) => {
                 const secId = `sec-acc-${secIdx}`;
                 if (sectionStates[secId] === undefined) sectionStates[secId] = true;
@@ -540,6 +573,14 @@
                         <svg class="sec-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
                     </div>
                     <div class="sec-accordion-body">`;
+                (sec.resources || []).forEach(r => {
+                    const fileUrl = r.url ? (/^https?:\/\//.test(r.url) ? r.url : 'https://' + r.url) : '#';
+                    html += `<a href="${fileUrl}" target="_blank" rel="noopener" class="sidebar-file-item">
+              <span class="sidebar-file-icon">${r.icon || '📎'}</span>
+              <span class="sidebar-file-name">${r.name}</span>
+              <span class="sidebar-file-link">${r.label || 'Muat Turun ↗'}</span>
+            </a>`;
+                });
                 sec.lessons.forEach(lesson => {
                     const isDone = WazzaStore.isLessonComplete(currentCourseId, lesson.id);
                     const isActive = lesson.id === currentLessonId;
@@ -553,6 +594,15 @@
                 <div class="l-dur">⏱ ${lesson.duration} min${isActive ? ' · Sedang main' : ''}</div>
               </div>
             </div>`;
+                    const resources = lesson.resources || [];
+                    resources.forEach(r => {
+                        const fileUrl = r.url ? (/^https?:\/\//.test(r.url) ? r.url : 'https://' + r.url) : '#';
+                        html += `<a href="${fileUrl}" target="_blank" rel="noopener" class="sidebar-file-item">
+              <span class="sidebar-file-icon">${r.icon || '📎'}</span>
+              <span class="sidebar-file-name">${r.name}</span>
+              <span class="sidebar-file-link">${r.label || 'Muat Turun ↗'}</span>
+            </a>`;
+                    });
                 });
                 html += `</div></div>`;
             });
@@ -589,17 +639,6 @@
         function toggleBahan() {
             bahanOpen = !bahanOpen;
             document.getElementById('bahan-section').classList.toggle('open', bahanOpen);
-        }
-
-        function renderMaterials() {
-            const body = document.getElementById('bahan-body');
-            if (!body || !currentCourse) return;
-            const materials = currentCourse.materials || [];
-            if (!materials.length) { body.innerHTML = '<div class="bahan-empty">Tiada bahan untuk kursus ini.</div>'; return; }
-            body.innerHTML = materials.map(m => {
-                const url = m.url ? (/^https?:\/\//.test(m.url) ? m.url : 'https://' + m.url) : '#';
-                return `<a href="${url}" target="_blank" class="bahan-item"><span class="bahan-icon">${m.icon || '📄'}</span><span class="bahan-name">${m.name}</span><span class="bahan-link">${m.label || 'Buka ↗'}</span></a>`;
-            }).join('');
         }
 
         initCourse();

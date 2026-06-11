@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belian Stok — Kedai Olin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="olin.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="portal.html">&larr;</a>
+    <span class="title">📦 Belian <span class="dot">Stok</span></span>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="grid2">
+        <div><label>Tarikh</label><input id="tarikh" type="date"></div>
+        <div><label>Bayar Melalui</label><select id="melalui"></select></div>
+      </div>
+      <label>Produk (KOD)</label>
+      <select id="kod" onchange="showCost()"><option value="">— Pilih Produk —</option></select>
+      <div class="grid2">
+        <div><label>Kuantiti Masuk</label><input id="qty" type="number" min="1" step="1" placeholder="0"></div>
+        <div><label>Jumlah Bayar (RM) *</label><input id="amaun" type="number" min="0" step="0.01" placeholder="WAJIB"></div>
+      </div>
+      <div class="line-meta"><span id="costHint">Kos seunit semasa: —</span></div>
+    </div>
+    <button class="btn" id="btnSave" onclick="simpan()">Simpan Belian</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="olin-app.js"></script>
+  <script>
+    var pmap = {};
+    window.addEventListener('DOMContentLoaded', function(){
+      if(!requireLogin()) return;
+      document.getElementById('tarikh').value = todayISO();
+      callGAS('getMasterData', {}, function(res){
+        if(res.status!=='SUCCESS'){ toast(res.message||'Gagal muat produk','err'); return; }
+        (res.products||[]).forEach(function(p){ pmap[p.kod]=p; });
+        document.getElementById('kod').innerHTML = '<option value="">— Pilih Produk —</option>' +
+          (res.products||[]).map(function(p){ return '<option value="'+p.kod+'">'+p.kod+' — '+p.nama+'</option>'; }).join('');
+        document.getElementById('melalui').innerHTML = (res.banks||[]).map(function(b){ return '<option>'+b+'</option>'; }).join('');
+      }, function(){ toast('Ralat sambungan','err'); });
+    });
+
+    function showCost(){
+      var p = pmap[document.getElementById('kod').value];
+      document.getElementById('costHint').innerHTML = p ? ('Kos seunit semasa: <b>'+rm(p.kos_seunit)+'</b>') : 'Kos seunit semasa: —';
+    }
+
+    function simpan(){
+      var kod = document.getElementById('kod').value;
+      var qty = parseFloat(document.getElementById('qty').value)||0;
+      var amaun = parseFloat(document.getElementById('amaun').value)||0;
+      if(!kod){ toast('Sila pilih produk','err'); return; }
+      if(qty<=0){ toast('Kuantiti mesti > 0','err'); return; }
+      if(amaun<=0){ toast('Jumlah Bayar (AMOUNT) wajib diisi','err'); return; }
+
+      var b = document.getElementById('btnSave'); b.disabled=true; b.textContent='Menyimpan...';
+      callGAS('addPurchase', {
+        payload: {
+          tarikh: document.getElementById('tarikh').value,
+          melalui: document.getElementById('melalui').value,
+          kod: kod, kuantiti: qty, amaun: amaun
+        }
+      }, function(res){
+        b.disabled=false; b.textContent='Simpan Belian';
+        if(res.status==='SUCCESS'){
+          toast('✅ '+res.message,'ok');
+          document.getElementById('qty').value=''; document.getElementById('amaun').value='';
+          document.getElementById('kod').value=''; showCost();
+        } else toast(res.message||'Gagal simpan','err');
+      }, function(){ b.disabled=false; b.textContent='Simpan Belian'; toast('Ralat sambungan','err'); });
+    }
+  </script>
+</body>
+</html>

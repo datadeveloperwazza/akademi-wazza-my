@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perbelanjaan — Kedai Olin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="olin.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="portal.html">&larr;</a>
+    <span class="title">💸 <span class="dot">Perbelanjaan</span></span>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="grid2">
+        <div><label>Tarikh</label><input id="tarikh" type="date"></div>
+        <div><label>Bayar Melalui</label><select id="melalui"></select></div>
+      </div>
+      <label>Butiran Perbelanjaan *</label>
+      <input id="butiran" placeholder="cth: Bil elektrik kedai" autocomplete="off">
+      <div class="grid2">
+        <div><label>Kategori</label><select id="kategori"></select></div>
+        <div><label>Jumlah (RM) *</label><input id="amaun" type="number" min="0" step="0.01" placeholder="WAJIB"></div>
+      </div>
+      <label>Catatan (pilihan)</label>
+      <textarea id="catatan" rows="2" placeholder="Nota tambahan..."></textarea>
+    </div>
+    <button class="btn" id="btnSave" onclick="simpan()">Simpan Perbelanjaan</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="olin-app.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function(){
+      if(!requireLogin()) return;
+      document.getElementById('tarikh').value = todayISO();
+      callGAS('getMasterData', {}, function(res){
+        if(res.status!=='SUCCESS'){ toast(res.message||'Gagal muat data','err'); return; }
+        document.getElementById('melalui').innerHTML = (res.banks||[]).map(function(b){ return '<option>'+b+'</option>'; }).join('');
+        var cats = res.categories||[];
+        document.getElementById('kategori').innerHTML = '<option value="">— Pilih —</option>' +
+          cats.map(function(c){ return '<option>'+c+'</option>'; }).join('');
+      }, function(){ toast('Ralat sambungan','err'); });
+    });
+
+    function simpan(){
+      var butiran = document.getElementById('butiran').value.trim();
+      var amaun = parseFloat(document.getElementById('amaun').value)||0;
+      if(!butiran){ toast('Butiran perbelanjaan wajib','err'); return; }
+      if(amaun<=0){ toast('Jumlah (AMOUNT) wajib diisi','err'); return; }
+
+      var b = document.getElementById('btnSave'); b.disabled=true; b.textContent='Menyimpan...';
+      callGAS('addExpense', {
+        payload: {
+          tarikh: document.getElementById('tarikh').value,
+          melalui: document.getElementById('melalui').value,
+          butiran: butiran,
+          kategori: document.getElementById('kategori').value,
+          amaun: amaun,
+          catatan: document.getElementById('catatan').value
+        }
+      }, function(res){
+        b.disabled=false; b.textContent='Simpan Perbelanjaan';
+        if(res.status==='SUCCESS'){
+          toast('✅ '+res.message,'ok');
+          document.getElementById('butiran').value=''; document.getElementById('amaun').value='';
+          document.getElementById('catatan').value=''; document.getElementById('kategori').value='';
+        } else toast(res.message||'Gagal simpan','err');
+      }, function(){ b.disabled=false; b.textContent='Simpan Perbelanjaan'; toast('Ralat sambungan','err'); });
+    }
+  </script>
+</body>
+</html>

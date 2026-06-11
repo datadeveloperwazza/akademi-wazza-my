@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Inventori — Kedai Olin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== TEMA BERSAMA OLIN (dark + amber) — sama untuk semua page ===== */
+    :root{
+      --bg:#111827; --surface:#1f2937; --surface-3:#374151;
+      --border:#374151; --accent:#eab308; --accent-dim:rgba(234,179,8,.08);
+      --success:#4ade80; --danger:#f87171; --info:#60a5fa;
+      --text-1:#f9fafb; --text-2:#9ca3af; --text-3:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text-1);margin:0;min-height:100vh;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:780px;margin:0 auto;padding:20px}
+    .topbar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .brand{font-weight:800;letter-spacing:.5px}
+    .brand .dot{color:var(--accent)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--accent);color:#1a1a1a;font-weight:700;font-size:15px;cursor:pointer;transition:.15s}
+    .btn:active{transform:scale(.98)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ghost{background:var(--surface-3);color:var(--text-1)}
+    label{display:block;font-size:13px;color:var(--text-2);margin:14px 0 6px;font-weight:600}
+    input,select{width:100%;padding:13px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text-1);font-size:15px;font-family:inherit}
+    input:focus,select:focus{outline:none;border-color:var(--accent)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .nav-tile{display:flex;flex-direction:column;gap:8px;padding:22px 18px;border-radius:16px;background:var(--surface);border:1px solid var(--border);text-decoration:none;color:var(--text-1);transition:.15s}
+    .nav-tile:active{transform:scale(.98)}
+    .nav-tile .ic{font-size:30px}
+    .nav-tile .t{font-weight:700}
+    .nav-tile .s{font-size:12px;color:var(--text-2)}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--surface-3);color:#fff;padding:14px 20px;border-radius:12px;font-weight:600;font-size:14px;transition:.3s;z-index:99;max-width:90%;text-align:center}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    .toast.ok{background:#14532d}.toast.err{background:#7f1d1d}
+    .overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+    .hide{display:none!important}
+    .muted{color:var(--text-2);font-size:13px}
+  </style>
+</head>
+<body>
+  <!-- ===== LOGIN OVERLAY ===== -->
+  <div id="loginOverlay" class="overlay">
+    <div class="wrap" style="max-width:380px;width:100%">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:40px">🛍️</div>
+        <h1 class="brand" style="font-size:22px;margin:8px 0 2px">KEDAI <span class="dot">OLIN</span></h1>
+        <p class="muted">Sistem Inventori &amp; Jualan</p>
+      </div>
+      <div class="card">
+        <label>Passcode</label>
+        <input id="pass" type="password" inputmode="numeric" placeholder="Masukkan passcode" autocomplete="off">
+        <div style="height:14px"></div>
+        <button class="btn" id="btnLogin" onclick="doLogin()">Log Masuk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HUB ===== -->
+  <div id="hub" class="hide">
+    <div class="topbar">
+      <span style="font-size:22px">🛍️</span>
+      <span class="brand">KEDAI <span class="dot">OLIN</span></span>
+      <button class="btn-ghost" style="width:auto;margin-left:auto;padding:8px 14px;border:none;border-radius:8px;cursor:pointer" onclick="logout()">Keluar</button>
+    </div>
+    <div class="wrap">
+      <p class="muted" style="margin:4px 0 16px">Pilih tugas:</p>
+      <div class="nav-grid">
+        <a class="nav-tile" href="dashboard.html"><span class="ic">📊</span><span class="t">Dashboard</span><span class="s">Ringkasan jualan &amp; untung</span></a>
+        <a class="nav-tile" href="jualan.html"><span class="ic">🧾</span><span class="t">Rekod Jualan</span><span class="s">Masuk jualan harian</span></a>
+        <a class="nav-tile" href="belian.html"><span class="ic">📦</span><span class="t">Belian Stok</span><span class="s">Stok masuk baru</span></a>
+        <a class="nav-tile" href="perbelanjaan.html"><span class="ic">💸</span><span class="t">Perbelanjaan</span><span class="s">Rekod kos operasi</span></a>
+        <a class="nav-tile" href="stok.html"><span class="ic">📋</span><span class="t">Stok Semasa</span><span class="s">Baki &amp; nilai stok</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="olin-app.js"></script>
+  <script>
+    // Gate: kalau belum login, papar overlay; kalau dah, terus ke hub.
+    window.addEventListener('DOMContentLoaded', function(){
+      if (isLoggedIn()) showHub();
+      document.getElementById('pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+    });
+    function showHub(){ document.getElementById('loginOverlay').classList.add('hide'); document.getElementById('hub').classList.remove('hide'); }
+    function doLogin(){
+      var pc = document.getElementById('pass').value.trim();
+      if(!pc){ toast('Sila masukkan passcode','err'); return; }
+      var b = document.getElementById('btnLogin'); b.disabled=true; b.textContent='Menyemak...';
+      callGAS('login', {passcode: pc}, function(res){
+        b.disabled=false; b.textContent='Log Masuk';
+        if(res.status==='SUCCESS'){ setSession(pc, res.nama); showHub(); }
+        else toast(res.message||'Gagal log masuk','err');
+      }, function(){ b.disabled=false; b.textContent='Log Masuk'; toast('Ralat sambungan','err'); });
+    }
+  </script>
+</body>
+</html>
