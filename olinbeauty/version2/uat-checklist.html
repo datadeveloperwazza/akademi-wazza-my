@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UAT Checklist — Olin Beauty V2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  body { background: #dfe5ec; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+  /* Sidebar nav highlight */
+  .nav-item { transition: all .15s; }
+  .nav-item.active { background: #1f2937; color: #fff; }
+  .nav-item:not(.active):hover { background: #f1f5f9; }
+
+  /* Phase badge colours */
+  .badge-m0 { background: #dbeafe; color: #1d4ed8; }
+  .badge-m1 { background: #ede9fe; color: #6d28d9; }
+  .badge-m2 { background: #dcfce7; color: #15803d; }
+  .badge-m3 { background: #fef3c7; color: #b45309; }
+  .badge-m4a { background: #fee2e2; color: #b91c1c; }
+  .badge-m4b { background: #fce7f3; color: #be185d; }
+  .badge-m5 { background: #e0f2fe; color: #0369a1; }
+  .badge-m6 { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .badge-e2e { background: #f5f3ff; color: #5b21b6; }
+  .badge-golive { background: #fff7ed; color: #9a3412; }
+
+  /* Test card hover */
+  .test-card { transition: box-shadow .15s, transform .15s; }
+  .test-card:hover { box-shadow: 0 4px 20px rgba(15,23,42,.08); transform: translateY(-1px); }
+
+  /* Sticky sidebar */
+  .sidebar-sticky { position: sticky; top: 20px; }
+
+  /* Section anchor scroll offset */
+  .section-anchor { scroll-margin-top: 24px; }
+
+  /* Step list */
+  .step-item::before {
+    content: attr(data-n);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Print */
+  @media print {
+    body { background: white; }
+    .no-print { display: none !important; }
+    .print-break { page-break-before: always; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="max-w-[1400px] mx-auto lg:p-5 p-3">
+  <div class="flex gap-5 items-start">
+
+    <!-- ═══════════════════════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════════════════════ -->
+    <aside class="no-print hidden lg:flex flex-col w-60 shrink-0 sidebar-sticky">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+        <!-- Brand -->
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex items-center gap-2.5 mb-1">
+            <div class="w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center text-white font-bold text-sm">O</div>
+            <div>
+              <div class="font-semibold text-gray-900 text-sm">Olin Beauty V2</div>
+              <div class="text-xs text-gray-400">UAT Checklist</div>
+            </div>
+          </div>
+          <div class="mt-2 px-2 py-1 bg-gray-50 rounded-lg text-xs text-gray-500 font-mono">olin-v2-M6b-2026.06.12</div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="p-2 space-y-0.5 text-sm">
+          <a href="#overview" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="text-base">📋</span> Ringkasan
+          </a>
+          <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1">Persediaan</div>
+          <a href="#setup" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="text-base">⚙️</span> Setup Sistem
+          </a>
+          <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1">Fasa UAT</div>
+          <a href="#m0" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center shrink-0">M0</span> Auth &amp; Sesi
+          </a>
+          <a href="#m1" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center shrink-0">M1</span> Master Data
+          </a>
+          <a href="#m2" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center shrink-0">M2</span> Stok Masuk
+          </a>
+          <a href="#m3" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0">M3</span> DO Ejen
+          </a>
+          <a href="#m4a" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-red-100 text-red-700 text-xs font-bold flex items-center justify-center shrink-0">M4</span> Bayaran Ejen
+          </a>
+          <a href="#m4b" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-pink-100 text-pink-700 text-xs font-bold flex items-center justify-center shrink-0">M4</span> Transfer &amp; Pos
+          </a>
+          <a href="#m5" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-sky-100 text-sky-700 text-xs font-bold flex items-center justify-center shrink-0">M5</span> Void &amp; Integriti
+          </a>
+          <a href="#m6" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0">M6</span> Dashboard
+          </a>
+          <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1">Senario</div>
+          <a href="#e2e" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="text-base">🔗</span> End-to-End
+          </a>
+          <a href="#golive" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-xl text-gray-600 cursor-pointer">
+            <span class="text-base">🚀</span> Go-Live Checklist
+          </a>
+        </nav>
+
+        <!-- Stats footer -->
+        <div class="p-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+          <div class="bg-gray-50 rounded-xl p-2.5 text-center">
+            <div class="text-xl font-bold text-gray-900">64</div>
+            <div class="text-xs text-gray-400 mt-0.5">Test Case</div>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-2.5 text-center">
+            <div class="text-xl font-bold text-gray-900">7</div>
+            <div class="text-xs text-gray-400 mt-0.5">Milestone</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════════════ -->
+    <main class="flex-1 min-w-0 space-y-5">
+
+      <!-- PAGE HEADER -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">BELUM DIJALANKAN</span>
+              <span class="text-xs text-gray-400">Dijadual selepas deployment lengkap</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Senarai Semak UAT</h1>
+            <p class="text-gray-500 mt-1 text-sm">Pengujian Penerimaan Pengguna — Sistem Inventori Olin Beauty V2</p>
+          </div>
+          <div class="text-right text-sm text-gray-400 space-y-0.5 shrink-0">
+            <div class="font-mono font-semibold text-gray-700">olin-v2-M6b-2026.06.12</div>
+            <div>Disediakan: 12 Jun 2026</div>
+            <div>Penguji: <span class="italic">belum ditetapkan</span></div>
+          </div>
+        </div>
+
+        <!-- Progress bar (for show only) -->
+        <div class="mt-5 p-4 bg-gray-50 rounded-xl">
+          <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+            <span class="font-medium">Status keseluruhan</span>
+            <span class="font-semibold text-amber-600">0 / 64 lulus</span>
+          </div>
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-full bg-amber-400 rounded-full" style="width:0%"></div>
+          </div>
+          <div class="mt-2 text-xs text-gray-400">UAT belum dimulakan — semua test case dalam status menunggu</div>
+        </div>
+      </div>
+
+      <!-- ─── RINGKASAN ─── -->
+      <section id="overview" class="section-anchor">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">📋</span>
+          <h2 class="text-base font-bold text-gray-700 uppercase tracking-wide">Ringkasan Fasa</h2>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m0 px-2 py-0.5 rounded-md text-xs font-bold">M0</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Auth &amp; Sesi</div>
+            <div class="text-xs text-gray-400 mt-0.5">4 test case</div>
+            <div class="text-xs text-gray-400">T01 – T04</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m1 px-2 py-0.5 rounded-md text-xs font-bold">M1</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Master Data</div>
+            <div class="text-xs text-gray-400 mt-0.5">8 test case</div>
+            <div class="text-xs text-gray-400">T05 – T10 + T09b/T09c</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m2 px-2 py-0.5 rounded-md text-xs font-bold">M2</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Stok Masuk (GRN)</div>
+            <div class="text-xs text-gray-400 mt-0.5">4 test case</div>
+            <div class="text-xs text-gray-400">T11 – T14</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m3 px-2 py-0.5 rounded-md text-xs font-bold">M3</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">DO Ejen</div>
+            <div class="text-xs text-gray-400 mt-0.5">7 test case</div>
+            <div class="text-xs text-gray-400">T15 – T21</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m4a px-2 py-0.5 rounded-md text-xs font-bold">M4a</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Bayaran Ejen</div>
+            <div class="text-xs text-gray-400 mt-0.5">5 test case</div>
+            <div class="text-xs text-gray-400">T22 – T26</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m4b px-2 py-0.5 rounded-md text-xs font-bold">M4b</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Transfer, Outlet, Return, Pos</div>
+            <div class="text-xs text-gray-400 mt-0.5">11 test case</div>
+            <div class="text-xs text-gray-400">T27 – T37</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m5 px-2 py-0.5 rounded-md text-xs font-bold">M5</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Void, Integriti, Kiraan Stok</div>
+            <div class="text-xs text-gray-400 mt-0.5">13 test case</div>
+            <div class="text-xs text-gray-400">T38 – T50</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-m6 px-2 py-0.5 rounded-md text-xs font-bold">M6</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Dashboard &amp; Ringkasan</div>
+            <div class="text-xs text-gray-400 mt-0.5">8 test case</div>
+            <div class="text-xs text-gray-400">T51 – T58</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-e2e px-2 py-0.5 rounded-md text-xs font-bold">E2E</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Senario End-to-End</div>
+            <div class="text-xs text-gray-400 mt-0.5">4 test case</div>
+            <div class="text-xs text-gray-400">T59 – T62</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge-golive px-2 py-0.5 rounded-md text-xs font-bold">GO-LIVE</span>
+            </div>
+            <div class="font-semibold text-gray-900 text-sm">Semak Akhir Go-Live</div>
+            <div class="text-xs text-gray-400 mt-0.5">10 checklist item</div>
+            <div class="text-xs text-gray-400">Sebelum buka kepada staf</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── CARA GUNA ─── -->
+      <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+        <div class="flex gap-3">
+          <span class="text-xl shrink-0">ℹ️</span>
+          <div>
+            <div class="font-semibold text-blue-800 mb-1">Cara Guna UAT Ini</div>
+            <div class="text-sm text-blue-700 space-y-1">
+              <p>Jalankan test case <strong>mengikut urutan M0 → M6</strong> kerana setiap modul bergantung pada modul sebelumnya.</p>
+              <p>Tandakan setiap test case: <strong>✅ Lulus</strong> / <strong>❌ Gagal</strong> (tulis nota) / <strong>⏭ Langkau</strong> (dengan sebab).</p>
+              <p>Sebarang isu yang ditemui — log dalam jadual <a href="#troubleshoot" class="underline font-medium">Log Troubleshoot</a> di bawah.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SETUP ─── -->
+      <section id="setup" class="section-anchor">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">⚙️</span>
+          <h2 class="text-base font-bold text-gray-700 uppercase tracking-wide">Persediaan Sebelum Test</h2>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <p class="text-sm text-gray-500 mb-4">Pastikan semua langkah ini selesai <strong class="text-gray-700">sebelum</strong> mula T01.</p>
+          <div class="space-y-3">
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+              <div>
+                <div class="font-medium text-gray-800 text-sm">Deploy Code.gs versi baru</div>
+                <div class="text-xs text-gray-500 mt-0.5">Apps Script → Deploy → New deployment → Web App → Execute as Me → Access: Anyone</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+              <div>
+                <div class="font-medium text-gray-800 text-sm">Sahkan GAS_URL dalam index.html</div>
+                <div class="text-xs text-gray-500 mt-0.5">URL format: <code class="bg-gray-200 px-1 rounded">https://script.google.com/macros/s/.../exec</code></div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+              <div>
+                <div class="font-medium text-gray-800 text-sm">Run <code class="bg-gray-200 px-1 rounded">setupOlinSheets()</code></div>
+                <div class="text-xs text-gray-500 mt-0.5">Hanya sekali jika sheet baru. Mencipta 16 tab + seed 50 produk.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+              <div>
+                <div class="font-medium text-gray-800 text-sm">Run <code class="bg-gray-200 px-1 rounded">setupTriggers()</code></div>
+                <div class="text-xs text-gray-500 mt-0.5">Apps Script → dropdown pilih "setupTriggers" → Run. Semak Triggers: mesti ada 3 (keepWarm, backupHarian, semakIntegritiHarian).</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-amber-200 text-amber-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">5</span>
+              <div>
+                <div class="font-medium text-amber-800 text-sm">Isi Tetapan Sistem</div>
+                <div class="text-xs text-amber-700 mt-1 space-y-0.5">
+                  <div>• <strong>backup_folder_id</strong> — ID folder Google Drive (dari URL: .../folders/<em>ID</em>)</div>
+                  <div>• <strong>admin_email</strong> — e-mel penerima notifikasi integriti / backup gagal</div>
+                  <div>• <strong>backup_simpan_hari</strong> — 30 (atau ikut keperluan)</div>
+                  <div>• <strong>void_warehouse_hari_sama</strong> — Ya atau Tidak</div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-xl">
+              <span class="w-6 h-6 rounded-lg bg-red-200 text-red-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">6</span>
+              <div>
+                <div class="font-medium text-red-800 text-sm">Tukar PIN admin dari 123456</div>
+                <div class="text-xs text-red-600 mt-0.5">Master → Staf → edit STF-01 → tukar PIN</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M0
+      ═══════════════════════════════════════════════ -->
+      <section id="m0" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m0 px-3 py-1 rounded-lg text-sm font-bold">M0</span>
+          <h2 class="text-base font-bold text-gray-700">Pengesahan &amp; Sesi</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">4 test case · T01–T04</span>
+        </div>
+        <div class="space-y-3">
+
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">T01</span>
+                  <span class="font-semibold text-gray-900 text-sm">Login sah</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Buka app → masukkan ID <code class="bg-gray-100 px-1 rounded">STF-01</code> + PIN admin</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Masuk ke skrin "Hari Ini", nama staf terpapar</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">T02</span>
+                  <span class="font-semibold text-gray-900 text-sm">Login gagal — PIN salah</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Cuba login dengan PIN <code class="bg-gray-100 px-1 rounded">000000</code></div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Mesej ralat "ID atau PIN tidak sah", tidak masuk</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">T03</span>
+                  <span class="font-semibold text-gray-900 text-sm">Log keluar</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Klik Log Keluar</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Kembali ke skrin login, sesi dipadam</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">T04</span>
+                  <span class="font-semibold text-gray-900 text-sm">Akses tanpa sesi</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Padam cookie/session → cuba buka URL terus</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Redirect ke skrin login</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M1
+      ═══════════════════════════════════════════════ -->
+      <section id="m1" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m1 px-3 py-1 rounded-lg text-sm font-bold">M1</span>
+          <h2 class="text-base font-bold text-gray-700">Master Data</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">8 test case · T05–T10</span>
+        </div>
+        <div class="space-y-3">
+
+          <!-- T05 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T05</span>
+                  <span class="font-semibold text-gray-900 text-sm">Tambah produk baru</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Master → Produk → Tambah → isi SKU, Nama, Kategori, Kos, Harga Ejen</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Produk tersimpan, muncul dalam senarai</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T06 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T06</span>
+                  <span class="font-semibold text-gray-900 text-sm">Edit produk (harga)</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Edit produk T05 → tukar harga_ejen_rm</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Harga terkemas, updated_at berubah</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T07 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T07</span>
+                  <span class="font-semibold text-gray-900 text-sm">Tambah ejen baru</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Master → Ejen → Tambah → isi nama, no_tel, kawasan, target bulanan</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Ejen tersimpan dengan ejen_id auto</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T08 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T08</span>
+                  <span class="font-semibold text-gray-900 text-sm">Tambah outlet baru</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Master → Outlet → Tambah → isi nama, alamat</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Outlet tersimpan dengan outlet_id auto</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T09 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T09</span>
+                  <span class="font-semibold text-gray-900 text-sm">Tetapan sistem — nilai asas</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Master → Tetapan → semak: Nama Syarikat, Amaran Expiry, Sesi Log Masuk, Min. Diskaun</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Nilai tersimpan sebelum ni terpapar (bukan kosong), boleh dikemas dan disimpan</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T09b -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-amber-100 bg-amber-50/30 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">T09b</span>
+                  <span class="font-semibold text-gray-900 text-sm">Tetapan backup &amp; notifikasi</span>
+                  <span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Fix baru</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Isi <code class="bg-gray-100 px-1 rounded">backup_folder_id</code>, <code class="bg-gray-100 px-1 rounded">admin_email</code>, <code class="bg-gray-100 px-1 rounded">backup_simpan_hari: 30</code> → Simpan → reload → buka Tetapan semula</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Nilai kekal (bukan kosong semula) — mengesahkan <code class="bg-gray-100 px-1 rounded">PUBLIC_SETTINGS</code> backend menghantar key ini</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T09c -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-amber-100 bg-amber-50/30 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">T09c</span>
+                  <span class="font-semibold text-gray-900 text-sm">Toggle void staf WH</span>
+                  <span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Fix baru</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Tetapan → <code class="bg-gray-100 px-1 rounded">void_warehouse_hari_sama</code> → tukar kepada <strong>Tidak (NO)</strong> → Simpan → reload → buka semula</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Dropdown kekal pada "Tidak (NO)", bukan balik ke Ya</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+          <!-- T10 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded">T10</span>
+                  <span class="font-semibold text-gray-900 text-sm">Alert expiry di Stok</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Buka skrin Stok → semak tab Expiry</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Produk expiry &lt; 30 hari terpapar (merah), 30–90 hari (kuning)</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M2
+      ═══════════════════════════════════════════════ -->
+      <section id="m2" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m2 px-3 py-1 rounded-lg text-sm font-bold">M2</span>
+          <h2 class="text-base font-bold text-gray-700">Stok Masuk (GRN)</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">4 test case · T11–T14</span>
+        </div>
+        <div class="space-y-3">
+          <!-- T11-T14 -->
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded">T11</span>
+                  <span class="font-semibold text-gray-900 text-sm">GRN tanpa expiry</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Stok Masuk → Tambah → pilih produk (ada_expiry=NO) → qty 50 → kos RM10</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> GRN-OBSB#### tercipta, baki WH +50, LEDGER ada baris MASUK</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded">T12</span>
+                  <span class="font-semibold text-gray-900 text-sm">GRN dengan expiry</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> GRN produk ada_expiry=YES → isi tarikh expiry bulan depan</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Batch tercipta dengan tarikh expiry, batch_id dalam LEDGER</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded">T13</span>
+                  <span class="font-semibold text-gray-900 text-sm">GRN beberapa baris (multi-SKU)</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> GRN dengan 3 SKU berbeza dalam satu dokumen</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> 1 DOC_HEADER, 3 DOC_LINES, 3 baris LEDGER</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded">T14</span>
+                  <span class="font-semibold text-gray-900 text-sm">Semak baki stok bertambah</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Catat baki sebelum T11 → semak baki selepas</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Baki = baki sebelum + qty GRN</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M3
+      ═══════════════════════════════════════════════ -->
+      <section id="m3" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m3 px-3 py-1 rounded-lg text-sm font-bold">M3</span>
+          <h2 class="text-base font-bold text-gray-700">DO Ejen</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">7 test case · T15–T21</span>
+        </div>
+        <div class="space-y-3">
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T15</span>
+                  <span class="font-semibold text-gray-900 text-sm">DO standard</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> DO Ejen → pilih ejen T07 → tambah produk T11 qty 5</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> DO-OBSB#### tercipta, baki WH −5, status AKTIF</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T16</span>
+                  <span class="font-semibold text-gray-900 text-sm">DO dengan diskaun %</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> DO → diskaun 10% → semak jumlah_bersih = subtotal × 0.90</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Kiraan sen tepat, tiada rounding liar</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T17</span>
+                  <span class="font-semibold text-gray-900 text-sm">DO dengan diskaun flat (RM)</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> DO → diskaun RM5 → semak jumlah_bersih = subtotal − 5</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Kiraan betul</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T18</span>
+                  <span class="font-semibold text-gray-900 text-sm">DO melebihi baki — disekat</span>
+                  <span class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-medium">Negative test</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> DO qty 9999 untuk produk yang baki &lt; 9999</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> ERROR "Baki tidak mencukupi", DO tidak tercipta</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T19</span>
+                  <span class="font-semibold text-gray-900 text-sm">DO produk expiry hampir — amaran</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> DO produk yang ada batch expiry &lt; 60 hari</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Skrin tunjuk amaran CONFIRM_EXPIRY, kena klik Sahkan untuk teruskan</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T20</span>
+                  <span class="font-semibold text-gray-900 text-sm">FEFO — expiry awal keluar dulu</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> GRN 2 batch produk sama (expiry A: bulan depan, B: 6 bulan). DO qty 10</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> LEDGER papar batch A digunakan dulu (expiry lebih awal)</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">T21</span>
+                  <span class="font-semibold text-gray-900 text-sm">Picking list &amp; WhatsApp copy</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Buka DO yang baru → semak butang "Picking List" dan "WhatsApp"</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Picking list terpapar dengan betul, teks WhatsApp tersalin</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M4a
+      ═══════════════════════════════════════════════ -->
+      <section id="m4a" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m4a px-3 py-1 rounded-lg text-sm font-bold">M4a</span>
+          <h2 class="text-base font-bold text-gray-700">Bayaran Ejen</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">5 test case · T22–T26</span>
+        </div>
+        <div class="space-y-3">
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">T22</span>
+                  <span class="font-semibold text-gray-900 text-sm">Bayar penuh satu DO</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Akaun Ejen → ejen T07 → Bayar → amaun = jumlah_bersih DO T15</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> DO T15 status bayar = LUNAS, baki_hutang = 0</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">T23</span>
+                  <span class="font-semibold text-gray-900 text-sm">Bayar separa (2 DO)</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Buat 2 DO → bayar amaun yang cukup untuk DO 1 sahaja</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> DO 1 LUNAS, DO 2 TERTUNGGAK / SEPARA</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">T24</span>
+                  <span class="font-semibold text-gray-900 text-sm">Bayaran lebih → kredit</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Bayar melebihi jumlah hutang semua DO aktif</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Semua DO LUNAS, lebihan masuk baki_kredit_rm</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">T25</span>
+                  <span class="font-semibold text-gray-900 text-sm">Void bayaran</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Akaun Ejen → senarai bayaran → void bayaran T22</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Bayaran status VOID, DO kembali TERTUNGGAK</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+          <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="font-mono text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded">T26</span>
+                  <span class="font-semibold text-gray-900 text-sm">Penyata ejen</span>
+                </div>
+                <div class="text-xs text-gray-500 space-y-1">
+                  <div><strong class="text-gray-600">Langkah:</strong> Akaun Ejen → pilih ejen → Penyata</div>
+                  <div><strong class="text-gray-600">Jangkaan:</strong> Senarai DO + bayaran terpapar, baki hutang tepat</div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M4b
+      ═══════════════════════════════════════════════ -->
+      <section id="m4b" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m4b px-3 py-1 rounded-lg text-sm font-bold">M4b</span>
+          <h2 class="text-base font-bold text-gray-700">Transfer, Jualan Outlet, Return, Lupus, Pos</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">11 test case · T27–T37</span>
+        </div>
+        <div class="space-y-3">
+          <!-- T27-T37 compact cards -->
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T27</span><span class="font-semibold text-gray-900 text-sm">Transfer WH → Outlet</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> WH −20, Outlet +20, batch_id sama di kedua LEDGER</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T28</span><span class="font-semibold text-gray-900 text-sm">Transfer melebihi baki — disekat</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR, transfer tidak berlaku</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T29</span><span class="font-semibold text-gray-900 text-sm">Jualan Outlet</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Outlet −5, status LUNAS, tiada payment row</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T30</span><span class="font-semibold text-gray-900 text-sm">Jualan Outlet melebihi stok — disekat</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T31</span><span class="font-semibold text-gray-900 text-sm">Return RTN_EJEN → RESTOCK</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> WH +2, KREDIT_RETURN tercipta auto</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T32</span><span class="font-semibold text-gray-900 text-sm">Return RTN_EJEN → ROSAK</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ROSAK +1, WH tidak berubah</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T33</span><span class="font-semibold text-gray-900 text-sm">Return RTN_OUTLET</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Outlet −3, WH +3</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T34</span><span class="font-semibold text-gray-900 text-sm">Lupus dari ROSAK</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ROSAK −1, LEDGER KELUAR (LUPUS)</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T35</span><span class="font-semibold text-gray-900 text-sm">Lupus melebihi ROSAK — disekat</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T36</span><span class="font-semibold text-gray-900 text-sm">Tambah Pos</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> POSTAGE_LOG tercipta, tracking muncul dalam detail DO</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded">T37</span><span class="font-semibold text-gray-900 text-sm">Hari Ini — strip "Belum Pos"</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Strip "Belum Pos" tunjuk bilangan, tap bawa ke skrin Pos</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M5
+      ═══════════════════════════════════════════════ -->
+      <section id="m5" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m5 px-3 py-1 rounded-lg text-sm font-bold">M5</span>
+          <h2 class="text-base font-bold text-gray-700">VOID, Integriti, Kiraan Stok, Ledger</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">13 test case · T38–T50</span>
+        </div>
+        <div class="space-y-3">
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T38</span><span class="font-semibold text-gray-900 text-sm">VOID GRN</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> GRN VOID, baki WH berkurang semula, LEDGER ada is_reversal=YES</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T39</span><span class="font-semibold text-gray-900 text-sm">VOID DO tanpa bayaran</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> DO VOID, baki WH pulih semula</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T40</span><span class="font-semibold text-gray-900 text-sm">VOID DO ada bayaran — disekat</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR "Void bayaran dulu", DO tidak tervoid</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T41</span><span class="font-semibold text-gray-900 text-sm">VOID RTN_EJEN → auto-void KREDIT</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> RTN_EJEN VOID + KREDIT_RETURN berkaitan VOID dalam satu operasi</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T42</span><span class="font-semibold text-gray-900 text-sm">VOID tidak boleh negatifkan baki</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR "Baki akan jadi negatif selepas void"</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-green-100 bg-green-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T43</span><span class="font-semibold text-gray-900 text-sm">Semak Integriti — sistem bersih</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Lencana HIJAU, tiada anomali</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T44</span><span class="font-semibold text-gray-900 text-sm">Dokumen — senarai &amp; cari</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Senarai terpapar, carian nama/doc_no berfungsi</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T45</span><span class="font-semibold text-gray-900 text-sm">Dokumen — detail lengkap</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Header + Lines + LEDGER rows + Bayaran + Postage terpapar</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T46</span><span class="font-semibold text-gray-900 text-sm">Kiraan Stok — buat sesi &amp; isi</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Sesi DRAF tercipta, staf tidak nampak qty sistem</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T47</span><span class="font-semibold text-gray-900 text-sm">Kiraan Stok — Submit &amp; Lulus</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ADJ + GRN PENEMUAN auto-jana, SC status DILULUSKAN</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-red-100 bg-red-50/20 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T48</span><span class="font-semibold text-gray-900 text-sm">Kiraan basi — disekat</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> ERROR "Kiraan basi — stok bergerak sejak sesi dimula"</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T49</span><span class="font-semibold text-gray-900 text-sm">Kiraan Stok — Tolak</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> SC status DITOLAK, catatan tersimpan</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">T50</span><span class="font-semibold text-gray-900 text-sm">Ledger audit</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Semua pergerakan SKU tersenarai, baki berlari tepat, footer Σ betul</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           M6
+      ═══════════════════════════════════════════════ -->
+      <section id="m6" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-m6 px-3 py-1 rounded-lg text-sm font-bold">M6</span>
+          <h2 class="text-base font-bold text-gray-700">Dashboard &amp; Ringkasan Bulanan</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">8 test case · T51–T58</span>
+        </div>
+        <div class="space-y-3">
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T51</span><span class="font-semibold text-gray-900 text-sm">Hari Ini (S1) — data hidup</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Strip DO hari ini / Jualan / Belum Pos terpapar dengan angka betul</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T52</span><span class="font-semibold text-gray-900 text-sm">Dashboard Admin — KPI</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> 4 KPI: Nilai Stok, Jualan Bulan, Kutipan Bulan, Hutang</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T53</span><span class="font-semibold text-gray-900 text-sm">Dashboard — Ranking Ejen</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Ejen tersusun, bar % terhadap target_bulanan betul</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T54</span><span class="font-semibold text-gray-900 text-sm">Dashboard — Pending Payment</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Ejen ada hutang tersenarai, jumlah betul</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T55</span><span class="font-semibold text-gray-900 text-sm">Dashboard — Stok Laju / Risiko / Slow</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Top 10 stok laju, risiko habis (&lt;14 hari), slow moving (60+ hari)</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T56</span><span class="font-semibold text-gray-900 text-sm">Dashboard Warehouse — versi ringkas</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> KPI kewangan/ranking TIDAK terpapar, hanya info stok &amp; status</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T57</span><span class="font-semibold text-gray-900 text-sm">Ringkasan Bulanan</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Jadual jualan/kutipan/belian/write-off terpapar, angka konsisten</div>
+            </div>
+            <div class="test-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex items-center gap-2 mb-1.5"><span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">T58</span><span class="font-semibold text-gray-900 text-sm">VOID retroaktif dalam Ringkasan</span></div>
+              <div class="text-xs text-gray-500"><strong>Jangkaan:</strong> Jualan bulan berkurang selepas VOID DO (VOID dikecualikan auto)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           E2E
+      ═══════════════════════════════════════════════ -->
+      <section id="e2e" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="badge-e2e px-3 py-1 rounded-lg text-sm font-bold">E2E</span>
+          <h2 class="text-base font-bold text-gray-700">Senario Hujung-ke-Hujung</h2>
+          <span class="ml-auto text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100">4 senario · T59–T62</span>
+        </div>
+        <div class="space-y-4">
+
+          <!-- T59 -->
+          <div class="test-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded">T59</span>
+                <span class="font-semibold text-gray-900">Kitaran penuh: GRN → DO → Bayar → Pos</span>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+            <ol class="space-y-1.5">
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>GRN 100 unit SKU-A, kos RM8</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>DO Ejen X, qty 10, harga RM15 (diskaun 5%)</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>Semak picking list</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</span>Bayar penuh (amaun = jumlah_bersih DO)</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</span>Tambah postage J&amp;T, tracking 123456</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</span>Semak Hari Ini — strip DO + belum pos</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">7</span>Semak Dashboard — KPI nilai stok berkurang, jualan bertambah</li>
+            </ol>
+          </div>
+
+          <!-- T60 -->
+          <div class="test-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded">T60</span>
+                <span class="font-semibold text-gray-900">Kitaran penuh: Transfer → Jualan Outlet → Return</span>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+            <ol class="space-y-1.5">
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>Transfer 30 unit SKU-A dari WH ke Outlet-1</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>Jualan Outlet-1, qty 5, harga outlet</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>Return 2 unit dari Outlet-1, disposisi RESTOCK</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</span>Semak: WH baki betul, Outlet baki betul, LEDGER konsisten</li>
+            </ol>
+          </div>
+
+          <!-- T61 -->
+          <div class="test-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded">T61</span>
+                <span class="font-semibold text-gray-900">Kitaran penuh: Return Rosak → Lupus → Integriti</span>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+            <ol class="space-y-1.5">
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>Return RTN_EJEN qty 3, disposisi ROSAK</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>Lupus 2 unit dari ROSAK</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>Semak baki ROSAK = 1</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</span>Semak Integriti → mesti HIJAU</li>
+            </ol>
+          </div>
+
+          <!-- T62 -->
+          <div class="test-card bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded">T62</span>
+                <span class="font-semibold text-gray-900">VOID chain: DO ada return, void return dulu baru void DO</span>
+              </div>
+              <span class="shrink-0 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-lg">Menunggu</span>
+            </div>
+            <ol class="space-y-1.5">
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>DO Ejen Y, qty 5</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>Return 1 unit dari Ejen Y (KREDIT_RETURN auto-jana)</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>Cuba VOID DO → patut disekat (ada return)</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</span>VOID Return dulu → KREDIT_RETURN auto-void</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</span>VOID DO → berjaya</li>
+              <li class="flex items-start gap-2 text-xs text-gray-600"><span class="w-5 h-5 rounded-md bg-violet-100 text-violet-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</span>Semak baki WH pulih penuh</li>
+            </ol>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           GO-LIVE
+      ═══════════════════════════════════════════════ -->
+      <section id="golive" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-xl">🚀</span>
+          <h2 class="text-base font-bold text-gray-700">Semak Akhir Go-Live</h2>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <p class="text-sm text-gray-500 mb-4">Lengkapkan <strong class="text-gray-700">semua item</strong> ini sebelum URL dikongsi dengan staf dan klien.</p>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700">Semua T01–T62 lulus (atau noted dengan workaround yang boleh diterima)</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-red-100 bg-red-50/30 hover:bg-red-50">
+              <div class="w-5 h-5 rounded border-2 border-red-300 shrink-0"></div>
+              <span class="text-sm text-red-800">PIN admin ditukar dari <code class="bg-red-100 px-1 rounded">123456</code></span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-amber-100 bg-amber-50/30 hover:bg-amber-50">
+              <div class="w-5 h-5 rounded border-2 border-amber-300 shrink-0"></div>
+              <span class="text-sm text-amber-800"><code class="bg-amber-100 px-1 rounded">backup_folder_id</code> diisi dalam Tetapan</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-amber-100 bg-amber-50/30 hover:bg-amber-50">
+              <div class="w-5 h-5 rounded border-2 border-amber-300 shrink-0"></div>
+              <span class="text-sm text-amber-800"><code class="bg-amber-100 px-1 rounded">admin_email</code> diisi dalam Tetapan</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700"><code class="bg-gray-100 px-1 rounded">setupTriggers()</code> telah dijalankan</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700">Trigger aktif disahkan (Apps Script → Triggers — mesti ada 3 trigger)</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700">Harga outlet/runcit semua produk diisi (bukan 0)</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700"><code class="bg-gray-100 px-1 rounded">min_stok_wh</code> semua produk ditetapkan</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50">
+              <div class="w-5 h-5 rounded border-2 border-gray-300 shrink-0"></div>
+              <span class="text-sm text-gray-700">Seed data dipadam / data sebenar dimasukkan</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl border border-green-100 bg-green-50/30 hover:bg-green-50">
+              <div class="w-5 h-5 rounded border-2 border-green-400 shrink-0"></div>
+              <span class="text-sm text-green-800">URL app dikongsi dengan Puan Olin + staf</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+           LOG TROUBLESHOOT
+      ═══════════════════════════════════════════════ -->
+      <section id="troubleshoot" class="section-anchor">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-xl">🔧</span>
+          <h2 class="text-base font-bold text-gray-700">Log Troubleshoot</h2>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-100 text-xs text-gray-500">Rekod isu yang ditemui semasa UAT awal (pembangunan) dan cara penyelesaiannya.</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-100">
+                  <th class="text-left px-4 py-2.5 font-semibold text-gray-600 w-28">Tarikh</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-gray-600">Isu</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-gray-600">Fix</th>
+                  <th class="text-left px-4 py-2.5 font-semibold text-gray-600 w-24">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-gray-400 font-mono">2026-06-12</td>
+                  <td class="px-4 py-3 text-gray-700"><code class="bg-gray-100 px-1 rounded">backup_folder_id</code>, <code class="bg-gray-100 px-1 rounded">admin_email</code>, <code class="bg-gray-100 px-1 rounded">backup_simpan_hari</code>, <code class="bg-gray-100 px-1 rounded">void_warehouse_hari_sama</code> tiada dalam UI Tetapan</td>
+                  <td class="px-4 py-3 text-gray-600">Tambah ke <code class="bg-gray-100 px-1 rounded">LABELS</code> dalam <code class="bg-gray-100 px-1 rounded">renderMasterTetapan</code> (index.html)</td>
+                  <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">✅ Fixed</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-gray-400 font-mono">2026-06-12</td>
+                  <td class="px-4 py-3 text-gray-700"><code class="bg-gray-100 px-1 rounded">sesi_tamat_jam</code>, <code class="bg-gray-100 px-1 rounded">nilai_minimum_diskaun_lulus_admin</code> terpapar dalam UI tapi nilai kosong</td>
+                  <td class="px-4 py-3 text-gray-600">Tambah kedua key ke <code class="bg-gray-100 px-1 rounded">PUBLIC_SETTINGS</code> dalam <code class="bg-gray-100 px-1 rounded">getMaster</code> (Code.gs)</td>
+                  <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">✅ Fixed</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-gray-400 font-mono">2026-06-12</td>
+                  <td class="px-4 py-3 text-gray-700">Backup harian — salah faham: dikira akan padam SEMUA fail dalam folder</td>
+                  <td class="px-4 py-3 text-gray-600">Disahkan: <code class="bg-gray-100 px-1 rounded">backupHarian</code> ada regex <code class="bg-gray-100 px-1 rounded">/^OlinV2-backup-.../</code> — hanya padam fail OlinV2 sahaja, selamat</td>
+                  <td class="px-4 py-3"><span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">Tiada bug</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="p-3 border-t border-gray-100 text-xs text-gray-400 text-center">Tambah baris baharu semasa UAT berlangsung</div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 text-center">
+        <div class="text-sm font-semibold text-gray-700 mb-1">Olin Beauty Inventory System V2</div>
+        <div class="text-xs text-gray-400">64 test case · 7 milestone · Disediakan 12 Jun 2026</div>
+        <div class="text-xs text-gray-400 mt-0.5">Rujuk <strong>FLOWCHART.md</strong> atau <strong>flowchart.html</strong> untuk carta alir visual setiap senario</div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Sidebar active highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-item[href]');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => {
+          const active = a.getAttribute('href') === '#' + e.target.id;
+          a.classList.toggle('active', active);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+
+  // Also highlight non-section nav items on click
+  navLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.forEach(n => n.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

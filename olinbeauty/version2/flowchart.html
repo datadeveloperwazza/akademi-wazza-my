@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olin Beauty — Carta Alir Sistem V2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #dfe5ec;
+      --surface:     #ffffff;
+      --surface-alt: #f6f7f9;
+      --border:      #e5e8ee;
+      --text:        #111827;
+      --muted:       #9ca3af;
+      --muted-dark:  #6b7280;
+      --accent:      #1f2937;
+      --accent-bg:   rgba(31,41,55,.08);
+      --green:       #059669;
+      --red:         #dc2626;
+      --shadow:      0 1px 3px rgba(15,23,42,.07), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-lg:   0 10px 50px rgba(15,23,42,.10);
+      --sidebar-w:   256px;
+      --radius:      16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-brand {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-logo {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-brand .name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .sidebar-brand .sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .sidebar-nav { padding: 10px 8px; flex: 1; }
+    .sidebar-nav .nav-group {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 8px 4px;
+      margin-top: 4px;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      color: var(--muted-dark);
+      text-decoration: none;
+      font-size: 12.5px;
+      border-radius: 10px;
+      transition: all .15s;
+      margin-bottom: 1px;
+    }
+    .sidebar-nav a:hover {
+      background: var(--surface-alt);
+      color: var(--text);
+    }
+    .sidebar-nav a.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .nav-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      border-radius: 6px;
+      background: var(--border);
+      color: var(--muted-dark);
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all .15s;
+    }
+    .sidebar-nav a.active .nav-num {
+      background: rgba(255,255,255,.2);
+      color: #fff;
+    }
+
+    .sidebar-footer {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 10.5px;
+      font-family: 'Consolas', monospace;
+      color: var(--muted);
+      background: var(--surface-alt);
+    }
+
+    /* ── MAIN ── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 32px 32px 48px;
+      max-width: calc(var(--sidebar-w) + 920px);
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.3px;
+    }
+    .page-header .meta {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .page-header .badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 48px;
+      scroll-margin-top: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .section-num {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-num.muted {
+      background: var(--border);
+      color: var(--muted-dark);
+    }
+    .section h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── EXPLAIN BOX ── */
+    .explain-box {
+      background: #f0f4ff;
+      border: 1px solid #dbe4ff;
+      border-left: 3px solid #4f6ef7;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      color: #374151;
+      line-height: 1.65;
+    }
+    .explain-box b { color: var(--text); }
+    .explain-box .ex-label {
+      display: block;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: .8px; text-transform: uppercase;
+      color: #4f6ef7;
+      margin-bottom: 4px;
+    }
+
+    /* ── DIAGRAM CARD ── */
+    .diagram-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow-x: auto;
+      cursor: zoom-in;
+      position: relative;
+      transition: box-shadow .2s, border-color .2s;
+      box-shadow: var(--shadow);
+    }
+    .diagram-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 4px 20px rgba(15,23,42,.08);
+    }
+    .diagram-card .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    .diagram-card::after {
+      content: '⛶  Klik untuk zum';
+      position: absolute;
+      top: 10px; right: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface-alt);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .diagram-card:hover::after { opacity: 1; }
+
+    /* ── NOTE BOX ── */
+    .note-box {
+      margin-top: 10px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #92400e;
+    }
+
+    /* ── GLOSSARY ── */
+    .glossary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .glossary-table th {
+      text-align: left;
+      padding: 9px 14px;
+      background: var(--surface-alt);
+      color: var(--muted-dark);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    .glossary-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .glossary-table tr:last-child td { border-bottom: none; }
+    .glossary-table tr:hover td { background: var(--surface-alt); }
+    .glossary-table td:first-child {
+      font-family: 'Consolas', monospace;
+      color: var(--accent);
+      white-space: nowrap;
+      font-size: 12px;
+      width: 180px;
+      font-weight: 600;
+    }
+    .glossary-table td:last-child { color: var(--muted-dark); }
+
+    /* ── PANDUAN PANEL ── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .panel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: box-shadow .15s, transform .15s;
+    }
+    .panel-card:hover {
+      box-shadow: 0 4px 20px rgba(15,23,42,.08);
+      transform: translateY(-1px);
+    }
+    .panel-card h3 {
+      font-size: 13.5px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel-card .pc-what { font-size: 12px; color: var(--muted-dark); margin: 6px 0 8px; }
+    .panel-card ul { margin: 0; padding-left: 16px; font-size: 12px; color: var(--muted-dark); }
+    .panel-card li { margin-bottom: 3px; }
+
+    .role-pill {
+      font-size: 9px; font-weight: 800; letter-spacing: .5px;
+      padding: 2px 8px; border-radius: 99px;
+      margin-left: auto; white-space: nowrap;
+    }
+    .role-all   { background: #dcfce7; color: #15803d; }
+    .role-admin { background: #fee2e2; color: #b91c1c; }
+    .role-wh    { background: #fef3c7; color: #b45309; }
+
+    /* ── ZOOM MODAL ── */
+    #zoomModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0,0,0,.82);
+      flex-direction: column;
+    }
+    #zoomModal.open { display: flex; }
+
+    #zoomToolbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    #zoomTitle {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .ztool {
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      border-radius: 7px;
+      padding: 5px 12px;
+      font-size: 12.5px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: background .15s;
+    }
+    .ztool:hover { background: #475569; }
+    .ztool.close-btn { background: #7f1d1d; color: #fca5a5; }
+    .ztool.close-btn:hover { background: #991b1b; }
+
+    #zoomHint {
+      font-size: 11px;
+      color: #64748b;
+      padding: 0 4px;
+    }
+
+    #zoomStage {
+      flex: 1;
+      overflow: hidden;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #zoomStage.dragging { cursor: grabbing; }
+
+    #zoomWrapper {
+      transform-origin: center center;
+      display: inline-block;
+      user-select: none;
+      line-height: 0;
+    }
+    #zoomWrapper svg { max-width: none !important; display: block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      #sidebar { display: none; }
+      #main { margin-left: 0; padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">O</div>
+    <div>
+      <div class="name">Olin Beauty V2</div>
+      <div class="sub">Carta Alir Sistem</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-group">Panduan</div>
+    <a href="#panduan"><span class="nav-num">P</span> Panduan Panel</a>
+    <div class="nav-group">Carta Alir</div>
+    <a href="#s1"><span class="nav-num">1</span> Gambaran Keseluruhan</a>
+    <a href="#s2"><span class="nav-num">2</span> Stok Masuk (GRN)</a>
+    <a href="#s3"><span class="nav-num">3</span> DO Ejen</a>
+    <a href="#s4"><span class="nav-num">4</span> Bayaran Ejen</a>
+    <a href="#s5"><span class="nav-num">5</span> Transfer Outlet</a>
+    <a href="#s6"><span class="nav-num">6</span> Jualan Outlet</a>
+    <a href="#s7"><span class="nav-num">7</span> Return</a>
+    <a href="#s8"><span class="nav-num">8</span> VOID Dokumen</a>
+    <a href="#s9"><span class="nav-num">9</span> Kiraan Stok</a>
+    <a href="#s10"><span class="nav-num">10</span> Integriti &amp; Backup</a>
+    <a href="#s11"><span class="nav-num">11</span> Log Masuk &amp; Akses</a>
+    <a href="#s12"><span class="nav-num">12</span> Ringkasan Bulanan</a>
+    <div class="nav-group">Rujukan</div>
+    <a href="#glosari"><span class="nav-num">G</span> Glosari</a>
+  </div>
+  <div class="sidebar-footer">olin-v2-M6b-2026.06.12</div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+  <div class="page-header">
+    <h1>Carta Alir Sistem Inventori</h1>
+    <div class="meta">
+      <span class="badge">V2</span>
+      <span class="badge">M6 Complete</span>
+      Olin Beauty · 2026-06-12
+    </div>
+  </div>
+
+  <!-- PANDUAN PANEL -->
+  <section class="section" id="panduan">
+    <div class="section-header">
+      <div class="section-num">P</div>
+      <h2>Panduan Panel — Setiap Menu &amp; Fungsinya</h2>
+    </div>
+    <div class="explain-box">
+      Senarai semua panel dalam sistem (menu kiri app), siapa boleh guna, dan macam mana guna.
+      <b>Hijau</b> = semua staf · <b>Kuning</b> = Admin + Warehouse · <b>Merah</b> = Admin sahaja.
+    </div>
+    <div class="panel-grid">
+
+      <div class="panel-card">
+        <h3>🏠 Hari Ini <span class="role-pill role-all">SEMUA</span></h3>
+        <div class="pc-what">Skrin pertama selepas login — status hari ini sekali pandang.</div>
+        <ul>
+          <li>Strip atas: bilangan DO hari ini, jumlah jualan, DO belum pos</li>
+          <li>Lencana hijau/merah = kesihatan sistem (integriti + expiry + stok bawah min)</li>
+          <li>Tap "BELUM POS" terus lompat ke skrin Pos</li>
+          <li>10 DO terkini dengan status bayaran</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>📊 Dashboard <span class="role-pill role-all">SEMUA*</span></h3>
+        <div class="pc-what">Pusat pemantauan. Admin nampak penuh; staf nampak versi ringkas.</div>
+        <ul>
+          <li>4 KPI: Nilai Stok · Jualan Bulan · Kutipan · Hutang Tertunggak</li>
+          <li>Ranking ejen dengan bar % capai target</li>
+          <li>Stok Laju / Risiko Habis / Slow Moving</li>
+          <li>Picker bulan + butang "Papar" untuk Ringkasan Bulanan setahun</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>📦 Stok <span class="role-pill role-all">SEMUA</span></h3>
+        <div class="pc-what">Baki semasa setiap produk, pecah ikut lokasi (WH / Outlet / Rosak).</div>
+        <ul>
+          <li>Taip nama atau SKU untuk cari pantas</li>
+          <li>Tapis ikut lokasi</li>
+          <li>Amaran expiry merah (kritikal) &amp; kuning (hampir luput)</li>
+          <li>"Muat semula" untuk angka paling terkini</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>💰 Ejen &amp; Bayaran <span class="role-pill role-admin">ADMIN</span></h3>
+        <div class="pc-what">Akaun setiap ejen — hutang, kredit, ranking jualan.</div>
+        <ul>
+          <li>Tap ejen → senarai DO dia + status LUNAS/SEBAHAGIAN/BELUM</li>
+          <li>"Terima Bayaran": key-in jumlah sekali, sistem agih ke DO tertua dulu</li>
+          <li>Bayar lebih? Lebihan jadi kredit untuk DO akan datang</li>
+          <li>Penyata penuh per ejen untuk semakan / WhatsApp</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>🧾 Dokumen <span class="role-pill role-all">SEMUA</span></h3>
+        <div class="pc-what">Arkib semua dokumen sistem — GRN, DO, transfer, return, semuanya.</div>
+        <ul>
+          <li>Tapis ikut jenis / status, atau cari nombor dokumen</li>
+          <li>Tap baris → detail penuh: barang, ledger, bayaran, pos</li>
+          <li>Butang VOID di bawah detail (Admin; staf WH bersyarat)</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>📥 Stok Masuk <span class="role-pill role-wh">ADMIN + WH</span></h3>
+        <div class="pc-what">Daftar barang yang tiba dari pembekal (GRN).</div>
+        <ul>
+          <li>Pilih produk → kuantiti → kos seunit</li>
+          <li>Produk ada expiry? Isi tarikh luput batch</li>
+          <li>Simpan → baki Warehouse terus naik, nombor dokumen auto</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>🚚 DO Ejen <span class="role-pill role-wh">ADMIN + WH</span></h3>
+        <div class="pc-what">Hantar barang ke ejen — jantung operasi harian.</div>
+        <ul>
+          <li>Pilih ejen → tambah barang → diskaun (jika ada) → Preview</li>
+          <li>Sistem auto pilih batch expiry terdekat dulu (FEFO)</li>
+          <li>Lepas sah: picking list, teks WhatsApp siap copy, cetak</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>✉️ Pos &amp; AWB <span class="role-pill role-wh">ADMIN + WH</span></h3>
+        <div class="pc-what">Urus penghantaran — senarai DO yang belum dipos hari ini.</div>
+        <ul>
+          <li>Pilih DO → isi kurier (CityLink/J&amp;T) + nombor tracking + berat</li>
+          <li>DO yang dah ada tracking dapat ikon ✈️ di mana-mana skrin</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>🔁 Transfer Outlet <span class="role-pill role-admin">ADMIN</span></h3>
+        <div class="pc-what">Pindah stok dari Warehouse ke outlet/kedai.</div>
+        <ul>
+          <li>Pilih outlet → barang → kuantiti</li>
+          <li>Satu transfer = keluar WH + masuk outlet serentak (takkan "hilang")</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>🏪 Jualan Outlet <span class="role-pill role-all">ADMIN + OUTLET</span></h3>
+        <div class="pc-what">Rekod jualan harian kedai — tolak stok outlet, bukan WH.</div>
+        <ul>
+          <li>Pilih outlet → barang → kuantiti → harga auto (outlet/runcit)</li>
+          <li>Terus LUNAS — pelanggan bayar di kaunter</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>↩️ Return / Rosak <span class="role-pill role-admin">ADMIN</span></h3>
+        <div class="pc-what">Terima barang pulangan dari ejen atau outlet + lupus barang rosak.</div>
+        <ul>
+          <li>Barang elok → RESTOCK (balik ke WH, boleh jual semula)</li>
+          <li>Barang rosak → kuarantin ROSAK (tak boleh jual)</li>
+          <li>Return ejen auto potong hutang ejen (KREDIT_RETURN)</li>
+          <li>Lupus: hapus kekal barang dari kuarantin (Admin sahaja)</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>🔢 Kiraan Stok <span class="role-pill role-wh">ADMIN + WH</span></h3>
+        <div class="pc-what">Stock take — kira fizikal tanpa nampak angka sistem (blind count).</div>
+        <ul>
+          <li>Admin buka sesi → staf isi kuantiti sebenar yang dikira tangan</li>
+          <li>Staf TAK nampak angka sistem — tak boleh "tiru" angka</li>
+          <li>Admin nampak varians → Lulus = pelarasan auto dijana</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>📒 Ledger <span class="role-pill role-admin">ADMIN</span></h3>
+        <div class="pc-what">Audit trail mentah — setiap pergerakan stok sejak hari pertama.</div>
+        <ul>
+          <li>Tapis ikut produk / lokasi / dokumen / tarikh</li>
+          <li>Footer: Σ MASUK − Σ KELUAR = BAKI — bukti sistem tally</li>
+          <li>Sentiasa data live, tiada cache — ini skrin kebenaran</li>
+        </ul>
+      </div>
+
+      <div class="panel-card">
+        <h3>⚙️ Master &amp; Tetapan <span class="role-pill role-admin">ADMIN</span></h3>
+        <div class="pc-what">Data induk + konfigurasi sistem.</div>
+        <ul>
+          <li>5 tab: Produk · Ejen · Outlet · Staf · Tetapan</li>
+          <li>Tetapan: e-mel admin, folder backup, toggle void staf WH</li>
+          <li>Utiliti: Semak Integriti (9 ujian) + Rebuild Counters</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Gambaran Keseluruhan Sistem</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Peta besar</span>
+      Barang masuk dari pembekal (GRN), duduk sebagai stok di <b>Warehouse</b>, kemudian keluar melalui 5 pintu:
+      DO ke ejen, transfer ke outlet, jualan outlet, return, dan lupus. Setiap pergerakan — tanpa kecuali —
+      dicatat dalam <b>LEDGER</b>. Baki stok tidak pernah disimpan sebagai satu angka boleh-edit;
+      ia sentiasa <b>dikira semula</b> dari jumlah ledger. Sebab itulah sistem ini mustahil "tak tally" secara senyap.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+graph TD
+    subgraph INPUT["INPUT — Stok Masuk"]
+        GRN["GRN\nStok Masuk\n(Pembekal → WH)"]
+    end
+    subgraph STOK["STOK (LEDGER + BATCH)"]
+        WH["WAREHOUSE\nStok Semasa"]
+        ROSAK["ROSAK\nKuarantin"]
+        OUT["OUTLET(s)\nStok Konsain"]
+    end
+    subgraph KELUAR["KELUAR — Transaksi"]
+        DO["DO Ejen\n(WH → Ejen)"]
+        TRF["Transfer\n(WH → Outlet)"]
+        JLO["Jualan Outlet\n(Outlet → Pelanggan)"]
+        RTN["Return\n(Ejen/Outlet → WH/ROSAK)"]
+        LUPUS["Lupus\n(ROSAK → Buang)"]
+    end
+    subgraph BAYAR["BAYARAN"]
+        PAY["Bayaran Ejen\n(TUNAI/TRANSFER/KREDIT)"]
+        POS["Pos\n(CityLink/J&T)"]
+    end
+    subgraph ADMIN["ADMIN & KAWALAN"]
+        VOID["VOID Dokumen\n(reversal baki)"]
+        KIRAAN["Kiraan Stok\n(Blind Count)"]
+        INTEGRITI["Semak Integriti\n(I1–I9)"]
+        BACKUP["Backup Harian\n(Drive)"]
+    end
+    subgraph LAPORAN["LAPORAN"]
+        DASH["Dashboard\n(KPI + Ranking)"]
+        LEDGER["Ledger Audit\n(Semua transaksi)"]
+        RING["Ringkasan Bulanan"]
+    end
+    GRN --> WH
+    WH --> DO
+    WH --> TRF
+    TRF --> OUT
+    OUT --> JLO
+    DO --> PAY
+    DO --> POS
+    RTN --> WH
+    RTN --> ROSAK
+    ROSAK --> LUPUS
+    VOID -.->|reversal| WH
+    KIRAAN -->|ADJ/GRN auto| WH
+    WH --> INTEGRITI
+    INTEGRITI --> BACKUP
+    WH --> DASH
+    DO --> DASH
+    PAY --> DASH
+    DASH --> RING
+    LEDGER --> INTEGRITI
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>Aliran Stok Masuk (GRN)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: barang baru sampai dari pembekal</span>
+      Buka <b>Stok Masuk</b> → pilih produk → masukkan kuantiti dan kos seunit. Kalau produk ada tarikh luput,
+      isi expiry — sistem cipta <b>batch baru</b> yang dijejak berasingan. Simpan, dan baki Warehouse terus naik.
+      Setiap GRN dapat nombor dokumen automatik (OBSB####) — tak perlu tulis tangan, takkan berulang.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin/Staf WH]) --> B["Isi form:\nSKU · Kuantiti · Kos\nExpiry · Batch"]
+    B --> C{Batch ada expiry?}
+    C -->|Ya| D["Tetapkan tarikh expiry"]
+    C -->|Tidak| E["Tandakan ada_expiry=NO"]
+    D & E --> F["GAS: cipta BATCH baru\nDOC_HEADER + DOC_LINES\nLEDGER MASUK\n(safe write order)"]
+    F --> G["Baki WH bertambah\nstatus: AKTIF"]
+    G --> H([Stok dikemaskini])
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Aliran DO Ejen (Delivery Order)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: hantar barang ke ejen</span>
+      Pilih ejen, tambah barang, letak diskaun kalau ada — tekan <b>Preview</b> untuk semak kiraan dulu sebelum sah.
+      Sistem pilih batch yang <b>paling hampir expiry dulu</b> (FEFO) supaya stok lama habis dahulu.
+      Kalau batch terpilih luput dalam 60 hari, sistem minta pengesahan — elak terhantar barang hampir basi tanpa sedar.
+      Lepas DO jadi: <b>picking list</b> untuk staf ambil barang, teks <b>WhatsApp siap copy</b> untuk inform ejen, dan boleh terus isi tracking pos.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Staf/Admin]) --> B["previewDO:\nPilih Ejen · SKU · Qty\nDiskaun · Catatan"]
+    B --> C["GAS: _computeDO (sen-integer)\n_allocateFIFO FEFO\nsemak baki WH"]
+    C --> D{Baki mencukupi?}
+    D -->|Tidak| E([ERROR: Baki tidak cukup])
+    D -->|Ya| F{Ada expiry\n0–60 hari?}
+    F -->|Ya| G["Papar amaran CONFIRM_EXPIRY\nStaf kena sahkan"]
+    F -->|Tidak| H
+    G -->|Sahkan| H["addDOEjen:\nDOC_HEADER + DOC_LINES\nLEDGER KELUAR\nBatch dikurangkan"]
+    H --> I["Status: AKTIF\nPicking list + WhatsApp tersedia"]
+    I --> J{Tambah postage?}
+    J -->|Ya| K["addPostage:\nKurier · Tracking · Berat"]
+    J -->|Tidak| L([Siap])
+    K --> L
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Aliran Bayaran Ejen</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: ejen bayar hutang</span>
+      Key-in <b>satu jumlah sahaja</b> — sistem agihkan secara automatik ke DO yang paling lama tertunggak dulu.
+      Tak perlu pilih DO mana nak bayar dulu, tak boleh tersilap kira. Kalau ejen bayar lebih daripada jumlah hutang,
+      lebihan jadi <b>kredit</b> yang automatik dipakai untuk DO akan datang. Status LUNAS / SEBAHAGIAN / BELUM
+      <b>dikira oleh sistem</b>, bukan diisi tangan — jadi takkan ada DO "tertanda lunas" secara tersilap.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin]) --> B["addPayment:\nEjen · Amaun · Kaedah\nTUNAI / TRANSFER / KREDIT"]
+    B --> C["GAS: agih kepada DO tertunggak\n(tertua dulu)"]
+    C --> D{Lebihan selepas\nagih semua DO?}
+    D -->|Ya| E["Lebihan masuk KREDIT\nbaki_kredit_rm ejen"]
+    D -->|Tidak| F["DO diliputi fully\njumlah_dibayar = bersih"]
+    E & F --> G["Rekod PAYMENTS\nStatus bayaran DO — DERIVED via _payAgg"]
+    G --> H([Hutang ejen dikemas])
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Aliran Transfer (WH → Outlet)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: isi stok kedai dari Warehouse</span>
+      Pilih outlet, barang, dan kuantiti. Satu transfer mencatat <b>dua baris ledger serentak</b> —
+      keluar dari Warehouse dan masuk ke outlet. Jumlah keseluruhan sistem sentiasa sifar,
+      jadi mustahil ada stok "hilang dalam perjalanan". Maklumat batch (expiry, kos) ikut sekali ke outlet.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin]) --> B["addTransfer:\nPilih Outlet · SKU · Qty"]
+    B --> C["GAS: _allocateFIFO FEFO\nsemak baki WH"]
+    C --> D{Baki WH mencukupi?}
+    D -->|Tidak| E([ERROR])
+    D -->|Ya| F["DOC_HEADER + DOC_LINES\nLEDGER KELUAR dari WH\nLEDGER MASUK ke Outlet\nbatch_id GLOBAL dikongsi"]
+    F --> G["Stok WH berkurang\nStok Outlet bertambah"]
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Aliran Jualan Outlet</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: rekod jualan harian kedai</span>
+      Pilih outlet dan barang yang terjual — sistem tolak <b>stok outlet</b> (bukan Warehouse) dan terus tanda
+      <b>LUNAS</b> sebab pelanggan bayar di kaunter. Harga ikut harga outlet; kalau produk tu tiada harga outlet,
+      sistem guna harga runcit. Jualan ini terus masuk dalam KPI kutipan bulan di Dashboard.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Staf Outlet/Admin]) --> B["addJualanOutlet:\nPilih Outlet · SKU · Qty\nHarga outlet/runcit"]
+    B --> C["GAS: _allocateOrder FEFO\npriceMode: OUTLET\nsemak baki Outlet"]
+    C --> D{Baki Outlet cukup?}
+    D -->|Tidak| E([ERROR])
+    D -->|Ya| F["DOC_HEADER + DOC_LINES\nLEDGER KELUAR dari Outlet\nStatus: LUNAS\nTiada bayaran — tunai terus"]
+    F --> G["Jualan dicatat\nKutipan bulan bertambah"]
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="section" id="s7">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <h2>Aliran Return</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: barang balik dari ejen atau outlet</span>
+      Dua keputusan penting setiap return: <b>(1) Disposisi</b> — barang elok pilih RESTOCK (masuk balik Warehouse,
+      boleh jual semula); barang rosak pilih ROSAK (masuk kuarantin, tak boleh jual, tunggu lupus).
+      <b>(2) Kredit</b> — untuk return ejen, sistem auto jana KREDIT_RETURN dan hutang ejen terus berkurang.
+      Tak perlu kira tangan, tak boleh terlupa.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin]) --> B["addReturn:\nJenis: RTN_EJEN / RTN_OUTLET\nSKU · Qty · Disposisi"]
+    B --> C{Jenis Return?}
+    C -->|RTN_EJEN| D["MASUK sahaja\nRESTOCK: LEDGER MASUK WH\nROSAK: LEDGER MASUK ROSAK"]
+    C -->|RTN_OUTLET| E["Pasangan:\nLEDGER KELUAR Outlet\nLEDGER MASUK WH atau ROSAK"]
+    D & E --> F{Disposisi?}
+    F -->|RESTOCK| G["Barang balik ke WH\nBatch asal dipulihkan"]
+    F -->|ROSAK| H["Barang ke ROSAK\nKuarantin"]
+    G & H --> I["RTN_EJEN: jana KREDIT_RETURN\nauto potong hutang ejen"]
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="section" id="s8">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <h2>Aliran VOID Dokumen</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: tersalah key-in dokumen</span>
+      Sistem <b>tidak memadam apa-apa</b>. VOID menulis baris "terbalik" (reversal) — kesan dokumen dibatalkan,
+      tetapi sejarah penuh kekal untuk audit. Sebelum benarkan void, sistem <b>simulate dulu</b>: kalau void akan
+      menyebabkan baki jadi negatif (contoh: barang dari GRN itu dah terjual), void disekat.
+      DO yang dah ada bayaran pun disekat — void bayaran dulu, baru void DO. Susunan ini melindungi rekod kewangan.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A(["Admin / Staf WH *"]) --> B["Buka Dokumen\npilih doc"]
+    B --> C["GAS: _voidPreCheck\nsemak syarat void\nsimulasi reversal baki"]
+    C --> D{Boleh void?}
+    D -->|Tidak| E(["ERROR: disekat\nberbayar / baki negatif /\nbukan hari sama *"])
+    D -->|Ya| F["Header status: VOIDING\ntransient — selamat"]
+    F --> G["Append baris reversal\nis_reversal=YES, qty terbalik\nflush()"]
+    G --> H["Header status: VOID\ncatat sebab + void_by"]
+    H --> I{RTN_EJEN?}
+    I -->|Ya| J["Auto-void KREDIT_RETURN\ndalam lock yang sama"]
+    I -->|Tidak| K([Selesai])
+    J --> K
+      </div>
+    </div>
+    <div class="note-box">
+      * Staf WH boleh void: dokumen sendiri + hari sama + tiada bayaran + toggle <strong>void_warehouse_hari_sama = YES</strong> dalam Tetapan
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="section" id="s9">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <h2>Aliran Kiraan Stok (Blind Count)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Bila guna: stock take / audit stok fizikal</span>
+      Konsep <b>blind count</b>: staf mengira barang sebenar di rak dan key-in kuantiti — <b>tanpa nampak angka sistem</b>.
+      Jadi tak boleh "tengok sistem kata 47, tulis 47". Hanya Admin nampak perbezaan (varians) dan buat keputusan lulus
+      atau tolak. Bila lulus, sistem auto jana dokumen pelarasan (ADJ) — baki sistem disesuaikan dengan dunia sebenar.
+      Kalau ada transaksi berlaku <b>semasa kiraan berjalan</b>, kiraan jadi basi dan sistem tolak — elak pelarasan atas data lapuk.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin]) --> B["createStockCount:\nPilih Lokasi\nanchor = lastRow LEDGER"]
+    B --> C([Staf WH])
+    C --> D["saveStockCount:\nIsi qty FIZIKAL\nTiada lihat qty sistem\nBoleh tambah batch ditemui"]
+    D --> E{Status SC}
+    E -->|DRAF| D
+    E -->|SUBMIT| F([Admin])
+    F --> G["getStockCount:\npapar varians — Admin sahaja"]
+    G --> H{Keputusan Admin}
+    H -->|Tolak| I["rejectStockCount\nSC: DITOLAK\ncatatan sebab"]
+    H -->|Lulus| J["Stale check:\nada gerakan LEDGER\nsejak anchor?"]
+    J --> K{Stale?}
+    K -->|Ya| L(["ERROR: Kiraan basi\nulang semula"])
+    K -->|Tidak| M["Jana auto:\nADJ (varians qty bertanda)\nGRN PENEMUAN (batch baharu)\nLEDGER TERAKHIR\nSC: DILULUSKAN"]
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="section" id="s10">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2>Aliran Integriti &amp; Backup (Automatik)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Jalan sendiri setiap hari — tak perlu buat apa-apa</span>
+      Tiga "robot" bekerja di belakang tabir: <b>keepWarm</b> (setiap 5 minit — pastikan sistem sentiasa segar dan pantas),
+      <b>backupHarian</b> (1 pagi — salin keseluruhan database ke Google Drive, simpan 30 hari, padam yang lama),
+      dan <b>semakIntegriti</b> (6 pagi — periksa 9 peraturan kesihatan data). Kalau ada masalah kritikal,
+      <b>e-mel terus ke admin</b>. Lencana hijau/merah yang nampak di skrin Hari Ini datang dari semakan ini.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    subgraph CFG["Tetapan Wajib — Master & Tetapan"]
+        S1["admin_email\ne-mel notifikasi"]
+        S2["backup_folder_id\nID folder Google Drive"]
+        S3["backup_simpan_hari\nlalai: 30"]
+        S4["void_warehouse_hari_sama\nYES atau NO"]
+    end
+    subgraph TRIGGER["Trigger Harian — run setupTriggers() sekali"]
+        T1["keepWarm\nsetiap 5 min\nElak cold start"]
+        T2["backupHarian\n1 pagi\nSalin Sheet ke Drive\nPadam fail OlinV2-backup lebih N hari"]
+        T3["semakIntegritiHarian\n6 pagi\nJalankan I1–I9"]
+    end
+    S2 --> T2
+    S3 --> T2
+    S1 --> T3
+    T3 --> A{Ada anomali?}
+    A -->|Tiada| B["Properties: HIJAU\nLencana hijau dalam app"]
+    A -->|Ada| C["Properties: MERAH\nLencana merah dalam app"]
+    C --> D{Kritikal?}
+    D -->|Ya| E["MailApp.sendEmail\nke admin_email"]
+    D -->|Tidak| F["Log AUDIT_LOG sahaja"]
+    subgraph INVARIANT["9 Invariant (I1–I9)"]
+        I1["I1: Baki tidak negatif"]
+        I2["I2: Tiada orphan LEDGER"]
+        I3["I3: Lines sepadan LEDGER"]
+        I4["I4: Tiada VOIDING tergantung"]
+        I5["I5: TRF jumlah sifar"]
+        I6["I6: Dibayar tidak melebihi bersih"]
+        I7["I7: Nombor dokumen unik"]
+        I8["I8: Snapshot konsisten"]
+        I9["I9: Checksum baris LEDGER"]
+    end
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="section" id="s11">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <h2>Aliran Log Masuk &amp; Hak Akses</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Setiap staf ada ID + PIN sendiri</span>
+      Tiga peranan: <b>ADMIN</b> nampak semua — kewangan, ranking, void, lulus kiraan, ledger.
+      <b>WAREHOUSE</b> fokus operasi harian — stok masuk, DO, pos, transfer; angka kewangan disorok.
+      <b>OUTLET</b> hanya urusan kedai sendiri. Penting: penapisan dibuat di <b>server</b>, bukan sekadar
+      sembunyi butang — staf tak boleh akses data admin walaupun pandai teknikal.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Pengguna buka app]) --> B["Skrin Log Masuk:\nID Staf + PIN"]
+    B --> C["GAS: semak pin_hash\nsesi 4–12 jam"]
+    C --> D{Sah?}
+    D -->|Tidak| E([Tolak: ID atau PIN salah])
+    D -->|Ya| F["Jana session_token\nsimpan di Properties + Cache"]
+    F --> G{Role?}
+    G -->|ADMIN| H["Akses PENUH:\nDashboard KPI\nRingkasan Bulanan\nSemak Integriti\nVOID mana-mana dokumen\nKiraan: Lulus atau Tolak\nLedger penuh"]
+    G -->|WAREHOUSE| I["Akses TERHAD:\nHari Ini ringkas\nStok Masuk, DO, Pos\nTransfer\nVOID dokumen sendiri *\nKiraan: Isi sahaja"]
+    G -->|OUTLET| J["Akses OUTLET:\nJualan Outlet\nReturn dari outlet\nStok outlet sendiri"]
+      </div>
+    </div>
+    <div class="note-box">
+      * VOID oleh Staf WH: bersyarat — dokumen sendiri + hari sama + tiada bayaran + <strong>void_warehouse_hari_sama = YES</strong>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="section" id="s12">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <h2>Ringkasan Bulanan (Recompute-on-Read)</h2>
+    </div>
+    <div class="explain-box">
+      <span class="ex-label">Laporan operasi bulanan — bukan penyata untung rugi</span>
+      Jadual setahun: jualan ejen, jualan outlet, return, kutipan, belian stok, write-off.
+      Angka <b>tidak disimpan</b> — setiap kali buka, sistem kira semula terus dari ledger.
+      Kelebihan besar: kalau dokumen bulan lepas di-VOID hari ini, angka bulan lepas
+      <b>betul semula secara automatik</b>. Untuk P&amp;L dan zakat, itu kerja akauntan — sistem ini fokus operasi.
+    </div>
+    <div class="diagram-card">
+      <div class="mermaid">
+flowchart TD
+    A([Admin pilih bulan]) --> B["getRingkasanBulanan"]
+    B --> C["Scan SEMUA LEDGER + DOC_HEADER\ntapis status AKTIF sahaja\nVOID dikecualikan"]
+    C --> D["Kira per bulan:\nJualan Ejen (DO minus RTN)\nJualan Outlet (JLO)\nKutipan (PAYMENTS + JLO)\nBelian Stok (GRN kos)\nWrite-off (LUPUS / ADJ negatif)\nStok akhir bulan"]
+    D --> E["Papar jadual 12 bulan\nbulan semasa paling kiri"]
+    E --> F["VOID retroaktif kurangkan\nbulan asal secara automatik"]
+      </div>
+    </div>
+  </section>
+
+  <!-- GLOSARI -->
+  <section class="section" id="glosari">
+    <div class="section-header">
+      <div class="section-num muted">G</div>
+      <h2>Glosari Cepat</h2>
+    </div>
+    <div class="diagram-card" style="padding:0; overflow:hidden; cursor:default;">
+      <table class="glossary-table">
+        <thead>
+          <tr><th>Istilah</th><th>Maksud</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>LEDGER</td><td>Semua pergerakan stok — append-only, tidak boleh diedit terus</td></tr>
+          <tr><td>BATCH</td><td>Lot stok fizikal dengan expiry dan kos seunit tersendiri</td></tr>
+          <tr><td>FEFO</td><td>First-Expired-First-Out — stok expiry awal keluar dulu</td></tr>
+          <tr><td>VOID</td><td>Batalkan dokumen — sistem jana baris reversal dalam LEDGER, bukan padam</td></tr>
+          <tr><td>VOIDING</td><td>Status sementara semasa proses void untuk elak double-void</td></tr>
+          <tr><td>ROSAK</td><td>Lokasi kuarantin stok rosak atau returned yang tidak boleh dijual</td></tr>
+          <tr><td>ADJ</td><td>Adjustment — dokumen varians kiraan stok, qty bertanda positif atau negatif</td></tr>
+          <tr><td>GRN</td><td>Goods Received Note — dokumen stok masuk dari pembekal</td></tr>
+          <tr><td>DO</td><td>Delivery Order — hantar stok dari WH ke ejen</td></tr>
+          <tr><td>JLO</td><td>Jualan Langsung Outlet — jualan terus dari outlet ke pelanggan</td></tr>
+          <tr><td>TRF</td><td>Transfer stok dari Warehouse ke Outlet</td></tr>
+          <tr><td>RTN</td><td>Return dari ejen (RTN_EJEN) atau outlet (RTN_OUTLET)</td></tr>
+          <tr><td>KREDIT_RETURN</td><td>Kredit auto-jana apabila ejen return — terus potong hutang ejen</td></tr>
+          <tr><td>SEN integer</td><td>Wang dikira dalam sen (×100) untuk elak ralat floating-point</td></tr>
+          <tr><td>I1–I9</td><td>9 peraturan integriti sistem — semak automatik setiap 6 pagi</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ZOOM MODAL -->
+<div id="zoomModal">
+  <div id="zoomToolbar">
+    <span id="zoomTitle">Carta Alir</span>
+    <span id="zoomHint">🖱 Scroll = zum · Drag = gerak · ESC = tutup</span>
+    <button class="ztool" id="btnZoomIn">＋ Zum Masuk</button>
+    <button class="ztool" id="btnZoomOut">－ Zum Keluar</button>
+    <button class="ztool" id="btnZoomReset">⊡ Reset</button>
+    <button class="ztool close-btn" id="btnZoomClose">✕ Tutup</button>
+  </div>
+  <div id="zoomStage">
+    <div id="zoomWrapper"></div>
+  </div>
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'neutral',
+    themeVariables: {
+      primaryColor:        '#f1f5f9',
+      primaryTextColor:    '#0f172a',
+      primaryBorderColor:  '#94a3b8',
+      lineColor:           '#475569',
+      secondaryColor:      '#e2e8f0',
+      tertiaryColor:       '#f8fafc',
+      edgeLabelBackground: '#ffffff',
+      clusterBkg:          '#f8fafc',
+      clusterBorder:       '#cbd5e1',
+      titleColor:          '#0f172a',
+      nodeBorder:          '#94a3b8',
+      mainBkg:             '#f1f5f9',
+      nodeTextColor:       '#0f172a',
+      fontFamily:          'Inter, system-ui, sans-serif',
+      fontSize:            '13px',
+    },
+    flowchart: { curve: 'basis', padding: 20 }
+  });
+
+  await mermaid.run({ querySelector: '.mermaid' });
+
+  // ── NAV highlight on scroll ──
+  const sections = document.querySelectorAll('.section');
+  const links    = document.querySelectorAll('#sidebar a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = document.querySelector(`#sidebar a[href="#${e.target.id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => obs.observe(s));
+
+  // ── ZOOM MODAL ──
+  const modal   = document.getElementById('zoomModal');
+  const stage   = document.getElementById('zoomStage');
+  const wrapper = document.getElementById('zoomWrapper');
+  const title   = document.getElementById('zoomTitle');
+
+  let scale = 1, panX = 0, panY = 0;
+  let dragging = false, lastX = 0, lastY = 0;
+
+  function applyTransform() {
+    wrapper.style.transform = `translate(${panX}px,${panY}px) scale(${scale})`;
+  }
+  function resetView() { scale = 1; panX = 0; panY = 0; applyTransform(); }
+
+  function openZoom(card) {
+    const svg = card.querySelector('svg');
+    if (!svg) return;
+    const h2 = card.closest('.section').querySelector('h2');
+    title.textContent = h2 ? h2.textContent : 'Carta Alir';
+
+    const clone = svg.cloneNode(true);
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    const w = (vb && vb.width  > 0) ? vb.width  : (svg.getBoundingClientRect().width  || 800);
+    const h = (vb && vb.height > 0) ? vb.height : (svg.getBoundingClientRect().height || 600);
+    clone.setAttribute('width',  w);
+    clone.setAttribute('height', h);
+    clone.removeAttribute('style');
+
+    const svgStr = new XMLSerializer().serializeToString(clone);
+    const img = document.createElement('img');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+    img.style.display = 'block';
+    img.style.maxWidth = 'none';
+    img.draggable = false;
+
+    wrapper.innerHTML = '';
+    wrapper.appendChild(img);
+    resetView();
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeZoom() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // wire diagram cards (skip glossary)
+  document.querySelectorAll('.diagram-card').forEach(card => {
+    if (card.querySelector('.glossary-table')) return;
+    card.addEventListener('click', () => openZoom(card));
+  });
+
+  document.getElementById('btnZoomClose').addEventListener('click', closeZoom);
+  document.getElementById('btnZoomReset').addEventListener('click', resetView);
+  document.getElementById('btnZoomIn').addEventListener('click', () => {
+    scale = Math.min(8, scale * 1.25); applyTransform();
+  });
+  document.getElementById('btnZoomOut').addEventListener('click', () => {
+    scale = Math.max(0.15, scale * 0.8); applyTransform();
+  });
+
+  stage.addEventListener('click', e => { if (e.target === stage) closeZoom(); });
+
+  stage.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+    const newScale = Math.max(0.15, Math.min(8, scale * factor));
+    const rect = stage.getBoundingClientRect();
+    const cx = e.clientX - rect.left - rect.width  / 2;
+    const cy = e.clientY - rect.top  - rect.height / 2;
+    panX = cx - (cx - panX) * (newScale / scale);
+    panY = cy - (cy - panY) * (newScale / scale);
+    scale = newScale;
+    applyTransform();
+  }, { passive: false });
+
+  stage.addEventListener('mousedown', e => {
+    if (e.target === stage || e.target === wrapper || stage.contains(e.target)) {
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+      stage.classList.add('dragging');
+    }
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    panX += e.clientX - lastX;
+    panY += e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    dragging = false; stage.classList.remove('dragging');
+  });
+
+  let lastTouchDist = null;
+  stage.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+    }
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY);
+    }
+  }, { passive: true });
+  stage.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && dragging) {
+      panX += e.touches[0].clientX - lastX;
+      panY += e.touches[0].clientY - lastY;
+      lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+      applyTransform();
+    }
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY);
+      if (lastTouchDist) {
+        scale = Math.max(0.15, Math.min(8, scale * (dist / lastTouchDist)));
+        applyTransform();
+      }
+      lastTouchDist = dist;
+    }
+  }, { passive: false });
+  stage.addEventListener('touchend', () => { dragging = false; lastTouchDist = null; });
+
+  window.addEventListener('keydown', e => {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') closeZoom();
+    if (e.key === '=' || e.key === '+') { scale = Math.min(8, scale * 1.2); applyTransform(); }
+    if (e.key === '-') { scale = Math.max(0.15, scale * 0.83); applyTransform(); }
+    if (e.key === '0') resetView();
+  });
+</script>
+
+</body>
+</html>
