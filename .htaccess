@@ -1,0 +1,19 @@
+# === Wazza Academy: cache control ===
+# Tujuan: elak browser simpan HTML/JSON versi lama (punca isu login & link 404),
+# tapi kekalkan cache untuk asset statik supaya laman tetap laju.
+
+# HTML & JSON — sentiasa ambil versi terbaru (jangan cache)
+<FilesMatch "\.(html|json)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </IfModule>
+</FilesMatch>
+
+# Asset statik — cache 30 hari (laju)
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff|woff2|ttf|eot)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=2592000"
+  </IfModule>
+</FilesMatch>
