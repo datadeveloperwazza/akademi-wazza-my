@@ -109,7 +109,7 @@
       const err  = document.getElementById('error-msg');
 
       try {
-        const res = await fetch('./data/products.json');
+        const res = await fetch('./data/products.json?v=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) throw new Error();
         const products = await res.json();
 

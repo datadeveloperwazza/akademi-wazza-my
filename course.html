@@ -404,7 +404,7 @@
             async loadAll(folder) {
                 if (this._cache[folder]) return this._cache[folder];
                 try {
-                    const res = await fetch(folder + '/courses.json');
+                    const res = await fetch(folder + '/courses.json?v=' + Date.now(), { cache: 'no-store' });
                     const data = await res.json();
                     this._cache[folder] = data.courses;
                     return this._cache[folder];
@@ -431,7 +431,7 @@
         async function initCourse() {
             // Load config for branding
             try {
-                const cfgRes = await fetch(courseFolder + '/config.json');
+                const cfgRes = await fetch(courseFolder + '/config.json?v=' + Date.now(), { cache: 'no-store' });
                 const cfg = await cfgRes.json();
                 const logoImg = document.getElementById('topbar-logo-img');
                 const welcomeLogo = document.getElementById('welcome-course-logo');
