@@ -200,7 +200,7 @@
 
     async function loadConfig() {
       if (_cfg) return _cfg;
-      const res = await fetch(courseId + '/config.json');
+      const res = await fetch(courseId + '/config.json?v=' + Date.now(), { cache: 'no-store' });
       _cfg = await res.json();
       applyBranding(_cfg);
       return _cfg;
