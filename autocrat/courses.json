@@ -90,6 +90,15 @@
               "description": "Video ini menunjukkan integrasi tiga elemen: Google Form (untuk mengumpul maklumat peserta), Google Slides (sebagai templat sijil), dan Google Sheets (sebagai pangkalan data). Anda akan belajar menambah kotak teks dan penanda '<< >>' pada templat di Google Slides. Paling penting, fungsi 'Run on form trigger' diajar untuk memastikan sijil dijana secara automatik sejurus selepas seseorang menghantar jawapan di Google Form.",
               "tip": "Apabila menggunakan Google Slides untuk sijil, jenis font dan gaya tulisan yang anda tetapkan pada templat akan dikekalkan pada sijil yang dijana.",
               "resources": []
+            },
+            {
+              "id": "m2-06",
+              "title": "2.6 Praktis 4: Jana Laporan Bergambar",
+              "duration": 13,
+              "videoUrl": "https://www.youtube.com/watch?v=xXtY-_-CdDg",
+              "description": "Belajar menjana laporan PDF yang mengandungi gambar secara automatik. Video ini menerangkan kenapa gambar perlu menggunakan pautan (link) dan cara menukar pautan Google Drive menggunakan formula supaya boleh dibaca oleh Autocrat. Anda akan menyalin templat laporan, menyemak penanda (placeholder) di dalamnya, dan mencipta Job baru. Tutorial ini turut menerangkan jenis tag dalam mapping data — Standard, Hyperlink, Image dan Checkbox — serta cara menetapkan saiz gambar. Akhir sekali, anda akan menetapkan nama fail, format PDF, folder, perkongsian dan trigger, sebelum menjalankan (run) job dan menyemak hasil laporan PDF.",
+              "tip": "Pastikan gambar dalam Google Drive di-share \"Anyone with the link\". Kalau tidak, gambar tidak akan keluar dalam laporan.",
+              "resources": []
             }
           ]
         }
